@@ -4,12 +4,74 @@ from datetime import timedelta
 from decimal import Decimal
 
 from django.contrib.auth import get_user_model
+from django.contrib.auth.models import Group, Permission
 from django.core.management.base import BaseCommand
 from django.db import transaction
+from django.db.models import Q
 from django.utils import timezone
 
 from demo.commerce.models import Contact, Customer, Invoice, Order, Organization, Payment
 from modern_admin.models import AuditEvent
+
+# Roles the demo ships with, so permission editing has something realistic to show.
+DEMO_GROUPS: dict[str, tuple[str, ...]] = {
+    "Operations": (
+        "commerce.view_workspace_dashboard",
+        "commerce.view_customer",
+        "commerce.change_customer",
+        "commerce.view_contact",
+        "commerce.view_order",
+        "commerce.change_order",
+        "commerce.view_product",
+        "commerce.view_invoice",
+        "commerce.view_payment",
+    ),
+    "Billing": (
+        "commerce.view_workspace_dashboard",
+        "commerce.view_customer",
+        "commerce.view_order",
+        "commerce.view_invoice",
+        "commerce.change_invoice",
+        "commerce.view_payment",
+        "commerce.change_payment",
+    ),
+    "Support": (
+        "commerce.view_customer",
+        "commerce.view_contact",
+        "commerce.view_order",
+    ),
+    "Workspace admins": (
+        "commerce.view_workspace_dashboard",
+        "commerce.view_workspace_settings",
+        "auth.view_user",
+        "auth.add_user",
+        "auth.change_user",
+        "auth.view_group",
+        "auth.add_group",
+        "auth.change_group",
+    ),
+}
+DEMO_OPERATORS: tuple[tuple[str, str, str, str], ...] = (
+    ("ops", "Rafael", "Ortiz", "Operations"),
+    ("billing", "Hanna", "Lindqvist", "Billing"),
+    ("support", "Yusuf", "Demir", "Support"),
+    ("workspace-admin", "Priya", "Raman", "Workspace admins"),
+)
+
+
+def resolve_permissions(labels: tuple[str, ...]) -> list[Permission]:
+    """Look permissions up by app label and codename so typos fail loudly."""
+    condition = Q()
+    for label in labels:
+        app_label, codename = label.split(".")
+        condition |= Q(content_type__app_label=app_label, codename=codename)
+    permissions = list(Permission.objects.filter(condition))
+    missing = set(labels) - {
+        f"{permission.content_type.app_label}.{permission.codename}" for permission in permissions
+    }
+    if missing:
+        raise ValueError(f"Unknown permissions: {', '.join(sorted(missing))}")
+    return permissions
 
 
 class Command(BaseCommand):
@@ -206,9 +268,29 @@ class Command(BaseCommand):
                 },
             )
 
+        user_model = get_user_model()
+        for name, labels in DEMO_GROUPS.items():
+            group, _ = Group.objects.get_or_create(name=name)
+            group.permissions.set(resolve_permissions(labels))
+        for username, first_name, last_name, group_name in DEMO_OPERATORS:
+            operator, _ = user_model.objects.get_or_create(
+                username=username,
+                defaults={"email": f"{username}@northstar.example"},
+            )
+            operator.first_name = first_name
+            operator.last_name = last_name
+            operator.email = f"{username}@northstar.example"
+            operator.is_staff = True
+            operator.is_superuser = False
+            operator.set_password("demo")
+            operator.save()
+            operator.groups.set([Group.objects.get(name=group_name)])
+
         self.stdout.write(
             self.style.SUCCESS(
                 f"Demo ready: {len(customers)} customers, {Order.objects.count()} orders, "
-                f"{Invoice.objects.count()} invoices. Sign in with demo / demo."
+                f"{Invoice.objects.count()} invoices, {Group.objects.count()} groups. "
+                "Sign in with demo / demo, or ops / billing / support / workspace-admin, "
+                "all with the password demo."
             )
         )

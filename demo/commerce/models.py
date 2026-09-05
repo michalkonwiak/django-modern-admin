@@ -21,6 +21,24 @@ class Organization(models.Model):
         return self.name
 
 
+class WorkspaceAccess(models.Model):
+    """Permission host for pages that are not backed by records of their own.
+
+    The model is unmanaged and has no table; it exists so the dashboard and the
+    settings page can be granted with ordinary Django permissions.
+    """
+
+    class Meta:
+        managed = False
+        default_permissions = ()
+        verbose_name = "workspace access"
+        verbose_name_plural = "workspace access"
+        permissions = (
+            ("view_workspace_dashboard", "Can view the operations overview"),
+            ("view_workspace_settings", "Can view workspace settings"),
+        )
+
+
 class Customer(models.Model):
     class Status(models.TextChoices):
         LEAD = "lead", "Lead"

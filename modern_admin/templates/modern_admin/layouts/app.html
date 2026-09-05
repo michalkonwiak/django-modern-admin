@@ -20,7 +20,7 @@
 
     <nav class="ma-nav">
       {% for group, items in navigation_groups.items %}
-        <section class="ma-nav-group">
+        <section class="ma-nav-group{% if group == modern_admin_site.navigation_group_order.0 %} is-primary{% endif %}">
           <h2 class="ma-nav-group-label">{{ group }}</h2>
           <div class="ma-nav-items">
             {% for item in items %}

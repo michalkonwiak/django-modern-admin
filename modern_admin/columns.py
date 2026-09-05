@@ -28,7 +28,9 @@ def resolve_value(source: Any, path: str) -> Any:
         if value is None:
             return None
         value = getattr(value, part)
-        if callable(value):
+        # Related managers are callable, but calling one is a manager-class switch,
+        # not a value lookup; hand it back so formatting can read the relation.
+        if callable(value) and not isinstance(value, models.Manager):
             value = value()
     return value
 

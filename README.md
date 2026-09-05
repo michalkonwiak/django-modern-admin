@@ -68,6 +68,7 @@ can coexist and operate on the same models.
 | Forms | Django ModelForms, explicit editable fields, inline server validation, dialogs |
 | Workflows | Resource actions, bulk actions, guarded transitions, scoped work queues |
 | Extension points | Custom pages, dashboard widgets, querysets, policies, templates, and URLs |
+| Accounts | Opt-in user and group administration with a grouped, searchable permission picker |
 | Integration | Namespaced authentication routes, Django permissions, migrations, bundled assets |
 
 ### Project status
@@ -289,6 +290,51 @@ an explicit active-user check. A custom `permission_policy_class` can implement
 resource-specific rules. The default policy accepts model-level permissions; it is
 not a tenant or row-level authorization engine.
 
+Navigation follows authorization: a resource appears in the sidebar only when the
+operator may view it, and pages and dashboards are gated by `permission_required`.
+Operators who cannot open the dashboard land on their first permitted destination
+instead of an error page.
+
+```python
+@backoffice.page(path="settings/", label="Settings", icon="settings", group="System")
+class SettingsPage(PageResource):
+    permission_required = "crm.view_workspace_settings"
+    template_name = "settings/index.html"
+```
+
+Permissions for pages that have no records of their own live on any model you choose.
+A small unmanaged model keeps them out of an unrelated table:
+
+```python
+class WorkspaceAccess(models.Model):
+    class Meta:
+        managed = False
+        default_permissions = ()
+        permissions = (("view_workspace_settings", "Can view workspace settings"),)
+```
+
+### Managing accounts
+
+Account administration is opt-in. Register it on your site to manage Django users,
+group membership, and individual permissions inside the workspace:
+
+```python
+from modern_admin import site
+from modern_admin.accounts import register_accounts
+
+register_accounts(site)
+```
+
+This adds `Users` and `Groups` resources with a searchable, grouped permission
+picker, and a `Set password` action that uses Django's `SetPasswordForm`. Access
+follows Django's own model permissions (`auth.view_user`, `auth.change_user`, and
+so on), with one added guard: only superusers may edit superuser accounts or grant
+superuser status. The bundled resources expect an `AbstractUser`-shaped model;
+for a different user model, subclass `UserResource` and register it yourself.
+
+`AccessChecklist` (`modern_admin.forms`) is the widget behind the picker and works
+with any `ModelMultipleChoiceField` whose choices are long enough to need filtering.
+
 Scope tenant-owned resources explicitly:
 
 ```python
@@ -352,7 +398,10 @@ uv run python manage.py runserver
 
 Open `http://127.0.0.1:8000/app/` and sign in with `demo` / `demo`.
 Try **Orders → Ready to ship → record preview** to explore a workflow without
-leaving the worklist. Never deploy demo settings or credentials.
+leaving the worklist. The seed also creates the `ops`, `billing`, `support`, and
+`workspace-admin` operators (password `demo`), each in a group with different
+permissions—sign in as one to see navigation change with authorization, and edit
+their access under **System → Users**. Never deploy demo settings or credentials.
 
 ## Contributing
 

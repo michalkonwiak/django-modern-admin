@@ -403,6 +403,14 @@ def pipeline_context(request: HttpRequest) -> Mapping[str, Any]:
 
 @site.set_dashboard
 class OperationsDashboard(Dashboard):
+    # The widgets read across the commercial records, so the overview needs all of them.
+    permission_required = (
+        "commerce.view_workspace_dashboard",
+        "commerce.view_customer",
+        "commerce.view_order",
+        "commerce.view_invoice",
+        "commerce.view_payment",
+    )
     template_name = "commerce/dashboard.html"
     widgets = (
         MetricWidget(
@@ -491,6 +499,7 @@ class OperationsDashboard(Dashboard):
 
 @site.page(path="settings/", label="Settings", icon="settings", group="System", order=10)
 class SettingsPage(PageResource):
+    permission_required = "commerce.view_workspace_settings"
     title = "Workspace settings"
     description = "Configuration shared across operations."
     template_name = "commerce/settings.html"

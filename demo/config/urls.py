@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.contrib.auth import views as auth_views
 from django.urls import path
 
-from demo.commerce import resources  # noqa: F401
+from demo.commerce import accounts, resources  # noqa: F401
 from modern_admin import site
 
 urlpatterns = [

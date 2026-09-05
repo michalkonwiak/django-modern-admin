@@ -1,0 +1,42 @@
+{% load modern_admin %}
+<div class="ma-access-picker" x-data="accessPicker">
+  <div class="ma-access-toolbar">
+    <div class="ma-access-search">
+      {% icon "search" 13 %}
+      <input type="search" x-model.debounce.120ms="query" placeholder="{{ widget.search_placeholder }}" aria-label="Filter {{ widget.group_label }}" autocomplete="off" @keydown.enter.prevent>
+    </div>
+    <p class="ma-access-summary" aria-live="polite"><strong x-text="selected"></strong><span>of <span x-text="total"></span> selected</span></p>
+    <button type="button" class="ma-access-clear" @click="clear()" x-show="selected > 0" x-cloak>Clear</button>
+  </div>
+  <div class="ma-access-groups" role="group" aria-label="{{ widget.group_label }}">
+    {% for group in widget.access_groups %}
+      {% with group_name=group.name options=group.options %}
+      <section class="ma-access-group" x-show="groupVisible($el)">
+        {% if group_name %}
+          <header class="ma-access-group-header">
+            <label class="ma-access-group-toggle">
+              <input type="checkbox" class="ma-checkbox" data-group-toggle @change="toggleGroup($event)" aria-label="Select every {{ group_name }} permission">
+              <span>{{ group_name }}</span>
+            </label>
+            <span class="ma-access-group-count" x-text="groupSummary($el)"></span>
+          </header>
+        {% endif %}
+        <div class="ma-access-options">
+          {% for option in options %}
+            <label class="ma-access-option" for="{{ option.attrs.id }}" data-search="{{ group_name }} {{ option.label }} {{ option.value.instance.codename }}" x-show="matches($el)">
+              <input type="checkbox" name="{{ option.name }}" value="{{ option.value }}" id="{{ option.attrs.id }}" class="ma-checkbox"{% if option.selected %} checked{% endif %}{% if widget.attrs.disabled %} disabled{% endif %} @change="sync()">
+              <span class="ma-access-option-copy">
+                <strong>{{ option.label }}</strong>
+                {% if option.value.instance.codename %}<small>{{ option.value.instance.codename }}</small>{% endif %}
+              </span>
+            </label>
+          {% endfor %}
+        </div>
+      </section>
+      {% endwith %}
+    {% empty %}
+      <p class="ma-access-empty">Nothing can be assigned yet.</p>
+    {% endfor %}
+  </div>
+  <p class="ma-access-empty" x-show="query && !visible()" x-cloak>No match for “<span x-text="query"></span>”.</p>
+</div>

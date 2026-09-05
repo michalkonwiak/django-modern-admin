@@ -3,9 +3,36 @@ from __future__ import annotations
 import os
 
 import pytest
-from playwright.sync_api import Page, sync_playwright
+from playwright.sync_api import Page, expect, sync_playwright
 
 pytestmark = [pytest.mark.browser, pytest.mark.django_db(transaction=True)]
+
+
+@pytest.mark.parametrize("width", [390, 1440])
+@pytest.mark.parametrize("theme", ["light", "dark"])
+def test_workspace_login_is_styled(page: Page, live_server, width, theme):
+    page.context.clear_cookies()
+    page.set_viewport_size({"width": width, "height": 844})
+    page.evaluate("theme => localStorage.setItem('ma-theme', theme)", theme)
+    page.goto(f"{live_server.url}/app/login/", wait_until="networkidle")
+    assert page.locator("form").count() == 1
+    assert page.locator(".ma-auth-panel").is_visible()
+    assert page.locator(".ma-auth-window").bounding_box()["width"] <= width
+    field = page.locator("#id_username")
+    assert field.evaluate("e => getComputedStyle(e).borderTopStyle") == "solid"
+    assert field.bounding_box()["height"] >= 42
+    assert field.evaluate("e => getComputedStyle(e).fontSize") == (
+        "16px" if width == 390 else "13px"
+    )
+    assert page.evaluate("document.documentElement.scrollWidth <= innerWidth")
+    assert page.locator("html").evaluate("e => e.classList.contains('dark')") == (theme == "dark")
+    page.screenshot(path=f"/tmp/modern-admin-login-{theme}-default.png", full_page=True)
+    page.locator("#id_username").fill("unknown-login-test")
+    page.locator("#id_password").fill("wrong-password")
+    page.get_by_role("button", name="Sign in").click()
+    assert page.locator(".ma-form-alert").is_visible()
+    assert page.locator("#id_username").get_attribute("class") == "ma-input"
+    page.screenshot(path=f"/tmp/modern-admin-login-{theme}.png", full_page=True)
 
 
 @pytest.mark.parametrize("width", [390, 1440])
@@ -177,6 +204,37 @@ def test_custom_checkboxes_support_keyboard_and_partial_selection(page: Page, li
     page.wait_for_function("!document.querySelector('thead input').indeterminate")
     select_all.uncheck()
     assert page.locator(".ma-data-row.is-selected").count() == 0
+
+
+def test_access_checklist_filters_toggles_and_saves(page: Page, live_server, user):
+    page.goto(f"{live_server.url}/app/user/{user.pk}/edit/", wait_until="networkidle")
+    permissions = page.locator(".ma-access-picker").nth(1)
+    option = permissions.locator('.ma-access-option input[type="checkbox"]').first
+    assert option.evaluate("e => getComputedStyle(e).appearance") == "none"
+    assert permissions.locator(".ma-access-group").count() > 1
+
+    search = permissions.locator(".ma-access-search input")
+    search.fill("invoice")
+    expect(permissions.locator(".ma-access-group:visible")).to_have_count(1)
+    group = permissions.locator(".ma-access-group").filter(has_text="Invoice")
+    visible_options = group.locator(".ma-access-option:visible")
+    assert visible_options.count() == 4
+
+    toggle = group.locator("[data-group-toggle]")
+    toggle.check()
+    assert permissions.locator(".ma-access-summary strong").inner_text() == "4"
+    assert group.locator(".ma-access-group-count").inner_text() == "4/4"
+    visible_options.first.locator("input").uncheck()
+    page.wait_for_function("() => document.querySelector('[data-group-toggle]:indeterminate')")
+
+    search.fill("nothing matches this")
+    expect(permissions.locator(".ma-access-option:visible")).to_have_count(0)
+    expect(permissions.locator(".ma-access-empty")).to_be_visible()
+
+    page.get_by_role("button", name="Save changes").click()
+    page.wait_for_url(f"**/app/user/{user.pk}/")
+    summary = page.locator("#main-content").inner_text().lower()
+    assert "change invoice" in summary and "view invoice" in summary
 
 
 @pytest.fixture

@@ -289,6 +289,59 @@
       }
     }));
 
+    // Long permission lists need filtering and group toggles; the checkboxes stay
+    // ordinary form inputs, so a submit without JavaScript still posts the truth.
+    Alpine.data("accessPicker", () => ({
+      query: "",
+      selected: 0,
+      total: 0,
+      revision: 0,
+      init() { this.sync(); },
+      options(root) {
+        return Array.from((root || this.$root).querySelectorAll('.ma-access-option input[type="checkbox"]'));
+      },
+      sync() {
+        const options = this.options();
+        this.total = options.length;
+        this.selected = options.filter(option => option.checked).length;
+        this.revision++;
+        this.$root.querySelectorAll(".ma-access-group").forEach(group => {
+          const toggle = group.querySelector("[data-group-toggle]");
+          if (!toggle) return;
+          const inputs = this.options(group);
+          const checked = inputs.filter(input => input.checked).length;
+          toggle.checked = checked > 0 && checked === inputs.length;
+          toggle.indeterminate = checked > 0 && checked < inputs.length;
+        });
+      },
+      toggleGroup(event) {
+        const group = event.target.closest(".ma-access-group");
+        this.options(group)
+          .filter(input => this.matches(input.closest(".ma-access-option")))
+          .forEach(input => { input.checked = event.target.checked; });
+        this.sync();
+      },
+      clear() {
+        this.options().forEach(input => { input.checked = false; });
+        this.sync();
+      },
+      matches(element) {
+        if (!this.query) return true;
+        return (element?.dataset.search || "").toLowerCase().includes(this.query.toLowerCase());
+      },
+      groupVisible(group) {
+        return !this.query || this.options(group).some(input => this.matches(input.closest(".ma-access-option")));
+      },
+      groupSummary(element) {
+        this.revision;
+        const inputs = this.options(element.closest(".ma-access-group"));
+        return `${inputs.filter(input => input.checked).length}/${inputs.length}`;
+      },
+      visible() {
+        return this.options().some(input => this.matches(input.closest(".ma-access-option")));
+      }
+    }));
+
     Alpine.data("toast", () => ({
       visible: true,
       start() { window.setTimeout(() => { this.visible = false; }, 4300); }

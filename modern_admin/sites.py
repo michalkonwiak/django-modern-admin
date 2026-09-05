@@ -92,17 +92,24 @@ class ModernAdminSite:
     def has_permission(self, request: HttpRequest) -> bool:
         return bool(request.user.is_active and request.user.is_staff)
 
+    def get_dashboard(self) -> Dashboard:
+        """A fresh dashboard per request: widget context is never shared."""
+        return self.dashboard_class(self)
+
     def get_navigation(self, request: HttpRequest) -> dict[str, list[ResolvedNavigationItem]]:
-        items: list[ResolvedNavigationItem] = [
-            ResolvedNavigationItem(
-                label="Overview",
-                icon="layout-dashboard",
-                url=self.reverse("dashboard"),
-                group="Workspace",
-                order=0,
-                active=request.path == self.reverse("dashboard"),
+        items: list[ResolvedNavigationItem] = []
+        dashboard = self.get_dashboard()
+        if dashboard.has_permission(request):
+            items.append(
+                ResolvedNavigationItem(
+                    label=dashboard.title or "Overview",
+                    icon="layout-dashboard",
+                    url=self.reverse("dashboard"),
+                    group="Workspace",
+                    order=0,
+                    active=request.path == self.reverse("dashboard"),
+                )
             )
-        ]
         for resource in self.registry.resources:
             nav = resource.navigation
             if nav is None or not resource.permission_policy.can_view(request.user):
@@ -247,6 +254,7 @@ class ModernAdminSite:
         from django.urls import URLResolver, reverse_lazy
 
         from modern_admin.access import protect
+        from modern_admin.forms.auth import WorkspaceAuthenticationForm
 
         def secure(items: list[URLPattern | URLResolver]) -> list[URLPattern | URLResolver]:
             secured: list[URLPattern | URLResolver] = []
@@ -273,6 +281,7 @@ class ModernAdminSite:
             path(
                 "login/",
                 LoginView.as_view(
+                    authentication_form=WorkspaceAuthenticationForm,
                     template_name="modern_admin/pages/login.html",
                     next_page=reverse_lazy(f"{self.name}:dashboard"),
                     extra_context={"site_title": self.site_title, "modern_admin_site": self},

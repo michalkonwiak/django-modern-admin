@@ -17,6 +17,7 @@ from django.utils.http import url_has_allowed_host_and_scheme
 
 from modern_admin.audit import events_for, record_event
 from modern_admin.columns import Cell, Column
+from modern_admin.forms.widgets import AccessChecklist
 from modern_admin.models import SavedView
 from modern_admin.resources import ModelResource
 from modern_admin.responses import Toast, htmx_events, is_htmx, notify
@@ -71,6 +72,14 @@ def _permission_denied(
         "breadcrumbs": (("Access restricted", ""),),
     }
     return render(request, template, context, status=403)
+
+
+def _first_permitted_destination(request: HttpRequest, site: ModernAdminSite) -> HttpResponse:
+    """Operators without dashboard access land on their first permitted page."""
+    for group in site.get_navigation(request).values():
+        for item in group:
+            return HttpResponseRedirect(item.url)
+    return _permission_denied(request, site, "You do not have access to any workspace page.")
 
 
 def _site_context(site: ModernAdminSite, request: HttpRequest, **context: Any) -> dict[str, Any]:
@@ -450,21 +459,36 @@ def resource_detail_view(
     return render(request, resource.detail_template_name, context)
 
 
+# Subclasses must inherit their base widget's styling, so match by type, not name.
+_CHECKBOX_WIDGETS = (forms.CheckboxInput, forms.CheckboxSelectMultiple, forms.RadioSelect)
+_TEXT_WIDGETS = (
+    forms.TextInput,
+    forms.NumberInput,
+    forms.EmailInput,
+    forms.URLInput,
+    forms.PasswordInput,
+    forms.Textarea,
+)
+
+
 def _style_form(form: Any) -> None:
     for field in form.fields.values():
         widget = field.widget
-        current = widget.attrs.get("class", "")
         if widget.is_hidden:
             continue
-        if widget.__class__.__name__ in {"CheckboxInput", "RadioSelect"}:
+        if isinstance(widget, _CHECKBOX_WIDGETS):
             classes = "ma-checkbox"
-        elif widget.__class__.__name__ == "Textarea":
+        elif isinstance(widget, forms.Textarea):
             classes = "ma-input ma-textarea"
         else:
             classes = "ma-input"
-        widget.attrs["class"] = f"{current} {classes}".strip()
-        if not isinstance(widget, forms.Select):
+        current = widget.attrs.get("class", "")
+        widget.attrs["class"] = " ".join(dict.fromkeys(f"{current} {classes}".split()))
+        if isinstance(widget, _TEXT_WIDGETS):
             widget.attrs.setdefault("placeholder", field.label)
+        if isinstance(widget, AccessChecklist):
+            # The field label lives outside the widget; name the option group for it.
+            widget.group_label = str(field.label)
 
 
 def resource_form_view(
@@ -699,9 +723,9 @@ def resource_tab_view(
 def dashboard_view(request: HttpRequest, *, site: ModernAdminSite) -> HttpResponse:
     if response := _guard(request):
         return response
-    dashboard = site.dashboard_class(site)
+    dashboard = site.get_dashboard()
     if not dashboard.has_permission(request):
-        return _permission_denied(request, site)
+        return _first_permitted_destination(request, site)
     widgets = tuple(
         (widget, dict(widget.get_context(request))) for widget in dashboard.get_widgets(request)
     )
@@ -721,7 +745,7 @@ def dashboard_view(request: HttpRequest, *, site: ModernAdminSite) -> HttpRespon
 def widget_view(request: HttpRequest, *, site: ModernAdminSite, widget_key: str) -> HttpResponse:
     if response := _guard(request):
         return response
-    dashboard = site.dashboard_class(site)
+    dashboard = site.get_dashboard()
     if not dashboard.has_permission(request):
         return _permission_denied(request, site)
     widget = next((item for item in dashboard.get_widgets(request) if item.key == widget_key), None)

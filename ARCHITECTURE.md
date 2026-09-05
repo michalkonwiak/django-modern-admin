@@ -48,6 +48,8 @@ modern_admin/
     mixins.py                 auth, resource lookup, HTMX rendering
   forms/
     fields.py                 opt-in richer Django form fields/widgets
+    widgets.py                opt-in widgets, including the access checklist
+  accounts.py                 opt-in user/group/permission administration
   permissions.py              default Django permission policy
   responses.py                HTMX events, redirects, and toast helpers
   audit.py                    optional audit recording service
@@ -116,7 +118,16 @@ case needs more than these contracts, it should be a custom Django view/page.
 
 A page is a normal shell-aware class-based endpoint with navigation and permission
 hooks. A dashboard is a specialized page with an ordered responsive widget list.
-They do not imitate models.
+They do not imitate models. `permission_required` declares the Django permissions a
+page needs; navigation and the endpoint guard read the same `has_permission` answer,
+so the sidebar can never advertise a destination that would answer 403.
+
+### Account administration
+
+`modern_admin.accounts` is an optional module, never registered implicitly. It ships
+resource configuration for Django's `User` and `Group`, a permission picker widget,
+and a policy that keeps non-superusers from granting superuser status. Authentication,
+password hashing, and the permission model stay in `django.contrib.auth`.
 
 ## Public API
 
@@ -124,6 +135,7 @@ Stable imports are shallow:
 
 ```python
 from modern_admin import ModelResource, PageResource, site
+from modern_admin.accounts import register_accounts
 from modern_admin.actions import ActionResult, ResourceAction
 from modern_admin.columns import BadgeColumn, DateTimeColumn, MoneyColumn
 from modern_admin.filters import ChoiceFilter, DateRangeFilter, RelationFilter

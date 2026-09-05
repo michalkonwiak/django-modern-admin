@@ -133,7 +133,7 @@
                 <td x-show="!hiddenColumns.includes({{ forloop.counter0 }})" class="{% if cell.numeric %}is-numeric {% endif %}{% if forloop.first %}is-identity{% elif cell.kind == 'badge' %}is-status{% endif %}">
                   {% if forloop.first %}<div class="ma-record-identity"><a class="ma-cell-link" href="{{ row.detail_url }}">{% endif %}
                   {% if cell.kind == "badge" %}<span class="ma-record-status is-{{ cell.variant }}">{{ cell.display }}</span>
-                  {% elif cell.kind == "boolean" %}<span class="ma-boolean is-{{ cell.variant }}">{% icon "check" 13 %}{{ cell.display }}</span>
+                  {% elif cell.kind == "boolean" %}<span class="ma-record-status is-{{ cell.variant }}">{{ cell.display }}</span>
                   {% elif cell.kind == "avatar" %}<span class="ma-person-cell"><span class="ma-avatar"><span>{{ cell.display|initials }}</span></span><span><strong>{{ cell.display }}</strong>{% if cell.secondary %}<small>{{ cell.secondary }}</small>{% endif %}</span></span>
                   {% elif cell.kind == "html" %}{{ cell.display|safe }}
                   {% else %}<span class="{% if forloop.first %}ma-primary-cell{% endif %}" title="{{ cell.display }}">{{ cell.display }}</span>{% if cell.secondary %}<small class="ma-cell-secondary">{{ cell.secondary }}</small>{% endif %}{% endif %}

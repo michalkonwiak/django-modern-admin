@@ -18,7 +18,11 @@ def test_namespaced_login_without_project_auth_urls(client, user):
     response = client.get("/office/")
     assert response.status_code == 302
     assert response.url.startswith("/office/login/")
-    assert client.get("/office/login/").status_code == 200
+    login = client.get("/office/login/")
+    assert login.status_code == 200
+    assert b"ma-auth-panel" in login.content
+    assert b'class="ma-input"' in login.content
+    assert b"modern_admin/app.css" in login.content
     client.force_login(user)
     response = client.get("/office/customer/")
     assert response.status_code == 200

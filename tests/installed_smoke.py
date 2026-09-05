@@ -60,15 +60,11 @@ with TemporaryDirectory(prefix="modern-admin-installed-") as directory:
     from django.test import Client
     from django.urls import path
 
-    from modern_admin import ModelResource
+    from modern_admin.accounts import register_accounts
     from modern_admin.sites import ModernAdminSite
 
     site = ModernAdminSite("installed")
-
-    @site.register(Group)
-    class GroupResource(ModelResource[Group]):
-        list_display = ("name",)
-        form_fields = ("name",)
+    register_accounts(site)
 
     urlpatterns = [path("office/", site.urls)]
     call_command("check", verbosity=0)
@@ -82,5 +78,24 @@ with TemporaryDirectory(prefix="modern-admin-installed-") as directory:
     assert client.post("/office/group/new/", {"name": "Operators"}).status_code == 302
     response = client.get("/office/group/")
     assert response.status_code == 200 and b"Operators" in response.content
+    group = Group.objects.get(name="Operators")
+    # The permission picker template and its markup must ship inside the wheel.
+    form = client.get("/office/user/new/")
+    assert form.status_code == 200 and b"ma-access-picker" in form.content
+    assert (
+        client.post(
+            "/office/user/new/",
+            {
+                "username": "teller",
+                "password1": "installed-smoke-passphrase",
+                "password2": "installed-smoke-passphrase",
+                "is_active": "on",
+                "is_staff": "on",
+                "groups": [str(group.pk)],
+            },
+        ).status_code
+        == 302
+    )
+    assert list(User.objects.get(username="teller").groups.all()) == [group]
     assert client.post("/office/logout/").status_code == 302
-    print("Installed wheel: auth, migrations, CRUD, manifest staticfiles OK")
+    print("Installed wheel: auth, migrations, CRUD, accounts, manifest staticfiles OK")

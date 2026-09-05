@@ -36,12 +36,21 @@ class Resource:
     description: str = ""
     icon: str = "circle"
     navigation: Navigation | None = None
+    permission_required: ClassVar[str | Sequence[str]] = ()
     template_name = ""
     site: ModernAdminSite
     key: str
 
+    def get_permission_required(self, request: HttpRequest) -> tuple[str, ...]:
+        required = self.permission_required
+        return (required,) if isinstance(required, str) else tuple(required)
+
     def has_permission(self, request: HttpRequest) -> bool:
-        return bool(request.user.is_authenticated)
+        """Navigation visibility and the endpoint guard share this single answer."""
+        return bool(
+            request.user.is_authenticated
+            and request.user.has_perms(self.get_permission_required(request))
+        )
 
     def get_context_data(self, request: HttpRequest, **kwargs: Any) -> dict[str, Any]:
         return kwargs
@@ -266,7 +275,11 @@ class ModelResource(Resource, Generic[ModelT]):
         if isinstance(value, bool):
             return "Yes" if value else "No"
         if isinstance(value, models.Manager):
-            return ", ".join(str(item) for item in value.all()[:5])
+            # One extra row tells us whether the relation continues past the preview.
+            labels = [str(item) for item in value.all()[:6]]
+            if not labels:
+                return "—"
+            return ", ".join(labels[:5]) + (", …" if len(labels) > 5 else "")
         return str(value)
 
     def format_field_value(self, obj: ModelT, path: str, value: Any) -> str:
