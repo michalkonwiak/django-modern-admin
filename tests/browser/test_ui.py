@@ -1,0 +1,330 @@
+from __future__ import annotations
+
+import os
+
+import pytest
+from playwright.sync_api import Page, sync_playwright
+
+pytestmark = [pytest.mark.browser, pytest.mark.django_db(transaction=True)]
+
+
+@pytest.mark.parametrize("width", [390, 1440])
+def test_queue_preview_and_transition_keep_operator_on_worklist(
+    page: Page, live_server, order, width
+):
+    page.set_viewport_size({"width": width, "height": 844})
+    page.goto(f"{live_server.url}/app/order/?queue=fulfillment", wait_until="networkidle")
+    page.locator(".ma-preview-trigger").first.click()
+    preview = page.locator("#record-preview")
+    preview.wait_for(state="visible")
+    assert "queue=fulfillment" in page.url
+    bounds = preview.bounding_box()
+    assert bounds["x"] >= 0 and bounds["x"] + bounds["width"] <= width
+    preview.get_by_role("link", name="Mark shipped").click()
+    page.locator("[data-ma-dialog]").wait_for(state="visible")
+    # Escape closes only the action, preserving the underlying record workspace.
+    page.keyboard.press("Escape")
+    page.locator("[data-ma-dialog]").wait_for(state="detached")
+    assert preview.is_visible()
+    preview.get_by_role("link", name="Mark shipped").click()
+    page.locator('[data-ma-dialog] button[type="submit"]').click()
+    page.locator("[data-ma-dialog]").wait_for(state="detached")
+    page.wait_for_function(
+        "document.querySelector('#record-preview .ma-record-status')"
+        "?.textContent.trim() === 'Shipped'"
+    )
+    assert preview.get_by_role("button", name="Mark shipped").is_disabled()
+    page.wait_for_function("document.querySelectorAll('.ma-data-row').length === 0")
+    assert "queue=fulfillment" in page.url
+    page.keyboard.press("Escape")
+    page.locator("[data-ma-preview]").wait_for(state="detached")
+
+
+def test_queue_selection_survives_htmx_search(page: Page, live_server):
+    page.goto(f"{live_server.url}/app/customer/", wait_until="networkidle")
+    page.locator('.ma-work-queues a[href*="queue=leads"]').click()
+    page.wait_for_url("**queue=leads*")
+    page.locator('.ma-work-queues a[aria-current="page"][href*="queue=leads"]').wait_for()
+    page.wait_for_function(
+        "!document.querySelector('#resource-panel').classList.contains('htmx-settling')"
+    )
+    page.fill("#resource-search", "Anna")
+    page.wait_for_url("**q=Anna*")
+    assert "queue=leads" in page.url
+    assert page.locator(".ma-data-row").count() == 1
+
+
+def assert_inside_viewport(page: Page, selector: str) -> None:
+    panel = page.locator(selector).first
+    panel.wait_for(state="visible")
+    page.wait_for_function(
+        "selector => { const r = document.querySelector(selector).getBoundingClientRect(); "
+        "return r.x >= 7 && r.y >= 7 && r.right <= innerWidth - 7 "
+        "&& r.bottom <= innerHeight - 7; }",
+        arg=selector,
+    )
+
+
+@pytest.mark.parametrize("width", [320, 390, 768, 1024, 1440])
+@pytest.mark.parametrize("compact", [False, True])
+def test_account_popover_fits_viewport_and_tracks_resize(page: Page, live_server, width, compact):
+    page.goto(f"{live_server.url}/app/customer/", wait_until="networkidle")
+    if compact:
+        page.get_by_role("button", name="Toggle compact sidebar").click()
+    page.set_viewport_size({"width": width, "height": 640})
+    if width <= 760:
+        page.get_by_role("button", name="Open navigation").click()
+    page.get_by_role("button", name="Account menu").click()
+    assert_inside_viewport(page, ".ma-user-popover")
+    page.set_viewport_size({"width": width, "height": 480})
+    assert_inside_viewport(page, ".ma-user-popover")
+    page.keyboard.press("Escape")
+    page.locator(".ma-user-popover").wait_for(state="hidden")
+
+
+@pytest.mark.parametrize("dark", [False, True])
+def test_popover_surfaces_match_and_stay_inside_viewport(page: Page, live_server, dark):
+    page.goto(f"{live_server.url}/app/customer/", wait_until="networkidle")
+    if dark:
+        page.get_by_role("button", name="Toggle color theme").click()
+    styles = []
+    for trigger, selector in [
+        (".ma-choice-filter summary", ".ma-toolbar .ma-choice-options"),
+        (".ma-filter-button", ".ma-range-popover"),
+        (".ma-toolbar-button", ".ma-views-popover"),
+        ('[aria-label="Choose columns"]', ".ma-column-picker"),
+        ('[aria-label="Account menu"]', ".ma-user-popover"),
+    ]:
+        page.locator(trigger).first.click()
+        assert_inside_viewport(page, selector)
+        styles.append(
+            page.locator(selector).first.evaluate(
+                "e => { const s = getComputedStyle(e); return "
+                "[s.backgroundColor, s.borderRadius, s.borderColor, "
+                "s.boxShadow, s.backdropFilter]; }"
+            )
+        )
+        page.keyboard.press("Escape")
+        page.locator(selector).first.wait_for(state="hidden")
+    assert all(style == styles[0] for style in styles)
+
+
+@pytest.mark.parametrize("width", [320, 390, 768, 1024, 1440])
+def test_toolbar_popovers_fit_after_open_resize_and_scroll(page: Page, live_server, width):
+    page.set_viewport_size({"width": width, "height": 600})
+    page.goto(f"{live_server.url}/app/customer/?status=active", wait_until="networkidle")
+    for selector in [".ma-views-popover", ".ma-column-picker"]:
+        panel = page.locator(selector)
+        page.evaluate(
+            """selector => {
+            window.popoverFrames = [];
+            let remaining = 20;
+            const sample = () => {
+                const e = document.querySelector(selector);
+                const r = e.getBoundingClientRect();
+                if (r.width && getComputedStyle(e).visibility !== 'hidden') {
+                    window.popoverFrames.push(r.x >= 0 && r.right <= innerWidth
+                        && r.y >= 0 && r.bottom <= innerHeight);
+                }
+                if (--remaining) requestAnimationFrame(sample);
+            };
+            requestAnimationFrame(sample);
+        }""",
+            selector,
+        )
+        panel.locator("xpath=preceding-sibling::button").click()
+        assert_inside_viewport(page, selector)
+        page.wait_for_timeout(350)
+        assert page.evaluate(
+            "window.popoverFrames.length > 0 && window.popoverFrames.every(Boolean)"
+        )
+        page.set_viewport_size({"width": 320, "height": 420})
+        assert_inside_viewport(page, selector)
+        page.mouse.wheel(0, 150)
+        assert_inside_viewport(page, selector)
+        page.keyboard.press("Escape")
+        panel.wait_for(state="hidden")
+        page.set_viewport_size({"width": width, "height": 600})
+
+
+@pytest.mark.parametrize("dark", [False, True])
+def test_record_status_uses_tonal_rectangular_labels(page: Page, live_server, dark):
+    page.goto(f"{live_server.url}/app/customer/", wait_until="networkidle")
+    if dark:
+        page.get_by_role("button", name="Toggle color theme").click()
+    status = page.locator(".ma-record-status.is-success").first
+    assert status.inner_text().strip() == "Active"
+    assert status.evaluate("e => getComputedStyle(e).borderRadius") == "5px"
+    assert status.evaluate("e => getComputedStyle(e).backdropFilter") == "none"
+    assert status.evaluate("e => getComputedStyle(e).backgroundColor") != "rgba(0, 0, 0, 0)"
+    assert status.locator("svg, i, .ma-record-status-mark").count() == 0
+    assert status.bounding_box()["height"] == 24
+    assert page.locator(".ma-table .ma-badge").count() == 0
+
+
+def test_custom_checkboxes_support_keyboard_and_partial_selection(page: Page, live_server):
+    page.goto(f"{live_server.url}/app/customer/", wait_until="networkidle")
+    checkbox = page.locator('tbody input[name="selected"]').first
+    select_all = page.get_by_role("checkbox", name="Select all rows")
+    assert checkbox.evaluate("e => getComputedStyle(e).appearance") == "none"
+    checkbox.focus()
+    page.keyboard.press("Space")
+    assert checkbox.is_checked()
+    page.wait_for_function("document.querySelector('thead input').indeterminate")
+    assert page.locator(".ma-data-row.is-selected").count() == 1
+    select_all.check()
+    assert page.locator(".ma-data-row.is-selected").count() == 2
+    page.wait_for_function("!document.querySelector('thead input').indeterminate")
+    select_all.uncheck()
+    assert page.locator(".ma-data-row.is-selected").count() == 0
+
+
+@pytest.fixture
+def page(live_server, user, customers, order) -> Page:
+    browser_path = os.environ.get("PLAYWRIGHT_BROWSERS_PATH")
+    if not browser_path:
+        pytest.skip("Set PLAYWRIGHT_BROWSERS_PATH after running `playwright install chromium`.")
+    with sync_playwright() as playwright:
+        browser = playwright.chromium.launch()
+        page = browser.new_page(viewport={"width": 1440, "height": 1000})
+        page.goto(f"{live_server.url}/login/", wait_until="domcontentloaded")
+        page.fill("#id_username", "operator")
+        page.fill("#id_password", "secret")
+        page.click('button[type="submit"]')
+        page.wait_for_url("**/app/")
+        yield page
+        browser.close()
+
+
+def test_desktop_density_dialog_command_and_dark_mode(page: Page, live_server):
+    page.goto(f"{live_server.url}/app/customer/", wait_until="domcontentloaded")
+    assert page.locator("#app-sidebar").is_visible()
+    assert page.locator(".ma-table tbody tr").count() == 2
+    row_height = page.locator(".ma-table tbody tr").first.evaluate(
+        "element => element.getBoundingClientRect().height"
+    )
+    assert 44 <= row_height <= 52
+    assert page.evaluate(
+        "getComputedStyle(document.documentElement).getPropertyValue('--primary').trim()"
+    )
+
+    page.keyboard.press("Control+k")
+    page.locator(".ma-command").wait_for(state="visible")
+    page.wait_for_function(
+        "document.activeElement === document.querySelector('.ma-command-input input')"
+    )
+    page.keyboard.press("Escape")
+
+    page.locator(".ma-list-header .ma-button").click()
+    page.wait_for_selector("[data-ma-dialog]")
+    modal = page.locator("[data-ma-dialog] .ma-dialog")
+    assert modal.is_visible()
+    page.wait_for_function(
+        "document.activeElement === "
+        "document.querySelector('[data-ma-dialog] input:not([type=hidden])')"
+    )
+    page.keyboard.press("Escape")
+
+    page.click('button[aria-label="Toggle color theme"]')
+    assert page.locator("html").evaluate("element => element.classList.contains('dark')")
+    page.reload(wait_until="networkidle")
+    assert page.locator("html").evaluate("element => element.classList.contains('dark')")
+
+
+def test_mobile_navigation_filter_drawer_and_no_document_overflow(page: Page, live_server):
+    page.set_viewport_size({"width": 390, "height": 844})
+    page.goto(f"{live_server.url}/app/customer/", wait_until="domcontentloaded")
+    assert page.evaluate("document.documentElement.scrollWidth") == 390
+
+    menu = page.locator('button[aria-label="Open navigation"]')
+    assert menu.is_visible()
+    menu.click()
+    assert "is-open" in (page.locator("#app-sidebar").get_attribute("class") or "")
+
+    page.locator('button[aria-label="Close navigation"]').click()
+    page.locator('button[aria-label="More filters"]').click()
+    page.locator(".ma-filter-drawer").wait_for(state="visible")
+    assert page.locator(".ma-filter-drawer .ma-choice-filter").count() >= 1
+    page.get_by_role("button", name="Close filters").click()
+    assert page.locator(".ma-table-scroll").evaluate("e => e.scrollWidth === e.clientWidth")
+    assert page.locator("tbody .is-identity").first.is_visible()
+    assert page.locator("tbody .is-status").first.is_visible()
+    assert page.locator("tbody .is-identity").first.bounding_box()["width"] >= 200
+    page.get_by_role("button", name="Show all columns").click()
+    assert page.locator(".ma-table-scroll").evaluate("e => e.scrollWidth > e.clientWidth")
+    assert page.evaluate("document.documentElement.scrollWidth") == 390
+
+
+def test_custom_filter_in_dark_mode_updates_results_and_url(page: Page, live_server):
+    page.goto(f"{live_server.url}/app/customer/", wait_until="networkidle")
+    page.get_by_role("button", name="Toggle color theme").click()
+    choice = page.locator(".ma-toolbar-filters .ma-choice-filter").first
+    choice.locator("summary").click()
+    choice.locator(".ma-choice-options").wait_for(state="visible")
+    choice.locator('input[value="active"]').check()
+    page.wait_for_url("**/*status=active*")
+    assert page.locator(".ma-data-row").count() == 1
+    assert page.locator(".ma-data-row").inner_text().find("Alex Morgan") >= 0
+
+
+@pytest.mark.parametrize("width", [390, 1440])
+def test_bulk_bar_position_does_not_change_after_selection(page: Page, live_server, width):
+    page.set_viewport_size({"width": width, "height": 844})
+    page.goto(f"{live_server.url}/app/customer/", wait_until="networkidle")
+    page.locator('tbody input[name="selected"]').first.check()
+    bar = page.locator(".ma-bulk-bar")
+    bar.wait_for(state="visible")
+    first = bar.bounding_box()
+    page.wait_for_timeout(1100)
+    assert bar.bounding_box() == first
+    assert first["x"] >= 0 and first["x"] + first["width"] <= width
+    assert bar.evaluate("e => getComputedStyle(e).transform") == "none"
+
+
+@pytest.mark.parametrize("theme", ["light", "dark"])
+def test_command_and_drawer_dismiss_without_composited_backdrop(page: Page, live_server, theme):
+    page.goto(f"{live_server.url}/app/customer/", wait_until="networkidle")
+    if theme == "dark":
+        page.get_by_role("button", name="Toggle color theme").click()
+    for _ in range(3):
+        page.keyboard.press("Control+k")
+        page.locator(".ma-command").wait_for(state="visible")
+        for selector in [".ma-command-backdrop", ".ma-command"]:
+            assert (
+                page.locator(selector).evaluate("e => getComputedStyle(e).backdropFilter") == "none"
+            )
+        page.keyboard.press("Escape")
+        page.locator(".ma-command").wait_for(state="hidden")
+        page.get_by_role("button", name="More filters").click()
+        page.locator(".ma-filter-drawer").wait_for(state="visible")
+        assert (
+            page.locator(".ma-drawer-backdrop").evaluate("e => getComputedStyle(e).backdropFilter")
+            == "none"
+        )
+        page.keyboard.press("Escape")
+        page.locator(".ma-filter-drawer").wait_for(state="hidden")
+        assert page.locator("body").evaluate("e => getComputedStyle(e).overflow") != "hidden"
+
+
+@pytest.mark.parametrize("dismiss", ["escape", "button", "backdrop"])
+def test_dialog_dismissal_keeps_background_stable_and_restores_focus(
+    page: Page, live_server, dismiss: str
+):
+    page.goto(f"{live_server.url}/app/customer/", wait_until="networkidle")
+    trigger = page.locator(".ma-list-header .ma-button")
+    trigger.click()
+    page.locator("[data-ma-dialog] input:not([type=hidden])").first.wait_for()
+    backdrop = page.locator("[data-ma-dialog]")
+    assert backdrop.evaluate("e => getComputedStyle(e).backdropFilter") == "none"
+    if dismiss == "escape":
+        page.keyboard.press("Escape")
+    elif dismiss == "button":
+        page.get_by_role("button", name="Close dialog", exact=True).click()
+    else:
+        backdrop.click(position={"x": 5, "y": 5})
+    backdrop.wait_for(state="detached")
+    assert trigger.evaluate("e => document.activeElement === e")
+    trigger.click()
+    page.locator("[data-ma-dialog]").wait_for(state="visible")
+    page.wait_for_timeout(200)
+    assert page.locator("[data-ma-dialog]").count() == 1

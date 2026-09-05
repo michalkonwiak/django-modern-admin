@@ -1,0 +1,8 @@
+{% load modern_admin %}
+<div class="ma-empty-state">
+  <span class="ma-empty-icon">{% icon "inbox" 20 %}</span>
+  <h3>No {{ resource.title|lower }} found</h3>
+  {% if query or active_filters %}<p>Try a different search or remove one of the active filters.</p><a href="{{ clear_filters_url }}" class="ma-button is-secondary is-small" hx-get="{{ clear_filters_url }}" hx-target="#resource-panel" hx-push-url="true">Clear search and filters</a>
+  {% elif can_add %}<p>Create the first {{ resource.verbose_name }} to get this workspace moving.</p><a href="{{ create_url }}" class="ma-button is-primary is-small" hx-get="{{ create_url }}?surface=dialog" hx-target="#dialog-host">{% icon "plus" 14 %}New {{ resource.verbose_name }}</a>
+  {% else %}<p>There is nothing to show here yet.</p>{% endif %}
+</div>

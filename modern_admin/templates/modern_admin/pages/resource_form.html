@@ -1,0 +1,12 @@
+{% extends "modern_admin/layouts/app.html" %}
+{% load modern_admin %}
+{% block title %}{{ page_title }} · {{ site_title }}{% endblock %}
+{% block content %}
+<div class="ma-page ma-form-page">
+  <header class="ma-page-header"><div class="ma-page-heading"><div class="ma-title-line"><h1>{{ page_title }}</h1></div><div class="ma-page-context"><span>{{ resource.title }}</span><i></i><span>Live record editor</span></div></div></header>
+  <div class="ma-form-workspace">
+    <aside><span class="ma-form-orbit">{% icon resource.icon 19 %}</span><div><span class="ma-section-index">EDITOR</span><h2>Core information</h2><p>Enter the details used by your team. Required fields are marked below.</p></div><div class="ma-form-note"><i></i><span><strong>Autosave is off</strong><small>Review and submit when ready.</small></span></div></aside>
+    <section class="ma-form-surface">{% include "modern_admin/partials/form_fields.html" %}</section>
+  </div>
+</div>
+{% endblock %}

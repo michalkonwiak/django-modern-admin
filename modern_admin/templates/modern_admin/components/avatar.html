@@ -1,0 +1,1 @@
+{% load modern_admin %}<span class="ma-avatar{% if size %} ma-avatar-{{ size }}{% endif %}"{% if label %} aria-label="{{ label }}" title="{{ label }}"{% else %} aria-hidden="true"{% endif %}>{% if image_url %}<img src="{{ image_url }}" alt="">{% else %}{{ label|initials }}{% endif %}</span>

@@ -1,0 +1,17 @@
+{% extends "modern_admin/layouts/app.html" %}
+{% load modern_admin %}
+{% block title %}{{ page.title }} · {{ site_title }}{% endblock %}
+{% block content %}
+<div class="ma-page demo-settings-page">
+  <header class="ma-page-header"><div><div class="ma-eyebrow">System</div><h1>{{ page.title }}</h1><p>{{ page.description }}</p></div><button class="ma-button is-primary" type="button" disabled>Save changes</button></header>
+  <div class="demo-settings-layout">
+    <nav class="demo-settings-nav" aria-label="Settings sections"><a class="is-active" href="#general">{% icon "building-2" 15 %}General</a><a href="#members">{% icon "users" 15 %}Members</a><a href="#billing">{% icon "credit-card" 15 %}Billing</a><a href="#integrations">{% icon "zap" 15 %}Integrations</a></nav>
+    <div class="demo-settings-content">
+      <section class="ma-section" id="general"><header><div><h2>Workspace profile</h2><p>Shared identity and regional defaults.</p></div></header><div class="ma-form-grid"><div class="ma-field"><label>Workspace name</label><input class="ma-input" value="{{ workspace.name }}"></div><div class="ma-field"><label>Operating region</label><select class="ma-input"><option>{{ workspace.region }}</option></select></div><div class="ma-field"><label>Timezone</label><select class="ma-input"><option>{{ workspace.timezone }}</option></select></div><div class="ma-field"><label>Default currency</label><select class="ma-input"><option>{{ workspace.currency }}</option></select></div></div></section>
+      <section class="ma-section"><header><div><h2>Appearance</h2><p>Theme follows each member's preference.</p></div></header><div class="demo-setting-row"><span class="demo-setting-icon">{% icon "moon" 16 %}</span><div><strong>Color theme</strong><small>Switch between designed light and dark palettes.</small></div><button class="ma-button is-secondary is-small" type="button" @click="toggleTheme()">Toggle theme</button></div></section>
+      <section class="ma-section"><header><div><h2>Danger zone</h2><p>Destructive workspace-level operations.</p></div></header><div class="demo-setting-row"><span class="demo-setting-icon is-danger">{% icon "archive" 16 %}</span><div><strong>Archive workspace</strong><small>Data remains exportable for 30 days.</small></div><button class="ma-button is-secondary is-small" type="button" disabled>Archive</button></div></section>
+    </div>
+  </div>
+</div>
+{% endblock %}
+

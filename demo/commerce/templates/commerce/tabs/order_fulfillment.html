@@ -1,0 +1,7 @@
+{% load modern_admin %}
+<div class="demo-fulfillment">
+  <div class="is-complete"><span>{% icon "check" 14 %}</span><div><strong>Order created</strong><small>{{ object.created_at|date:"M j, Y · P" }}</small></div></div>
+  <div class="{% if object.placed_at %}is-complete{% endif %}"><span>{% if object.placed_at %}{% icon "check" 14 %}{% endif %}</span><div><strong>Payment authorized</strong><small>{% if object.placed_at %}{{ object.placed_at|date:"M j, Y · P" }}{% else %}Waiting{% endif %}</small></div></div>
+  <div class="{% if object.status == 'shipped' %}is-complete{% endif %}"><span>{% if object.status == 'shipped' %}{% icon "check" 14 %}{% endif %}</span><div><strong>Shipped</strong><small>{% if object.status == 'shipped' %}Handed to carrier{% else %}Not yet shipped{% endif %}</small></div></div>
+</div>
+

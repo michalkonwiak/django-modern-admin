@@ -1,0 +1,5 @@
+{% load modern_admin %}
+<header class="ma-widget-header"><h2>{{ widget.title }}</h2><span class="ma-widget-icon">{% icon widget_context.icon 15 %}</span></header>
+<div class="ma-metric-value">{{ widget_context.value }}</div>
+<div class="ma-metric-meta">{% if widget_context.change != None %}<span class="{% if widget_context.change > 0 %}is-positive{% elif widget_context.change < 0 %}is-negative{% endif %}">{% if widget_context.change > 0 %}+{% endif %}{{ widget_context.change }}%</span>{% endif %}<span>{{ widget_context.description }}</span></div>
+

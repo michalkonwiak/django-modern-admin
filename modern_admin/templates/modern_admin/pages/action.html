@@ -1,0 +1,3 @@
+{% extends "modern_admin/layouts/app.html" %}
+{% block title %}{{ action.label }} · {{ resource.title }}{% endblock %}
+{% block content %}<div class="ma-page" aria-hidden="true"></div>{% include "modern_admin/partials/action_dialog.html" %}{% endblock %}

@@ -1,0 +1,5 @@
+{% load modern_admin %}
+<div class="demo-contact-grid">
+  {% for contact in contacts %}<article><span class="ma-avatar">{{ contact.name|initials }}</span><div><strong>{{ contact.name }}</strong><a href="mailto:{{ contact.email }}">{{ contact.email }}</a><small>{{ contact.role|default:"Contact" }}{% if contact.is_primary %} · Primary{% endif %}</small></div></article>{% empty %}<div class="demo-widget-empty">No contacts have been added.</div>{% endfor %}
+</div>
+

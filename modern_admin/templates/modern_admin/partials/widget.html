@@ -1,0 +1,4 @@
+<section id="widget-{{ widget.key }}" class="ma-widget ma-span-{{ widget.span }}"{% if widget.refresh_interval %} hx-get="{% url modern_admin_site.name|add:':widget' widget.key %}" hx-trigger="every {{ widget.refresh_interval }}s, ma:reload" hx-target="this" hx-swap="outerHTML"{% endif %}>
+  {% include widget.template_name with widget=widget %}
+</section>
+

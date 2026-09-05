@@ -1,0 +1,21 @@
+{% load modern_admin %}
+<section id="record-preview" class="ma-record-preview" role="dialog" aria-modal="true" aria-labelledby="preview-title" hx-get="{{ detail_url }}?surface=preview&amp;fragment=preview" hx-trigger="ma:reload" hx-target="this" hx-swap="outerHTML">
+  <header class="ma-preview-heading">
+    <div><p>{{ resource.verbose_name|title }}</p><h2 id="preview-title">{{ object_label }}</h2></div>
+    <button type="button" class="ma-icon-button" aria-label="Close preview" @click="close()">{% icon "x" 18 %}</button>
+  </header>
+  <div class="ma-preview-content">
+    {% for section, values in sections %}
+      <section class="ma-preview-section"><h3>{{ section.title }}</h3><dl>
+        {% for value in values %}<div><dt>{{ value.label }}</dt><dd>{% if value.kind == 'badge' %}<span class="ma-record-status is-{{ value.variant }}">{{ value.value }}</span>{% else %}{{ value.value }}{% endif %}</dd></div>{% endfor %}
+      </dl></section>
+    {% endfor %}
+    {% if detail_actions %}<section class="ma-preview-section"><h3>Actions</h3><div class="ma-preview-actions">
+      {% for link in detail_actions %}<div>{% if link.unavailable_reason %}<button class="ma-button is-secondary" type="button" disabled>{{ link.action.label }}</button><p>{{ link.unavailable_reason }}</p>{% else %}<a class="ma-button {% if link.action.variant == 'danger' %}is-danger-quiet{% else %}is-secondary{% endif %}" href="{{ link.url }}" hx-get="{{ link.url }}" hx-target="#dialog-host" hx-swap="innerHTML">{% icon link.action.icon 14 %}{{ link.action.label }}</a>{% endif %}</div>{% endfor %}
+    </div></section>{% endif %}
+    <section class="ma-preview-section"><h3>Activity</h3><ol class="ma-preview-activity">
+      {% for event in audit_events %}<li><strong>{{ event.action|capfirst }}</strong><span>{{ event.actor|default:"System" }} · {{ event.created_at|date:"M j, H:i" }}</span></li>{% empty %}<li>No activity recorded yet.</li>{% endfor %}
+    </ol></section>
+  </div>
+  <footer class="ma-preview-footer"><a class="ma-button is-primary" href="{{ detail_url }}">Open full record {% icon "chevron-right" 14 %}</a></footer>
+</section>

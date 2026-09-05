@@ -1,0 +1,22 @@
+{% load modern_admin %}
+<div class="ma-dialog-backdrop" data-ma-dialog x-data="dialog" x-init="open()" @click.self="close()" @keydown.escape.window="close()" @keydown.tab="trap($event)">
+  <section class="ma-dialog" role="alertdialog" aria-modal="true" aria-labelledby="action-dialog-title" aria-describedby="action-dialog-description" x-show="visible" x-transition:enter="ma-enter" x-transition:enter-start="ma-dialog-enter" x-transition:leave="ma-leave" x-transition:leave-end="ma-dialog-enter">
+    <span class="ma-dialog-refraction" aria-hidden="true"></span>
+    <header class="ma-dialog-header">
+      <span class="ma-dialog-action-icon is-{{ action.variant }}">{% icon action.icon 18 %}</span>
+      <div><div class="ma-eyebrow">Business action</div><h2 id="action-dialog-title">{{ action.label }}</h2><p id="action-dialog-description">{{ action.description|default:"Review the details before continuing." }}</p></div>
+      <button class="ma-icon-button" type="button" @click="close()" aria-label="Close dialog">{% icon "x" 16 %}</button>
+    </header>
+    <form method="post" class="ma-form" hx-disabled-elt="find button[type=submit]" hx-post="{{ request.path }}" hx-target="#dialog-host" hx-swap="innerHTML">
+      {% csrf_token %}{% for value in selected %}<input type="hidden" name="selected" value="{{ value }}">{% endfor %}
+      <div class="ma-dialog-body">
+        {% if object %}<div class="ma-action-object"><span class="ma-avatar">{{ object|initials }}</span><span><strong>{{ object }}</strong><small>{{ resource.verbose_name|title }}</small></span></div>{% endif %}
+        {% if form.non_field_errors %}<div class="ma-form-alert" role="alert">{{ form.non_field_errors }}</div>{% endif %}
+        {% if unavailable_reason and not form.non_field_errors %}<div class="ma-form-alert" role="status">{{ unavailable_reason }}</div>{% endif %}
+        {% for field in form.hidden_fields %}{{ field }}{% endfor %}
+        {% for field in form.visible_fields %}<div class="ma-field{% if field.errors %} has-error{% endif %}"><label for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{% if field.help_text %}<small class="ma-help-text">{{ field.help_text }}</small>{% endif %}{% for error in field.errors %}<span class="ma-field-error">{{ error }}</span>{% endfor %}</div>{% endfor %}
+      </div>
+      <footer class="ma-dialog-actions"><span>This operation will be added to activity.</span><div><button type="button" class="ma-button is-secondary" @click="close()">Cancel</button><button type="submit"{% if unavailable_reason %} disabled{% endif %} class="ma-button{% if action.variant == 'danger' %} is-danger{% else %} is-primary{% endif %}"><span class="ma-submit-label">{{ action.label }}</span><span class="ma-button-spinner"></span></button></div></footer>
+    </form>
+  </section>
+</div>

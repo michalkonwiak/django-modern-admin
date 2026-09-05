@@ -1,0 +1,61 @@
+{% load modern_admin %}
+<div id="resource-detail" class="ma-page ma-record-page" hx-get="{{ request.path }}?fragment=detail" hx-trigger="ma:reload" hx-target="this" hx-swap="outerHTML" x-data="detailTabs('{{ active_tab_key }}')">
+  <header class="ma-detail-header">
+    <div class="ma-detail-identity">
+      <span class="ma-avatar ma-avatar-lg"><span>{{ object_label|initials }}</span><i></i></span>
+      <div class="ma-detail-title">
+        <div class="ma-record-kicker"><span>{{ resource.verbose_name }}</span><i></i><span>Record #{{ object.pk }}</span></div>
+        <h1>{{ object_label }}</h1>
+        
+      </div>
+    </div>
+    <div class="ma-page-actions">
+      {% for link in detail_actions %}
+        <a href="{{ link.url }}" class="ma-button{% if link.action.variant == 'danger' %} is-danger-quiet{% else %} is-secondary{% endif %}" hx-get="{{ link.url }}" hx-target="#dialog-host" hx-swap="innerHTML">{% icon link.action.icon 14 %}<span>{{ link.action.label }}</span></a>
+      {% endfor %}
+      {% if can_change %}<a href="{{ edit_url }}" class="ma-button is-primary" hx-get="{{ edit_url }}?surface=dialog" hx-target="#dialog-host" hx-swap="innerHTML">{% icon "pencil" 14 %}<span>Edit record</span></a>{% endif %}
+    </div>
+  </header>
+
+  <nav class="ma-record-tabs" aria-label="Record workspace">
+    <a href="{{ request.path }}" role="tab" :aria-selected="active === 'overview'" :class="{ 'is-active': active === 'overview' }" @click.prevent="overview('{{ request.path }}')">Overview</a>
+    {% for tab in tabs %}<a href="{{ request.path }}?tab={{ tab.key }}" role="tab" :aria-selected="active === '{{ tab.key }}'" :class="{ 'is-active': active === '{{ tab.key }}' }" @click.prevent="select('{{ tab.key }}', $el)" data-tab-url="{% url modern_admin_site.name|add:':'|add:resource.key|add:'_tab' object.pk tab.key %}" data-tab-key="{{ tab.key }}">{% if tab.icon %}{% icon tab.icon 13 %}{% endif %}{{ tab.label }}</a>{% endfor %}
+    <span class="ma-record-tab-line" aria-hidden="true"></span>
+  </nav>
+
+  <div class="ma-record-overview" x-show="active === 'overview'">
+    <div class="ma-detail-layout">
+      <div class="ma-detail-main">
+        {% for section, values in sections %}
+          <section class="ma-dossier{% if forloop.last and not forloop.first %} is-signals{% endif %}">
+            <header><div><span class="ma-section-index">0{{ forloop.counter }}</span><h2>{{ section.title }}</h2>{% if section.description %}<p>{{ section.description }}</p>{% endif %}</div><span class="ma-section-rule"></span></header>
+            <dl class="ma-detail-grid" style="--detail-columns:{{ section.columns }}">
+              {% for item in values %}
+                <div><dt>{{ item.label }}</dt><dd title="{{ item.value }}">{% if item.kind == "badge" %}<span class="ma-badge is-{{ item.variant }}"><span class="ma-status-dot"></span>{{ item.value }}</span>{% else %}{{ item.value }}{% endif %}</dd></div>
+              {% endfor %}
+            </dl>
+          </section>
+        {% endfor %}
+      </div>
+      <aside class="ma-detail-aside">
+        <section class="ma-activity-section">
+          <header><div><span class="ma-section-index">LIVE</span><h2>Activity stream</h2><p>Recorded changes in this workspace.</p></div><span class="ma-live-pulse"><i></i>Live</span></header>
+          <ol class="ma-timeline">
+            {% for event in audit_events %}
+              <li><span class="ma-timeline-marker"></span><div><p><strong>{{ event.actor.get_full_name|default:event.actor.username|default:"System" }}</strong> {{ event.action }} this {{ resource.verbose_name }}.</p><time datetime="{{ event.created_at|date:'c' }}">{{ event.created_at|timesince }} ago</time></div></li>
+            {% empty %}
+              <li class="ma-timeline-empty"><span class="ma-empty-icon">{% icon "activity" 16 %}</span><div><strong>Quiet for now</strong><p>New changes will appear here as they happen.</p></div></li>
+            {% endfor %}
+          </ol>
+        </section>
+      </aside>
+    </div>
+  </div>
+
+  <section class="ma-record-tab-panel" x-cloak x-show="active !== 'overview'">
+    <div class="ma-tab-context"><span><i></i>Live resource view</span></div>
+    <div id="detail-tab-panel" class="ma-tab-panel" role="tabpanel">
+      {% if initial_tab %}{% include initial_tab.template_name %}{% else %}{% include "modern_admin/components/skeleton.html" %}{% endif %}
+    </div>
+  </section>
+</div>

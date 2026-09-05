@@ -1,0 +1,47 @@
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
+[project]
+name = "django-modern-admin"
+version = "0.1.0"
+description = "A Django-native resource framework for polished internal applications"
+readme = "README.md"
+requires-python = ">=3.13"
+license = { text = "MIT" }
+authors = [{ name = "Michal Konwiak", email = "michalkonwiak1@gmail.com" }]
+dependencies = ["Django>=5.2,<6.1"]
+
+[project.optional-dependencies]
+test = [
+  "pytest>=8.3",
+  "pytest-django>=4.10",
+  "pytest-cov>=6.0",
+  "playwright>=1.51",
+  "ruff>=0.9",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["modern_admin"]
+exclude = ["modern_admin/static/modern_admin/src"]
+
+[tool.hatch.build.targets.sdist]
+include = ["modern_admin", "README.md", "LICENSE", "ARCHITECTURE.md", "WORKFLOWS.md", "pyproject.toml"]
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "tests.settings"
+pythonpath = ["."]
+testpaths = ["tests"]
+addopts = "-ra -m 'not browser'"
+markers = ["browser: end-to-end browser checks requiring an installed Playwright browser"]
+
+[tool.ruff]
+target-version = "py313"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "DJ"]
+ignore = ["DJ008", "UP046", "UP047"]
+
+[tool.ruff.lint.per-file-ignores]
+"modern_admin/templatetags/modern_admin.py" = ["E501"]

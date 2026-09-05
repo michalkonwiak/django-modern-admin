@@ -1,0 +1,6 @@
+{% extends "modern_admin/layouts/app.html" %}
+{% load modern_admin %}
+{% block title %}{{ object_label }} · {{ resource.title }}{% endblock %}
+{% block content %}
+{% include "modern_admin/partials/resource_detail_body.html" %}
+{% endblock %}

@@ -1,0 +1,12 @@
+{
+  "private": true,
+  "scripts": {
+    "css:build": "tailwindcss -i modern_admin/static/modern_admin/src/app.css -o modern_admin/static/modern_admin/app.css --minify",
+    "css:watch": "tailwindcss -i modern_admin/static/modern_admin/src/app.css -o modern_admin/static/modern_admin/app.css --watch"
+  },
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.1.13",
+    "tailwindcss": "^4.1.13"
+  }
+}
+

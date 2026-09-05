@@ -1,0 +1,5 @@
+{% extends "modern_admin/layouts/app.html" %}
+{% block title %}{{ resource.title }} · {{ site_title }}{% endblock %}
+{% block content %}
+  {% include "modern_admin/partials/resource_panel.html" %}
+{% endblock %}

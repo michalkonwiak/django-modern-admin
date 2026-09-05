@@ -1,0 +1,21 @@
+{% load static modern_admin %}
+<!doctype html>
+<html lang="en" x-data="appShell" :class="{ 'dark': dark }">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta name="csrf-token" content="{{ csrf_token }}">
+  <title>{% block title %}{{ site_title }}{% endblock %}</title>
+  <script>try{if(localStorage.getItem('ma-theme')==='dark'||(!localStorage.getItem('ma-theme')&&matchMedia('(prefers-color-scheme: dark)').matches))document.documentElement.classList.add('dark')}catch(e){}</script>
+  <link rel="stylesheet" href="{% static 'modern_admin/app.css' %}?v=20260905-6">
+  {% for stylesheet in modern_admin_site.extra_css %}<link rel="stylesheet" href="{% static stylesheet %}">{% endfor %}
+  <script defer src="{% static 'modern_admin/vendor/htmx.min.js' %}"></script>
+  <script defer src="{% static 'modern_admin/app.js' %}?v=20260905-6"></script>
+  <script defer src="{% static 'modern_admin/vendor/alpine.min.js' %}"></script>
+  {% block extra_head %}{% endblock %}
+</head>
+<body hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}' class="ma-body">
+  {% block body %}{% endblock %}
+</body>
+</html>

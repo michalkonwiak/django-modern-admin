@@ -1,0 +1,20 @@
+{% extends "modern_admin/layouts/base.html" %}
+{% block body %}
+<main class="ma-content" style="max-width:420px;margin:10vh auto;padding:24px">
+  <h1 class="ma-page-title">{{ site_title }}</h1>
+  <p>Sign in to your workspace.</p>
+  <form method="post" class="ma-form">
+    {% csrf_token %}
+    {% if form.non_field_errors %}<div class="ma-form-alert" role="alert">{{ form.non_field_errors }}</div>{% endif %}
+    {% for field in form %}
+    <div class="ma-field">
+      <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+      {{ field }}
+      {% if field.errors %}<div class="ma-field-error">{{ field.errors }}</div>{% endif %}
+    </div>
+    {% endfor %}
+    <input type="hidden" name="next" value="{{ next }}">
+    <button type="submit" class="ma-button is-primary">Sign in</button>
+  </form>
+</main>
+{% endblock %}

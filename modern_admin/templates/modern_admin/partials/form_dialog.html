@@ -1,0 +1,8 @@
+{% load modern_admin %}
+<div class="ma-dialog-backdrop" data-ma-dialog x-data="dialog" x-init="open()" @click.self="close()" @keydown.escape.window="close()" @keydown.tab="trap($event)">
+  <section class="ma-dialog ma-dialog-wide" role="dialog" aria-modal="true" aria-labelledby="dialog-title" x-show="visible" x-transition:enter="ma-enter" x-transition:enter-start="ma-dialog-enter" x-transition:leave="ma-leave" x-transition:leave-end="ma-dialog-enter">
+    <span class="ma-dialog-refraction" aria-hidden="true"></span>
+    <header class="ma-dialog-header"><div class="ma-dialog-heading"><span class="ma-dialog-glyph">{% icon resource.icon 17 %}</span><div><div class="ma-eyebrow">{{ resource.title }} · Editor</div><h2 id="dialog-title">{{ page_title }}</h2><p>Review the details before saving.</p></div></div><button class="ma-icon-button" type="button" @click="close()" aria-label="Close dialog">{% icon "x" 16 %}</button></header>
+    <div class="ma-dialog-body">{% include "modern_admin/partials/form_fields.html" %}</div>
+  </section>
+</div>
