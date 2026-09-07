@@ -171,6 +171,7 @@ class ModernAdminSite:
             command_palette_view,
             dashboard_view,
             page_view,
+            relation_filter_choices_view,
             resource_detail_view,
             resource_form_view,
             resource_list_view,
@@ -205,6 +206,12 @@ class ModernAdminSite:
                         resource_list_view,
                         {"site": self, "resource_key": key},
                         name=f"{key}_list",
+                    ),
+                    path(
+                        f"{key}/filters/<str:filter_key>/choices/",
+                        relation_filter_choices_view,
+                        {"site": self, "resource_key": key},
+                        name=f"{key}_filter_choices",
                     ),
                     path(
                         f"{key}/views/save/",

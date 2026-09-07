@@ -1,18 +1,19 @@
 from __future__ import annotations
 
 from collections.abc import Callable, Iterable
+from contextlib import suppress
 from dataclasses import dataclass, field
 from decimal import Decimal, InvalidOperation
 from typing import TYPE_CHECKING, Any, Generic, TypeVar
 
-from django.core.exceptions import FieldDoesNotExist
+from django.core.exceptions import FieldDoesNotExist, ValidationError
 from django.db import models
-from django.db.models import QuerySet
+from django.db.models import Q, QuerySet
 from django.http import QueryDict
 from django.utils.dateparse import parse_date
 from django.utils.text import capfirst
 
-from modern_admin.exceptions import InvalidResourceConfiguration
+from modern_admin.exceptions import InvalidResourceConfiguration, NotRegistered
 
 if TYPE_CHECKING:
     from django.http import HttpRequest
@@ -21,6 +22,21 @@ if TYPE_CHECKING:
 
 ModelT = TypeVar("ModelT", bound=models.Model)
 ChoiceIterable = Iterable[tuple[Any, str]]
+
+
+def single_param(params: QueryDict, key: str, default: str = "") -> str:
+    """Return the last meaningful value for a single-valued query parameter.
+
+    A form can legitimately serialise the same filter key more than once -- a
+    hidden value carrier plus a no-JS fallback control, a drawer duplicating a
+    toolbar field, or a stale key already present in the URL. ``QueryDict.get``
+    answers with the *last* value, so a trailing ``&key=`` would silently
+    discard the selection the user just made. Blank values never win here.
+    """
+    for value in reversed(params.getlist(key)):
+        if value != "":
+            return value
+    return default
 
 
 @dataclass(frozen=True, slots=True)
@@ -39,6 +55,7 @@ class FilterState:
     value: str = ""
     value_to: str = ""
     active_label: str = ""
+    autocomplete_url: str = ""
 
 
 @dataclass(slots=True)
@@ -69,13 +86,13 @@ class Filter(Generic[ModelT]):
         return self._bound_label or self.label or capfirst(self.accessor.replace("_", " "))
 
     def apply(self, queryset: QuerySet[ModelT], params: QueryDict) -> QuerySet[ModelT]:
-        value = params.get(self.key)
-        return queryset.filter(**{self.accessor: value}) if value not in (None, "") else queryset
+        value = single_param(params, self.key)
+        return queryset.filter(**{self.accessor: value}) if value else queryset
 
     def get_state(
         self, request: HttpRequest, resource: ModelResource[ModelT], params: QueryDict
     ) -> FilterState:
-        value = params.get(self.key, "")
+        value = single_param(params, self.key)
         return FilterState(
             key=self.key,
             label=self.heading,
@@ -90,7 +107,7 @@ class TextFilter(Filter[ModelT]):
     lookup: str = "icontains"
 
     def apply(self, queryset: QuerySet[ModelT], params: QueryDict) -> QuerySet[ModelT]:
-        value = params.get(self.key, "").strip()
+        value = single_param(params, self.key).strip()
         return queryset.filter(**{f"{self.accessor}__{self.lookup}": value}) if value else queryset
 
 
@@ -109,7 +126,7 @@ class ChoiceFilter(Filter[ModelT]):
     def get_state(
         self, request: HttpRequest, resource: ModelResource[ModelT], params: QueryDict
     ) -> FilterState:
-        value = params.get(self.key, "")
+        value = single_param(params, self.key)
         options = tuple(
             FilterOption(str(option_value), str(option_label), str(option_value) == value)
             for option_value, option_label in self._choices(request, resource)
@@ -134,7 +151,7 @@ class MultipleChoiceFilter(ChoiceFilter[ModelT]):
     def get_state(
         self, request: HttpRequest, resource: ModelResource[ModelT], params: QueryDict
     ) -> FilterState:
-        values = set(params.getlist(self.key))
+        values = {value for value in params.getlist(self.key) if value}
         options = tuple(
             FilterOption(str(option_value), str(option_label), str(option_value) in values)
             for option_value, option_label in self._choices(request, resource)
@@ -158,7 +175,7 @@ class BooleanFilter(ChoiceFilter[ModelT]):
     )
 
     def apply(self, queryset: QuerySet[ModelT], params: QueryDict) -> QuerySet[ModelT]:
-        value = params.get(self.key, "")
+        value = single_param(params, self.key)
         if value not in {"0", "1"}:
             return queryset
         return queryset.filter(**{self.accessor: value == "1"})
@@ -166,15 +183,126 @@ class BooleanFilter(ChoiceFilter[ModelT]):
 
 @dataclass(slots=True)
 class RelationFilter(ChoiceFilter[ModelT]):
+    """Server-searched relation choices; limit is a page size, never a total cap."""
+
     choices: ChoiceIterable | Callable[[HttpRequest], ChoiceIterable] | None = None
     limit: int = 100
+    search_fields: tuple[str, ...] = ()
 
-    def _choices(self, request: HttpRequest, resource: ModelResource[ModelT]) -> ChoiceIterable:
+    def bind(self, model: type[ModelT], resource: ModelResource[ModelT]) -> RelationFilter[ModelT]:
+        Filter.bind(self, model, resource)
+        if "__" in self.accessor:
+            raise InvalidResourceConfiguration("RelationFilter accessor must be a direct relation.")
+        relation = model._meta.get_field(self.accessor)
+        if not relation.is_relation or relation.related_model is None or self.limit < 1:
+            raise InvalidResourceConfiguration(
+                "RelationFilter needs a relation and a positive limit."
+            )
+        for path in self.search_fields:
+            target = relation.related_model
+            try:
+                for index, part in enumerate(path.split("__")):
+                    target_field = target._meta.get_field(part)
+                    if index < len(path.split("__")) - 1:
+                        target = target_field.related_model
+                        if target is None:
+                            raise FieldDoesNotExist(path)
+            except FieldDoesNotExist as exc:
+                raise InvalidResourceConfiguration(
+                    f"RelationFilter has an invalid search field: {path}."
+                ) from exc
+        return self
+
+    def value_field(self, resource: ModelResource[ModelT]) -> str:
+        relation = resource.model._meta.get_field(self.accessor)
+        return relation.target_field.name if relation.many_to_one or relation.one_to_one else "pk"
+
+    def option_value(self, obj: models.Model, resource: ModelResource[ModelT]) -> str:
+        return str(getattr(obj, self.value_field(resource)))
+
+    def can_view_option(self, request, resource, obj) -> bool:
+        try:
+            related = resource.site.registry.get_for_model(type(obj))
+        except NotRegistered:
+            return True
+        return related.permission_policy.can_view(request.user, obj)
+
+    def apply(self, queryset: QuerySet[ModelT], params: QueryDict) -> QuerySet[ModelT]:
+        try:
+            return Filter.apply(self, queryset, params).distinct()
+        except (ValidationError, ValueError, TypeError):
+            return queryset.none()
+
+    def get_queryset(self, request: HttpRequest, resource: ModelResource[ModelT]) -> QuerySet[Any]:
+        relation = resource.model._meta.get_field(self.accessor)
+        try:
+            related = resource.site.registry.get_for_model(relation.related_model)
+        except NotRegistered:
+            # Unregistered models are limited to relations visible in this resource.
+            return relation.related_model._default_manager.filter(
+                **{
+                    f"{self.value_field(resource)}__in": resource.get_queryset(request).values(
+                        self.accessor
+                    )
+                }
+            )
+        if not related.has_permission(request) or not related.permission_policy.can_view(
+            request.user
+        ):
+            return related.model._default_manager.none()
+        return related.get_queryset(request)
+
+    def search(
+        self, request: HttpRequest, resource: ModelResource[ModelT], query: str
+    ) -> QuerySet[Any]:
+        queryset = self.get_queryset(request, resource)
+        if query:
+            fields = self.search_fields
+            if not fields:
+                with suppress(NotRegistered):
+                    related = resource.site.registry.get_for_model(queryset.model)
+                    fields = tuple(related.get_search_fields(request))
+            fields = fields or tuple(
+                f.name
+                for f in queryset.model._meta.fields
+                if isinstance(f, (models.CharField, models.TextField))
+            )
+            condition = Q()
+            for name in fields:
+                condition |= Q(**{f"{name}__icontains": query})
+            with suppress(ValidationError, ValueError, TypeError):
+                condition |= Q(pk=queryset.model._meta.pk.to_python(query))
+            queryset = queryset.filter(condition) if condition else queryset.none()
+        return queryset.order_by("pk").distinct()
+
+    def get_state(
+        self, request: HttpRequest, resource: ModelResource[ModelT], params: QueryDict
+    ) -> FilterState:
         if self.choices is not None:
-            return super()._choices(request, resource)
-        field_obj = resource.model._meta.get_field(self.accessor.split("__", 1)[0])
-        related_model = field_obj.related_model
-        return ((obj.pk, str(obj)) for obj in related_model._default_manager.all()[: self.limit])
+            return ChoiceFilter.get_state(self, request, resource, params)
+        value = single_param(params, self.key)
+        selected = None
+        if value:
+            with suppress(ValidationError, ValueError, TypeError):
+                selected = (
+                    self.get_queryset(request, resource)
+                    .filter(**{self.value_field(resource): value})
+                    .first()
+                )
+                if selected is not None and not self.can_view_option(request, resource, selected):
+                    selected = None
+        label = str(selected) if selected is not None else value
+        return FilterState(
+            key=self.key,
+            label=self.heading,
+            kind="relation",
+            value=value,
+            options=(FilterOption(value, label, True),) if value else (),
+            active_label=f"{self.heading}: {label}" if value else "",
+            autocomplete_url=resource.site.reverse(
+                f"{resource.key}_filter_choices", args=(self.key,)
+            ),
+        )
 
 
 @dataclass(slots=True)
@@ -182,14 +310,14 @@ class DateFilter(Filter[ModelT]):
     _is_datetime: bool = field(default=False, init=False, repr=False)
 
     def bind(self, model: type[ModelT], resource: ModelResource[ModelT]) -> DateFilter[ModelT]:
-        super().bind(model, resource)
+        Filter.bind(self, model, resource)
         self._is_datetime = isinstance(
             model._meta.get_field(self.accessor.split("__", 1)[0]), models.DateTimeField
         )
         return self
 
     def apply(self, queryset: QuerySet[ModelT], params: QueryDict) -> QuerySet[ModelT]:
-        raw = params.get(self.key, "")
+        raw = single_param(params, self.key)
         value = parse_date(raw)
         lookup = f"{self.accessor}__date" if self._is_datetime else self.accessor
         return queryset.filter(**{lookup: value}) if value else queryset
@@ -197,7 +325,7 @@ class DateFilter(Filter[ModelT]):
     def get_state(
         self, request: HttpRequest, resource: ModelResource[ModelT], params: QueryDict
     ) -> FilterState:
-        value = params.get(self.key, "")
+        value = single_param(params, self.key)
         return FilterState(
             key=self.key,
             label=self.heading,
@@ -212,7 +340,7 @@ class DateRangeFilter(Filter[ModelT]):
     _is_datetime: bool = field(default=False, init=False, repr=False)
 
     def bind(self, model: type[ModelT], resource: ModelResource[ModelT]) -> DateRangeFilter[ModelT]:
-        super().bind(model, resource)
+        Filter.bind(self, model, resource)
         self._is_datetime = isinstance(
             model._meta.get_field(self.accessor.split("__", 1)[0]), models.DateTimeField
         )
@@ -227,8 +355,8 @@ class DateRangeFilter(Filter[ModelT]):
         return f"{self.key}__lte"
 
     def apply(self, queryset: QuerySet[ModelT], params: QueryDict) -> QuerySet[ModelT]:
-        start = parse_date(params.get(self.from_key, ""))
-        end = parse_date(params.get(self.to_key, ""))
+        start = parse_date(single_param(params, self.from_key))
+        end = parse_date(single_param(params, self.to_key))
         base = f"{self.accessor}__date" if self._is_datetime else self.accessor
         if start:
             queryset = queryset.filter(**{f"{base}__gte": start})
@@ -239,8 +367,8 @@ class DateRangeFilter(Filter[ModelT]):
     def get_state(
         self, request: HttpRequest, resource: ModelResource[ModelT], params: QueryDict
     ) -> FilterState:
-        start = params.get(self.from_key, "")
-        end = params.get(self.to_key, "")
+        start = single_param(params, self.from_key)
+        end = single_param(params, self.to_key)
         value = " – ".join(part for part in (start, end) if part)
         return FilterState(
             key=self.key,
@@ -255,7 +383,7 @@ class DateRangeFilter(Filter[ModelT]):
 @dataclass(slots=True)
 class NumberFilter(Filter[ModelT]):
     def apply(self, queryset: QuerySet[ModelT], params: QueryDict) -> QuerySet[ModelT]:
-        raw = params.get(self.key, "")
+        raw = single_param(params, self.key)
         try:
             value = Decimal(raw)
         except (InvalidOperation, TypeError):
@@ -276,7 +404,7 @@ class NumberRangeFilter(Filter[ModelT]):
     def apply(self, queryset: QuerySet[ModelT], params: QueryDict) -> QuerySet[ModelT]:
         for suffix, key in (("gte", self.from_key), ("lte", self.to_key)):
             try:
-                value = Decimal(params.get(key, ""))
+                value = Decimal(single_param(params, key))
             except (InvalidOperation, TypeError):
                 continue
             queryset = queryset.filter(**{f"{self.accessor}__{suffix}": value})
@@ -285,8 +413,8 @@ class NumberRangeFilter(Filter[ModelT]):
     def get_state(
         self, request: HttpRequest, resource: ModelResource[ModelT], params: QueryDict
     ) -> FilterState:
-        start = params.get(self.from_key, "")
-        end = params.get(self.to_key, "")
+        start = single_param(params, self.from_key)
+        end = single_param(params, self.to_key)
         value = " – ".join(part for part in (start, end) if part)
         return FilterState(
             key=self.key,

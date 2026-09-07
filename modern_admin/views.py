@@ -11,16 +11,25 @@ from django.contrib.auth.views import redirect_to_login
 from django.core.exceptions import ValidationError
 from django.core.paginator import Paginator
 from django.db import connections, models, transaction
-from django.http import Http404, HttpRequest, HttpResponse, HttpResponseRedirect, QueryDict
+from django.http import (
+    Http404,
+    HttpRequest,
+    HttpResponse,
+    HttpResponseRedirect,
+    JsonResponse,
+    QueryDict,
+)
 from django.shortcuts import get_object_or_404, render
 from django.utils.http import url_has_allowed_host_and_scheme
 
 from modern_admin.audit import events_for, record_event
 from modern_admin.columns import Cell, Column
+from modern_admin.filters import RelationFilter
 from modern_admin.forms.widgets import AccessChecklist
 from modern_admin.models import SavedView
 from modern_admin.resources import ModelResource
 from modern_admin.responses import Toast, htmx_events, is_htmx, notify
+from modern_admin.sections import RelatedObjectList
 from modern_admin.sites import ModernAdminSite
 
 
@@ -86,8 +95,25 @@ def _site_context(site: ModernAdminSite, request: HttpRequest, **context: Any) -
     return site.each_context(request) | context
 
 
+def _canonical_params(params: QueryDict) -> QueryDict:
+    """Collapse repeated keys down to their meaningful values.
+
+    A repeated key with a blank trailing value would otherwise be carried into
+    every pagination, sort and saved-view link, where ``QueryDict.get`` reads the
+    blank and the filter looks like it was never applied. See
+    ``modern_admin.filters.single_param``.
+    """
+    clean = params.copy()
+    for key in params:
+        values = params.getlist(key)
+        if len(values) > 1:
+            meaningful = [value for value in values if value != ""]
+            clean.setlist(key, meaningful or [""])
+    return clean
+
+
 def _query_url(request: HttpRequest, **changes: str | int | None) -> str:
-    params = request.GET.copy()
+    params = _canonical_params(request.GET)
     params.pop("fragment", None)
     for key, value in changes.items():
         if value in (None, ""):
@@ -208,7 +234,7 @@ def _list_context(
     filter_states = tuple(filter_.get_state(request, resource, request.GET) for filter_ in filters)
     active_filters = tuple(state for state in filter_states if state.active_label)
     create_url = site.reverse(f"{resource.key}_create")
-    saved_params = request.GET.copy()
+    saved_params = _canonical_params(request.GET)
     saved_params.pop("page", None)
     saved_params.pop("fragment", None)
     current_view_query = saved_params.urlencode()
@@ -414,8 +440,8 @@ def resource_detail_view(
     selected_tab_key = "" if preview else request.GET.get("tab", "")
     initial_tab = next((tab for tab in tabs if tab.key == selected_tab_key), None)
     initial_tab_context: dict[str, Any] = {}
-    if initial_tab and initial_tab.context:
-        initial_tab_context.update(initial_tab.context(request, obj))
+    if initial_tab:
+        initial_tab_context.update(_detail_tab_context(request, resource, obj, initial_tab))
     context = _site_context(
         site,
         request,
@@ -647,7 +673,9 @@ def action_view(
                     response,
                     toast=Toast(result.message, result.level),
                     close_dialog=True,
-                    refresh=tuple(dict.fromkeys((*result.refresh, "#record-preview")))
+                    refresh=tuple(
+                        dict.fromkeys((*result.refresh, "#record-preview", "#related-list"))
+                    )
                     if obj is not None
                     else result.refresh,
                 )
@@ -715,8 +743,7 @@ def resource_tab_view(
         "modern_admin_site": site,
         "request": request,
     }
-    if tab.context:
-        context.update(tab.context(request, obj))
+    context.update(_detail_tab_context(request, resource, obj, tab))
     return render(request, tab.template_name, context)
 
 
@@ -832,3 +859,91 @@ def command_palette_view(request: HttpRequest, *, site: ModernAdminSite) -> Http
             "create_results": create_results[:5],
         },
     )
+
+
+def relation_filter_choices_view(request, *, site, resource_key, filter_key):
+    if response := _guard(request):
+        return response
+    resource = site.get_resource(resource_key)
+    if not resource.has_permission(request) or not resource.permission_policy.can_view(
+        request.user
+    ):
+        return _permission_denied(request, site)
+    filter_ = next((f for f in resource.get_filters(request) if f.key == filter_key), None)
+    if not isinstance(filter_, RelationFilter) or filter_.choices is not None:
+        raise Http404("Unknown relation filter")
+    page = Paginator(
+        filter_.search(request, resource, request.GET.get("q", "").strip()),
+        min(filter_.limit, 100),
+    ).get_page(request.GET.get("page", 1))
+    return JsonResponse(
+        {
+            "results": [
+                {"value": filter_.option_value(obj, resource), "label": str(obj)}
+                for obj in page
+                if filter_.can_view_option(request, resource, obj)
+            ],
+            "page": page.number,
+            "pages": page.paginator.num_pages,
+            "has_next": page.has_next(),
+            "has_previous": page.has_previous(),
+        }
+    )
+
+
+def _detail_tab_context(request, resource, obj, tab):
+    if not isinstance(tab, RelatedObjectList):
+        return dict(tab.context(request, obj)) if tab.context else {}
+    site = resource.site
+    child = site.get_resource(tab.resource_key)
+    if not child.has_permission(request) or not child.permission_policy.can_view(request.user):
+        return {"related_denied": True}
+    relation = child.model._meta.get_field(tab.relation_field)
+    if relation.related_model is not resource.model:
+        from modern_admin.exceptions import InvalidResourceConfiguration
+
+        raise InvalidResourceConfiguration("RelatedObjectList relation must point to its parent.")
+    queryset = child.get_queryset(request).filter(**{tab.relation_field: obj}).distinct()
+    queryset = queryset.order_by(*child.get_ordering(request), "pk")
+    page = Paginator(queryset, tab.page_size).get_page(request.GET.get("related_page", 1))
+    columns = child.get_list_display(request)
+    rows = []
+    for item in page:
+        if not child.permission_policy.can_view(request.user, item):
+            continue
+        rows.append(
+            {
+                "label": child.get_object_label(item),
+                "cells": tuple(column.get_cell(item, child, request) for column in columns),
+                "url": site.reverse(f"{child.key}_detail", args=(item.pk,)),
+                "edit_url": site.reverse(f"{child.key}_edit", args=(item.pk,))
+                if child.has_form and child.permission_policy.can_change(request.user, item)
+                else "",
+                "actions": tuple(
+                    ActionLink(
+                        action=action,
+                        url=site.reverse(f"{child.key}_action", args=(item.pk, action.key)),
+                        unavailable_reason=action.get_unavailable_reason(request, item),
+                    )
+                    for action in child.get_actions(request, "row", item)
+                ),
+            }
+        )
+    detail_url = site.reverse(f"{resource.key}_detail", args=(obj.pk,))
+
+    def page_url(number):
+        return detail_url + "?" + urlencode({"tab": tab.key, "related_page": number})
+
+    return {
+        "related_refresh_url": site.reverse(f"{resource.key}_tab", args=(obj.pk, tab.key))
+        + "?"
+        + urlencode({"related_page": page.number}),
+        "related_label": tab.label,
+        "related_rows": rows,
+        "related_columns": columns,
+        "related_page": page,
+        "related_previous_url": page_url(page.previous_page_number())
+        if page.has_previous()
+        else "",
+        "related_next_url": page_url(page.next_page_number()) if page.has_next() else "",
+    }

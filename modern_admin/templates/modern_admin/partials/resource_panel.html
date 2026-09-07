@@ -40,7 +40,8 @@
         <span class="ma-toolbar-separator" aria-hidden="true"></span>
         <div class="ma-toolbar-filters">
           {% for filter in filter_states %}
-            {% if filter.kind == "choice" or filter.kind == "multiple_choice" %}
+            {% if filter.kind == "relation" %}{% include "modern_admin/partials/relation_filter.html" with auto_submit=True %}
+            {% elif filter.kind == "choice" or filter.kind == "multiple_choice" %}
               {% include "modern_admin/partials/choice_filter.html" with auto_submit=True %}
             {% elif filter.kind == "date_range" or filter.kind == "number_range" %}
               <button class="ma-filter-button{% if filter.active_label %} is-active{% endif %}" type="button" @click="activeFilter = activeFilter === '{{ filter.key }}' ? '' : '{{ filter.key }}'">
@@ -98,7 +99,7 @@
             {% for filter in filter_states %}
               <div class="ma-field">
                 <label>{{ filter.label }}</label>
-                {% if filter.kind == "choice" or filter.kind == "multiple_choice" %}{% include "modern_admin/partials/choice_filter.html" with auto_submit=False %}
+                {% if filter.kind == "relation" %}{% include "modern_admin/partials/relation_filter.html" with auto_submit=False %}{% elif filter.kind == "choice" or filter.kind == "multiple_choice" %}{% include "modern_admin/partials/choice_filter.html" with auto_submit=False %}
                 {% elif filter.kind == "date_range" or filter.kind == "number_range" %}<div class="ma-drawer-range"><input class="ma-input" aria-label="{{ filter.label }} from" type="{% if filter.kind == 'date_range' %}date{% else %}number{% endif %}" name="{{ filter.key }}__gte" value="{{ filter.value }}"><span>to</span><input class="ma-input" aria-label="{{ filter.label }} to" type="{% if filter.kind == 'date_range' %}date{% else %}number{% endif %}" name="{{ filter.key }}__lte" value="{{ filter.value_to }}"></div>
                 {% else %}<input class="ma-input" type="text" name="{{ filter.key }}" value="{{ filter.value }}">{% endif %}
               </div>
@@ -121,7 +122,7 @@
       <table class="ma-table">
         <caption class="ma-sr-only">{{ resource.title }}</caption>
         <thead><tr>
-          <th class="ma-select-cell"><input class="ma-checkbox" type="checkbox" @change="toggleAll($event)" :checked="allSelected" x-effect="$el.indeterminate = selected.length > 0 && !allSelected" aria-label="Select all rows"></th>
+          <th class="ma-select-cell"><input class="ma-checkbox" type="checkbox" @change="toggleAll($event)" :checked="allSelected" x-effect="syncIndeterminate($el)" aria-label="Select all rows"></th>
           {% for header in column_headers %}<th class="{% if header.numeric %}is-numeric {% endif %}{% if forloop.first %}is-identity{% elif header.is_status %}is-status{% endif %}" x-show="!hiddenColumns.includes({{ forloop.counter0 }})"{% if header.column.width %} style="width:{{ header.column.width }}"{% endif %}>{% if header.sort_url %}<a href="{{ header.sort_url }}" hx-get="{{ header.sort_url }}" hx-target="#resource-panel" hx-push-url="true" class="ma-sort">{{ header.column.heading }}{% if header.direction == 'asc' %}{% icon "arrow-up" 12 %}{% elif header.direction == 'desc' %}{% icon "arrow-down" 12 %}{% endif %}</a>{% else %}{{ header.column.heading }}{% endif %}</th>{% endfor %}
           <th class="ma-actions-cell"><span class="ma-sr-only">Actions</span></th>
         </tr></thead>

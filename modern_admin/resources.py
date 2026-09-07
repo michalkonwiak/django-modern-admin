@@ -17,11 +17,11 @@ from django.utils.text import capfirst
 from modern_admin.actions import ResourceAction
 from modern_admin.columns import Column, infer_column, resolve_value
 from modern_admin.exceptions import InvalidResourceConfiguration
-from modern_admin.filters import Filter, infer_filter
+from modern_admin.filters import Filter, infer_filter, single_param
 from modern_admin.navigation import Navigation
 from modern_admin.permissions import PermissionPolicy
 from modern_admin.queues import WorkQueue
-from modern_admin.sections import DetailSection, DetailTab
+from modern_admin.sections import DetailSection, DetailTab, RelatedObjectList
 from modern_admin.widgets import Widget
 from modern_admin.workflows import TransitionAction
 
@@ -68,7 +68,7 @@ class ModelResource(Resource, Generic[ModelT]):
     form_class: type[forms.ModelForm[ModelT]] | None = None
     form_fields: ClassVar[Sequence[str] | str] = ()
     detail_sections: ClassVar[Sequence[DetailSection]] = ()
-    detail_tabs: ClassVar[Sequence[DetailTab]] = ()
+    detail_tabs: ClassVar[Sequence[DetailTab | RelatedObjectList]] = ()
     actions: ClassVar[Sequence[type[ResourceAction[ModelT]] | ResourceAction[ModelT]]] = ()
     list_template_name = "modern_admin/pages/resource_list.html"
     detail_template_name = "modern_admin/pages/resource_detail.html"
@@ -114,6 +114,12 @@ class ModelResource(Resource, Generic[ModelT]):
         return instance
 
     def validate(self) -> None:
+        tab_keys = [tab.key for tab in self.detail_tabs]
+        if len(tab_keys) != len(set(tab_keys)) or "overview" in tab_keys:
+            raise InvalidResourceConfiguration("Detail tab keys must be unique and not 'overview'.")
+        for tab in self.detail_tabs:
+            if isinstance(tab, RelatedObjectList) and not 1 <= tab.page_size <= 100:
+                raise InvalidResourceConfiguration("RelatedObjectList page_size must be 1–100.")
         queue_keys = [queue.key for queue in self.queues]
         if len(queue_keys) != len(set(queue_keys)):
             raise InvalidResourceConfiguration(
@@ -213,7 +219,7 @@ class ModelResource(Resource, Generic[ModelT]):
 
     def get_page_size(self, request: HttpRequest) -> int:
         try:
-            requested = int(request.GET.get("page_size", self.page_size))
+            requested = int(single_param(request.GET, "page_size", str(self.page_size)))
         except ValueError:
             return self.page_size
         return requested if requested in self.page_size_options else self.page_size
@@ -252,7 +258,9 @@ class ModelResource(Resource, Generic[ModelT]):
         )
         return (DetailSection(title="Overview", fields=field_names[:10]),)
 
-    def get_detail_tabs(self, request: HttpRequest, obj: ModelT) -> Sequence[DetailTab]:
+    def get_detail_tabs(
+        self, request: HttpRequest, obj: ModelT
+    ) -> Sequence[DetailTab | RelatedObjectList]:
         return self.detail_tabs
 
     def get_object_label(self, obj: ModelT) -> str:

@@ -1,3 +1,3 @@
-<div class="ma-dialog-backdrop ma-preview-backdrop" data-ma-preview x-data="dialog" x-init="open()" @click.self="close()" @keydown.escape.window="if (!document.querySelector('[data-ma-dialog]')) close()" @keydown.tab="trap($event)">
+<div class="ma-dialog-backdrop ma-preview-backdrop" data-ma-preview x-data="dialog" x-init="open()" @click.self="close()" @keydown.escape.window="closePreview()" @keydown.tab="trap($event)">
   {% include "modern_admin/partials/record_preview_body.html" %}
 </div>

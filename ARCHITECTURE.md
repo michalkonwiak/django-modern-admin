@@ -312,8 +312,9 @@ Sorting/search across relations can add joins and `distinct()`, exact counts can
 expensive, relation filter choices can grow unbounded, and cells that call arbitrary
 properties can hide queries. The framework never guesses `select_related`, exposes
 `get_queryset`, only adds `distinct` when relational search requires it, supports
-configurable counts, and documents that custom columns must not query. Autocomplete
-is used instead of rendering large relation choice sets.
+configurable counts, and documents that custom columns must not query. Relation filters use server-side autocomplete with explicit pagination instead of
+rendering large relation choice sets. Explicit `choices=` remain local choice lists;
+ModelForm relation widgets follow the configured Django form.
 
 ### Typing challenges
 

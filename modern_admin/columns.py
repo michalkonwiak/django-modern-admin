@@ -220,7 +220,7 @@ class AvatarColumn(TextColumn[ModelT]):
     image: str | Callable[[ModelT], str | None] | None = None
 
     def get_cell(self, obj: ModelT, resource: ModelResource[ModelT], request: HttpRequest) -> Cell:
-        base = super().get_cell(obj, resource, request)
+        base = TextColumn.get_cell(self, obj, resource, request)
         return Cell(
             display=base.display,
             kind="avatar",
@@ -249,7 +249,7 @@ class ComputedColumn(Column[ModelT]):
     sortable: bool | str = False
 
     def get_value(self, obj: ModelT, resource: ModelResource[ModelT]) -> Any:
-        return self.value(obj) if self.value else super().get_value(obj, resource)
+        return self.value(obj) if self.value else Column.get_value(self, obj, resource)
 
 
 def infer_column(model: type[ModelT], accessor: str) -> Column[ModelT]:

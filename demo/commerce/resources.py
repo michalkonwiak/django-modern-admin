@@ -32,7 +32,7 @@ from modern_admin.columns import (
 from modern_admin.filters import ChoiceFilter, DateRangeFilter, RelationFilter
 from modern_admin.navigation import Navigation
 from modern_admin.queues import WorkQueue
-from modern_admin.sections import DetailSection, DetailTab
+from modern_admin.sections import DetailSection, DetailTab, RelatedObjectList
 from modern_admin.widgets import MetricWidget, ProgressWidget, TemplateWidget
 from modern_admin.workflows import TransitionAction
 
@@ -195,13 +195,7 @@ class CustomerResource(ModelResource[Customer]):
         ),
     )
     detail_tabs = (
-        DetailTab(
-            "orders",
-            "Orders",
-            "commerce/tabs/customer_orders.html",
-            "receipt",
-            context=customer_orders_context,
-        ),
+        RelatedObjectList("orders", "Orders", "order", "customer", icon="receipt"),
         DetailTab(
             "contacts",
             "Contacts",

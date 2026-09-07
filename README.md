@@ -376,7 +376,7 @@ Treat the workspace as part of your Django application's security boundary.
 
 | Area | Boundary |
 | --- | --- |
-| Content Security Policy | The current Alpine runtime evaluates expressions, and templates include inline theme initialization. Strict CSP without runtime/inline allowances requires frontend changes. Do not weaken an existing policy without review. |
+| Content Security Policy | The bundled Alpine CSP build requires no `unsafe-eval`. Enable nonce middleware/context processing as described below; inline CSS attributes remain explicitly allowed. |
 | Database concurrency | The automated local suite uses SQLite; it does not establish PostgreSQL row-lock correctness or multi-database transaction guarantees. Test against your deployment database. |
 | Authentication | Built-in Django login does not add MFA or rate limiting. Existing SSO may authenticate the same Django session. |
 | Localization | UI copy is primarily English; full localization is not complete. |
@@ -449,3 +449,75 @@ Created and maintained by **Michal Konwiak**.
 
 Released under the [MIT License](LICENSE). Bundled third-party assets remain subject
 to their respective licenses.
+
+### Relation filters and related record lists
+
+`RelationFilter("organization", search_fields=("name", "domain"), limit=50)`
+searches records on the server. `limit` controls the page size (maximum 100),
+not the total number of available choices. Previous/Next controls reach every
+page; the selected value remains visible even when it is outside the first page.
+Without `search_fields`, the registered resource’s search fields (or local text
+fields if none are configured) and an exact primary key are searched.
+Explicit `choices=` retain the ordinary choice picker. Registered related models
+use their resource's permissions and `get_queryset(request)`; unregistered models
+are restricted to relations present in the source resource's scoped queryset.
+Override `RelationFilter.get_queryset()` for additional tenant or business scoping.
+
+Use `RelatedObjectList` as a detail tab when a relation needs its own table instead
+of an inline formset:
+
+```python
+from modern_admin import RelatedObjectList
+
+class CustomerResource(ModelResource):
+    detail_tabs = (
+        RelatedObjectList(
+            "orders", "Orders", resource_key="order",
+            relation_field="customer", page_size=25,
+        ),
+    )
+```
+
+The child resource must be registered on the same site. Its queryset, ordering,
+columns, object view/change permissions, form and `row` actions are reused.
+`relation_field` is the child's relation to the parent. The list is paginated,
+has an empty state, opens editing through the child form and runs actions in a
+dialog. After an action, the list refreshes without losing the active tab. These
+endpoints retain their existing validation, CSRF and audit behavior. Configure request/tenant visibility in the child resource's
+`get_queryset(request)`, just as for its main list. The demo's customer Orders tab
+uses this component.
+
+### Content Security Policy
+
+The bundled Alpine runtime is `@alpinejs/csp@3.17.1`; complex handlers live in
+`app.js`. HTMX has `allowEval=false` and receives the document nonce through its
+`inlineScriptNonce` and `inlineStyleNonce` configuration. The early theme script
+also carries that nonce. HTMX fragments use the already loaded document's config;
+do not replace it with the nonce of a later fragment response.
+
+Enable `modern_admin.csp.ContentSecurityPolicyMiddleware` in `MIDDLEWARE` and
+`modern_admin.csp.csp` in the Django template context processors. On Django 6 these
+are aliases of the built-in middleware/context processor; on Django 5.2 they
+provide the same nonce and enforcing-header integration for this policy:
+
+```python
+SECURE_CSP = {
+    "default-src": ["'self'"],
+    "script-src": ["'self'", "<CSP_NONCE_SENTINEL>"],
+    "style-src": ["'self'", "<CSP_NONCE_SENTINEL>"],
+    "style-src-attr": ["'unsafe-inline'"],
+    "img-src": ["'self'", "data:"],
+    "object-src": ["'none'"],
+    "base-uri": ["'self'"],
+    "frame-ancestors": ["'self'"],
+}
+```
+
+The demo enforces this policy. Scripts need neither `unsafe-eval` nor
+`unsafe-inline`. Style attributes remain allowed for layout variables and Alpine
+positioning/transitions; this is not a policy that forbids all inline CSS.
+The Django 5.2 adapter supports `SECURE_CSP`, preserves an existing CSP header,
+and does not implement Django 6's report-only settings or per-view decorators.
+Do not cache full HTML independently of its nonce-bearing CSP header.
+See [Django CSP](https://docs.djangoproject.com/en/6.0/ref/csp/) and
+[Alpine CSP expressions](https://alpinejs.dev/advanced/csp) for extension guidance.

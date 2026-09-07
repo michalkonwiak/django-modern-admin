@@ -55,7 +55,9 @@
     // The browser top layer escapes clipping/stacking contexts in toolbars and rails.
     Alpine.directive("floating", (el, { expression, modifiers }, { effect, evaluateLater, cleanup }) => {
       const read = evaluateLater(expression);
-      const anchor = el.previousElementSibling;
+      // A <details> panel is anchored to its summary, regardless of hidden form inputs.
+      const anchor = el.parentElement?.matches("details")
+        ? el.parentElement.querySelector(":scope > summary") : el.previousElementSibling;
       if (!anchor || !el.showPopover) return;
       el.setAttribute("popover", "manual");
       // Positioning must not depend on per-menu CSS (right/bottom offsets or margins).
@@ -117,6 +119,90 @@
         window.visualViewport?.removeEventListener("scroll", position);
       });
     });
+
+    const choiceFilter = () => ({
+      term: "", opened: false, selectedLabel: "", hasValue: false,
+      summary() {
+        const label = this.$root.dataset.label;
+        return this.hasValue ? `${label}: ${this.selectedLabel}` : label;
+      },
+      init() { this.syncChoice(); },
+      syncChoice() {
+        const selected = Array.from(this.$root.querySelectorAll('input:checked'))
+          .filter(input => input.value !== "");
+        this.hasValue = selected.length > 0;
+        this.selectedLabel = selected.map(input => input.closest("label").querySelector("span").textContent.trim()).join(", ");
+      },
+      toggled() { this.opened = this.$root.open; },
+      closeOptions() { this.$root.open = false; },
+      escape() { this.closeOptions(); this.$root.querySelector("summary").focus(); },
+      chooseOption(event) {
+        if (!event.target.matches('input[type="radio"], input[type="checkbox"]')) return;
+        this.syncChoice();
+        if (event.target.type === "radio") this.closeOptions();
+        if (this.$root.dataset.autoSubmit === "true") event.target.form.requestSubmit();
+      },
+      matchesOption(el) { return el.textContent.toLocaleLowerCase().includes(this.term.toLocaleLowerCase()); }
+    });
+    Alpine.data("choiceFilter", choiceFilter);
+    Alpine.data("relationFilter", () => ({
+      ...choiceFilter(), page: 1, hasNext: false, hasPrevious: false, status: "",
+      controller: null,
+      init() {
+        this.hasValue = this.$refs.value.value !== "";
+        this.selectedLabel = this.$root.dataset.selectedLabel || this.$refs.value.value;
+      },
+      toggled() {
+        this.opened = this.$root.open;
+        if (this.opened) this.load();
+      },
+      destroy() { this.controller?.abort(); },
+      search() { this.page = 1; this.load(); },
+      previous() { if (this.hasPrevious) { this.page--; this.load(); } },
+      next() { if (this.hasNext) { this.page++; this.load(); } },
+      clearValue() { this.choose("", ""); },
+      choose(value, label) {
+        this.$refs.value.value = value;
+        this.hasValue = value !== "";
+        this.selectedLabel = label;
+        this.$refs.results.querySelectorAll("button").forEach(button => {
+          button.setAttribute("aria-pressed", String(button.dataset.value === value));
+        });
+        this.closeOptions();
+        if (this.$root.dataset.autoSubmit === "true") this.$refs.value.form.requestSubmit();
+      },
+      async load() {
+        this.controller?.abort();
+        const controller = new AbortController();
+        this.controller = controller;
+        this.status = "Loading…";
+        this.hasNext = this.hasPrevious = false;
+        this.$refs.results.replaceChildren();
+        const url = new URL(this.$root.dataset.url, location.origin);
+        url.searchParams.set("q", this.term);
+        url.searchParams.set("page", this.page);
+        try {
+          const response = await fetch(url, { signal: controller.signal, headers: { Accept: "application/json" } });
+          if (!response.ok) throw new Error("Request failed");
+          const data = await response.json();
+          if (controller.signal.aborted) return;
+          this.page = data.page;
+          this.hasNext = data.has_next; this.hasPrevious = data.has_previous;
+          this.status = data.results.length ? `Page ${data.page} of ${data.pages}` : "No matching records.";
+          data.results.forEach(option => {
+            const button = document.createElement("button");
+            button.type = "button"; button.className = "ma-relation-option";
+            button.dataset.value = option.value;
+            button.textContent = option.label;
+            button.setAttribute("aria-pressed", String(option.value === this.$refs.value.value));
+            button.addEventListener("click", () => this.choose(option.value, option.label));
+            this.$refs.results.append(button);
+          });
+        } catch (error) {
+          if (error.name !== "AbortError") this.status = "Could not load records. Reopen or search to retry.";
+        }
+      }
+    }));
 
     Alpine.data("appShell", () => ({
       dark: document.documentElement.classList.contains("dark"),
@@ -189,6 +275,7 @@
           element?.focus();
         });
       },
+      closePreview() { if (!document.querySelector("[data-ma-dialog]")) this.close(); },
       async close() {
         if (this.closing) return;
         this.closing = true;
@@ -263,6 +350,7 @@
           ? this.selected.filter(item => item !== value)
           : [...this.selected, value];
       },
+      syncIndeterminate(element) { element.indeterminate = this.selected.length > 0 && !this.allSelected; },
       toggleAll(event) {
         const inputs = Array.from(this.$root.querySelectorAll('input[name="selected"]'));
         inputs.forEach(input => { input.checked = event.target.checked; });
@@ -388,7 +476,18 @@
   document.addEventListener("ma:refresh", event => {
     (event.detail.targets || []).forEach(selector => {
       const target = document.querySelector(selector);
-      if (target && window.htmx) htmx.trigger(target, "ma:reload");
+      if (target && window.htmx) {
+        if (selector === "#resource-detail") {
+          const url = new URL(location.href);
+          url.searchParams.set("fragment", "detail");
+          htmx.ajax("GET", url.pathname + url.search, { target, swap: "outerHTML" });
+          return;
+        }
+        // A parent refresh includes its related list; avoid two racing replacements.
+        if (selector === "#related-list" && (event.detail.targets || []).includes("#resource-detail")
+            && document.querySelector("#resource-detail")) return;
+        htmx.trigger(target, "ma:reload");
+      }
     });
   });
 })();

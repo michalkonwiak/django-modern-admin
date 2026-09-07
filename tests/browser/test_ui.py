@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import os
+import re
+from concurrent.futures import ThreadPoolExecutor
 
 import pytest
 from playwright.sync_api import Page, expect, sync_playwright
@@ -57,11 +59,11 @@ def test_queue_preview_and_transition_keep_operator_on_worklist(
     page.locator('[data-ma-dialog] button[type="submit"]').click()
     page.locator("[data-ma-dialog]").wait_for(state="detached")
     page.wait_for_function(
-        "document.querySelector('#record-preview .ma-record-status')"
+        "() => document.querySelector('#record-preview .ma-record-status')"
         "?.textContent.trim() === 'Shipped'"
     )
     assert preview.get_by_role("button", name="Mark shipped").is_disabled()
-    page.wait_for_function("document.querySelectorAll('.ma-data-row').length === 0")
+    page.wait_for_function("() => document.querySelectorAll('.ma-data-row').length === 0")
     assert "queue=fulfillment" in page.url
     page.keyboard.press("Escape")
     page.locator("[data-ma-preview]").wait_for(state="detached")
@@ -73,7 +75,7 @@ def test_queue_selection_survives_htmx_search(page: Page, live_server):
     page.wait_for_url("**queue=leads*")
     page.locator('.ma-work-queues a[aria-current="page"][href*="queue=leads"]').wait_for()
     page.wait_for_function(
-        "!document.querySelector('#resource-panel').classList.contains('htmx-settling')"
+        "() => !document.querySelector('#resource-panel').classList.contains('htmx-settling')"
     )
     page.fill("#resource-search", "Anna")
     page.wait_for_url("**q=Anna*")
@@ -197,11 +199,11 @@ def test_custom_checkboxes_support_keyboard_and_partial_selection(page: Page, li
     checkbox.focus()
     page.keyboard.press("Space")
     assert checkbox.is_checked()
-    page.wait_for_function("document.querySelector('thead input').indeterminate")
+    page.wait_for_function("() => document.querySelector('thead input').indeterminate")
     assert page.locator(".ma-data-row.is-selected").count() == 1
     select_all.check()
     assert page.locator(".ma-data-row.is-selected").count() == 2
-    page.wait_for_function("!document.querySelector('thead input').indeterminate")
+    page.wait_for_function("() => !document.querySelector('thead input').indeterminate")
     select_all.uncheck()
     assert page.locator(".ma-data-row.is-selected").count() == 0
 
@@ -269,7 +271,7 @@ def test_desktop_density_dialog_command_and_dark_mode(page: Page, live_server):
     page.keyboard.press("Control+k")
     page.locator(".ma-command").wait_for(state="visible")
     page.wait_for_function(
-        "document.activeElement === document.querySelector('.ma-command-input input')"
+        "() => document.activeElement === document.querySelector('.ma-command-input input')"
     )
     page.keyboard.press("Escape")
 
@@ -278,7 +280,7 @@ def test_desktop_density_dialog_command_and_dark_mode(page: Page, live_server):
     modal = page.locator("[data-ma-dialog] .ma-dialog")
     assert modal.is_visible()
     page.wait_for_function(
-        "document.activeElement === "
+        "() => document.activeElement === "
         "document.querySelector('[data-ma-dialog] input:not([type=hidden])')"
     )
     page.keyboard.press("Escape")
@@ -386,3 +388,241 @@ def test_dialog_dismissal_keeps_background_stable_and_restores_focus(
     page.locator("[data-ma-dialog]").wait_for(state="visible")
     page.wait_for_timeout(200)
     assert page.locator("[data-ma-dialog]").count() == 1
+
+
+def test_csp_has_no_violations_and_relation_search_reaches_last_record(
+    page, live_server, organization
+):
+    from demo.commerce.models import Organization
+
+    def seed_relations():
+        Organization.objects.bulk_create(
+            [
+                Organization(name=f"Search company {i:03d}", domain=f"search-{i}.example")
+                for i in range(150)
+            ]
+        )
+
+    with ThreadPoolExecutor(max_workers=1) as executor:
+        executor.submit(seed_relations).result()
+    errors = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    page.add_init_script("""
+        window.cspViolations = [];
+        document.addEventListener('securitypolicyviolation', event => {
+            window.cspViolations.push(event.violatedDirective + ': ' + event.blockedURI);
+        });
+    """)
+    page.goto(f"{live_server.url}/app/customer/", wait_until="networkidle")
+    picker = page.locator(".ma-toolbar-filters details[data-url]")
+    picker.locator("summary").click()
+    expect(picker.get_by_role("status")).to_have_text("Page 1 of 2")
+    picker.get_by_role("button", name="Next", exact=True).click()
+    expect(picker.get_by_role("button", name="Search company 149", exact=True)).to_be_visible()
+    picker.get_by_role("searchbox").fill("Search company 149")
+    expect(picker.get_by_role("status")).to_have_text("Page 1 of 1")
+    picker.get_by_role("button", name="Search company 149", exact=True).click()
+    page.wait_for_url("**organization=*")
+    expect(page.locator(".ma-toolbar-filters details[data-url] summary")).to_contain_text(
+        "Search company 149"
+    )
+    page.get_by_role("button", name="Toggle color theme").click()
+    assert not errors
+    assert page.evaluate("window.cspViolations") == []
+
+
+def test_related_list_lazy_tab_edit_and_action(page, live_server, customers, order):
+    errors = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    page.goto(f"{live_server.url}/app/customer/{customers[0].pk}/", wait_until="networkidle")
+    page.get_by_role("tab", name="Orders", exact=True).click()
+    panel = page.locator("#detail-tab-panel")
+    expect(panel.get_by_role("link", name=order.number, exact=True)).to_be_visible()
+    panel.get_by_role("link", name="Edit", exact=True).click()
+    page.wait_for_url(f"**/order/{order.pk}/edit/")
+    page.go_back(wait_until="networkidle")
+    page.locator("#detail-tab-panel").get_by_role("link", name="Mark shipped", exact=True).click()
+    page.get_by_role("button", name="Mark shipped", exact=True).click()
+    page.locator("[data-ma-dialog]").wait_for(state="detached")
+    expect(
+        page.locator("#detail-tab-panel").get_by_role("button", name="Mark shipped", exact=True)
+    ).to_be_disabled()
+    with ThreadPoolExecutor(max_workers=1) as executor:
+        executor.submit(order.refresh_from_db).result()
+    assert order.status == "shipped"
+    assert not errors
+
+
+@pytest.mark.parametrize("theme", ["light", "dark"])
+def test_relation_popover_is_anchored_to_summary_after_resize_and_swap(page, live_server, theme):
+    page.goto(f"{live_server.url}/app/customer/", wait_until="networkidle")
+    if theme == "dark":
+        page.get_by_role("button", name="Toggle color theme").click()
+    picker = page.locator('.ma-toolbar-filters details[data-label="Organization"]')
+
+    def assert_anchored():
+        page.wait_for_function("""() => {
+            const picker = document.querySelector(
+                '.ma-toolbar-filters details[data-label="Organization"]'
+            );
+            const anchor = picker.querySelector('summary').getBoundingClientRect();
+            const panel = picker.querySelector('.ma-choice-options').getBoundingClientRect();
+            return Math.abs(panel.x - anchor.x) < 2 && Math.abs(panel.y - anchor.bottom - 6) < 2;
+        }""")
+
+    picker.locator("summary").click()
+    expect(picker.get_by_role("button", name="Northline Labs", exact=True)).to_be_visible()
+    assert_anchored()
+    page.set_viewport_size({"width": 1280, "height": 900})
+    assert_anchored()
+    picker.get_by_role("button", name="Northline Labs", exact=True).click()
+    page.wait_for_url("**organization=*")
+    expect(picker.locator("summary")).to_have_text("Organization: Northline Labs")
+    picker.locator("summary").click()
+    expect(picker.get_by_role("button", name="Northline Labs", exact=True)).to_have_attribute(
+        "aria-pressed", "true"
+    )
+    assert_anchored()
+    page.keyboard.press("Escape")
+    expect(picker).not_to_have_attribute("open", "")
+    expect(picker.locator("summary")).to_be_focused()
+
+
+@pytest.mark.parametrize("width", [390, 1440])
+def test_drawer_filter_labels_track_drafts_clear_and_applied_values(page, live_server, width):
+    page.set_viewport_size({"width": width, "height": 1000})
+    page.goto(f"{live_server.url}/app/customer/", wait_until="networkidle")
+    page.get_by_role("button", name="More filters").click()
+    drawer = page.locator(".ma-filter-drawer")
+    status = drawer.locator('details[data-label="Status"]')
+    relation = drawer.locator('details[data-label="Organization"]')
+    status.locator("summary").click()
+    status.locator('input[value="active"]').check()
+    expect(status.locator("summary")).to_have_text("Status: Active")
+    expect(status).to_have_class(re.compile(r"\bis-active\b"))
+    assert page.url.endswith("/app/customer/")
+    status.locator("summary").click()
+    expect(status.locator('input[value="active"]')).to_be_checked()
+    status.locator('input[value=""]').check()
+    expect(status.locator("summary")).to_have_text("Status")
+    expect(status).not_to_have_class(re.compile(r"\bis-active\b"))
+    status.locator("summary").click()
+    status.locator('input[value="active"]').check()
+    relation.locator("summary").click()
+    relation.get_by_role("button", name="Northline Labs", exact=True).click()
+    expect(relation.locator("summary")).to_have_text("Organization: Northline Labs")
+    expect(relation).to_have_class(re.compile(r"\bis-active\b"))
+    relation.locator("summary").click()
+    expect(relation.get_by_role("button", name="Northline Labs", exact=True)).to_have_attribute(
+        "aria-pressed", "true"
+    )
+    relation.get_by_role("button", name="Any organization", exact=True).click()
+    expect(relation.locator("summary")).to_have_text("Organization")
+    expect(relation).not_to_have_class(re.compile(r"\bis-active\b"))
+    relation.locator("summary").click()
+    relation.get_by_role("button", name="Northline Labs", exact=True).click()
+    drawer.get_by_role("button", name="Show results", exact=True).click()
+    page.wait_for_url("**status=active*")
+    assert "organization=" in page.url
+    page.get_by_role("button", name="More filters").click()
+    expect(status.locator("summary")).to_have_text("Status: Active")
+    expect(relation.locator("summary")).to_have_text("Organization: Northline Labs")
+
+
+@pytest.mark.parametrize("width", [390, 1440])
+def test_select_arrow_keeps_inset_on_hover_and_focus(page, live_server, width):
+    page.set_viewport_size({"width": width, "height": 1000})
+    page.goto(f"{live_server.url}/app/settings/", wait_until="networkidle")
+    select = page.locator("select.ma-input").last
+    for interact in (select.hover, select.focus):
+        interact()
+        computed = select.evaluate("""el => {
+            const style = getComputedStyle(el);
+            return {appearance: style.appearance, image: style.backgroundImage,
+                    size: style.backgroundSize, position: style.backgroundPosition,
+                    padding: parseFloat(style.paddingRight)};
+        }""")
+        assert computed["appearance"] == "none"
+        assert "data:image/svg+xml" in computed["image"]
+        assert computed["size"] == "14px 14px"
+        assert "10px" in computed["position"]
+        assert computed["padding"] >= 34
+    assert page.evaluate("document.documentElement.scrollWidth <= innerWidth")
+
+
+def test_relation_filter_survives_a_second_choice_after_an_htmx_swap(page, live_server, customers):
+    """htmx builds swap fragments in a <template>, where scripting is off and
+    <noscript> children parse as real inputs. A second control named after the
+    filter then submitted the previously rendered value, and QueryDict.get reads
+    the last one -- so the record you just clicked was silently discarded."""
+
+    def seed_second_organization():
+        from demo.commerce.models import Customer, Organization
+
+        arc = Organization.objects.create(name="Arc Foundry", domain="arc.example")
+        Customer.objects.create(name="Rowan Fisk", email="rowan@arc.example", organization=arc)
+
+    with ThreadPoolExecutor(max_workers=1) as executor:
+        executor.submit(seed_second_organization).result()
+    page.goto(f"{live_server.url}/app/customer/", wait_until="networkidle")
+    picker = page.locator(".ma-toolbar-filters details[data-url]")
+
+    picker.locator("summary").click()
+    picker.get_by_role("button", name="Northline Labs", exact=True).click()
+    page.wait_for_url("**organization=*")
+    expect(page.locator(".ma-data-row")).to_have_count(2)
+
+    # The panel has now been swapped in by htmx; pick a different record through it.
+    picker.locator("summary").click()
+    picker.get_by_role("button", name="Arc Foundry", exact=True).click()
+    expect(page.locator(".ma-data-row")).to_have_count(1)
+    expect(page.locator(".ma-data-row")).to_contain_text("Rowan Fisk")
+    expect(picker.locator("summary")).to_have_text("Organization: Arc Foundry")
+
+    assert page.url.count("organization=") == 1
+    assert "organization=&" not in page.url and not page.url.endswith("organization=")
+    assert page.locator('#resource-filters [name="organization"]').count() == 1, (
+        "the swapped fragment must not resurrect a second value carrier"
+    )
+
+
+@pytest.mark.parametrize("width", [390, 1440])
+def test_related_list_panel_stays_inside_the_page_and_scrolls_itself(
+    page, live_server, customers, width
+):
+    def seed():
+        from decimal import Decimal
+
+        from demo.commerce.models import Order
+
+        for _ in range(3):
+            Order.objects.create(
+                customer=customers[0],
+                status=Order.Status.DRAFT,
+                subtotal=Decimal("10"),
+                total=Decimal("10"),
+            )
+
+    with ThreadPoolExecutor(max_workers=1) as executor:
+        executor.submit(seed).result()
+    page.set_viewport_size({"width": width, "height": 900})
+    page.goto(
+        f"{live_server.url}/app/customer/{customers[0].pk}/?tab=orders", wait_until="networkidle"
+    )
+    panel = page.locator(".ma-related-panel")
+    expect(panel).to_be_visible()
+    expect(panel.get_by_role("heading", name="Orders", exact=True)).to_be_visible()
+    assert panel.evaluate("e => getComputedStyle(e).borderTopStyle") == "solid"
+    assert panel.evaluate("e => parseFloat(getComputedStyle(e).borderRadius)") >= 8
+    # The list page bleeds its table full-width; a panel must not do that.
+    assert page.evaluate("document.documentElement.scrollWidth <= innerWidth")
+    assert panel.evaluate(
+        "e => { const r = e.getBoundingClientRect(); return r.left >= 0 && r.right <= innerWidth; }"
+    )
+    if width == 390:
+        assert panel.locator(".ma-table-scroll").evaluate("e => e.scrollWidth > e.clientWidth")
+    # Row action labels survive; the mobile .ma-page-actions rule must not reach them.
+    expect(panel.get_by_role("link", name="Edit").first).to_have_text("Edit")
+    markup = page.content()
+    for gone in (">LIVE<", "Live resource view", "Activity stream", "ma-live-pulse"):
+        assert gone not in markup

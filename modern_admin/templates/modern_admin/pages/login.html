@@ -5,7 +5,7 @@
 <main class="ma-auth">
   <header class="ma-auth-topbar">
     <div class="ma-auth-brand"><span class="ma-brand-mark" aria-hidden="true"><i></i><i></i><i></i></span><span>{{ site_title }}</span></div>
-    <button type="button" class="ma-icon-button ma-auth-theme" @click="dark=!dark;localStorage.setItem('ma-theme',dark?'dark':'light')" :aria-label="dark ? 'Use light mode' : 'Use dark mode'">
+    <button type="button" class="ma-icon-button ma-auth-theme" @click="toggleTheme()" :aria-label="dark ? 'Use light mode' : 'Use dark mode'">
       <span x-show="!dark">{% icon "moon" 16 %}</span><span x-show="dark" x-cloak>{% icon "sun" 16 %}</span>
     </button>
   </header>

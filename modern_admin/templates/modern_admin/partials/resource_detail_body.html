@@ -39,12 +39,12 @@
       </div>
       <aside class="ma-detail-aside">
         <section class="ma-activity-section">
-          <header><div><span class="ma-section-index">LIVE</span><h2>Activity stream</h2><p>Recorded changes in this workspace.</p></div><span class="ma-live-pulse"><i></i>Live</span></header>
+          <header><h2>Activity</h2><span class="ma-section-rule"></span></header>
           <ol class="ma-timeline">
             {% for event in audit_events %}
               <li><span class="ma-timeline-marker"></span><div><p><strong>{{ event.actor.get_full_name|default:event.actor.username|default:"System" }}</strong> {{ event.action }} this {{ resource.verbose_name }}.</p><time datetime="{{ event.created_at|date:'c' }}">{{ event.created_at|timesince }} ago</time></div></li>
             {% empty %}
-              <li class="ma-timeline-empty"><span class="ma-empty-icon">{% icon "activity" 16 %}</span><div><strong>Quiet for now</strong><p>New changes will appear here as they happen.</p></div></li>
+              <li class="ma-timeline-empty"><span class="ma-empty-icon">{% icon "activity" 16 %}</span><div><strong>No activity yet</strong><p>Changes to this record will be listed here.</p></div></li>
             {% endfor %}
           </ol>
         </section>
@@ -53,7 +53,6 @@
   </div>
 
   <section class="ma-record-tab-panel" x-cloak x-show="active !== 'overview'">
-    <div class="ma-tab-context"><span><i></i>Live resource view</span></div>
     <div id="detail-tab-panel" class="ma-tab-panel" role="tabpanel">
       {% if initial_tab %}{% include initial_tab.template_name %}{% else %}{% include "modern_admin/components/skeleton.html" %}{% endif %}
     </div>

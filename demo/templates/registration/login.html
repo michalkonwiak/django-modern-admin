@@ -1,14 +1,7 @@
+{% extends "modern_admin/layouts/base.html" %}
 {% load static modern_admin %}
-<!doctype html>
-<html lang="en" x-data="{ dark: document.documentElement.classList.contains('dark') }" :class="{'dark':dark}">
-<head>
-  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light dark">
-  <title>Sign in · Northstar</title>
-  <script>try{if(localStorage.getItem('ma-theme')==='dark'||(!localStorage.getItem('ma-theme')&&matchMedia('(prefers-color-scheme: dark)').matches))document.documentElement.classList.add('dark')}catch(e){}</script>
-  <link rel="stylesheet" href="{% static 'modern_admin/app.css' %}">
-  <script defer src="{% static 'modern_admin/vendor/alpine.min.js' %}"></script>
-</head>
-<body class="ma-body">
+{% block title %}Sign in · Northstar{% endblock %}
+{% block body %}
   <main class="demo-login">
     <section class="demo-login-panel">
       <header class="demo-login-brand"><span class="ma-brand-mark"><span></span><span></span></span><span><strong>Northstar</strong><small>Operations</small></span></header>
@@ -23,7 +16,6 @@
       <footer><span>Demo credentials</span><code>demo / demo</code></footer>
     </section>
     <aside class="demo-login-aside"><div><span class="demo-login-kicker">Today at a glance</span><blockquote>“A calm operations surface where the next important decision is always visible.”</blockquote><div class="demo-login-signal"><span></span><p><strong>7 orders</strong> ready for fulfillment</p></div></div></aside>
-    <button class="demo-theme-toggle ma-icon-button" type="button" @click="dark=!dark;document.documentElement.classList.toggle('dark',dark);localStorage.setItem('ma-theme',dark?'dark':'light')">{% icon "moon" 16 %}</button>
+    <button class="demo-theme-toggle ma-icon-button" type="button" @click="toggleTheme()">{% icon "moon" 16 %}</button>
   </main>
-</body>
-</html>
+{% endblock %}
