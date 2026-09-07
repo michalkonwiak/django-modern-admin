@@ -1,10 +1,11 @@
+{% load i18n %}
 {% load modern_admin %}
 <div class="ma-dialog-backdrop" data-ma-dialog x-data="dialog" x-init="open()" @click.self="close()" @keydown.escape.window="close()">
   <section class="ma-dialog" role="dialog" aria-modal="true" aria-labelledby="saved-view-title" x-show="visible" x-transition.opacity.duration.180ms>
-    <header class="ma-dialog-header"><span class="ma-dialog-action-icon">{% icon "filter" 17 %}</span><div><h2 id="saved-view-title">Save this view</h2><p>Keep the current search, filters, ordering, and page size for quick access.</p></div><button class="ma-icon-button" type="button" @click="close()" aria-label="Close dialog">{% icon "x" 16 %}</button></header>
+    <header class="ma-dialog-header"><span class="ma-dialog-action-icon">{% icon "filter" 17 %}</span><div><h2 id="saved-view-title">{% translate "Save this view" %}</h2><p>{% translate "Keep the current search, filters, ordering, and page size for quick access." %}</p></div><button class="ma-icon-button" type="button" @click="close()" aria-label="{% translate "Close dialog" %}">{% icon "x" 16 %}</button></header>
     <form class="ma-form" method="post" hx-post="{{ request.path }}" hx-target="#dialog-host" hx-swap="innerHTML">
-      {% csrf_token %}<div class="ma-dialog-body">{% for hidden in form.hidden_fields %}{{ hidden }}{% endfor %}<div class="ma-field{% if form.name.errors %} has-error{% endif %}"><label for="{{ form.name.id_for_label }}">View name</label>{{ form.name }}{% for error in form.name.errors %}<span class="ma-field-error">{{ error }}</span>{% endfor %}</div></div>
-      <footer class="ma-dialog-actions"><button class="ma-button is-secondary" type="button" @click="close()">Cancel</button><button class="ma-button is-primary" type="submit">Save view<span class="ma-button-spinner"></span></button></footer>
+      {% csrf_token %}<div class="ma-dialog-body">{% for hidden in form.hidden_fields %}{{ hidden }}{% endfor %}<div class="ma-field{% if form.name.errors %} has-error{% endif %}"><label for="{{ form.name.id_for_label }}">{% translate "View name" %}</label>{{ form.name }}{% for error in form.name.errors %}<span class="ma-field-error">{{ error }}</span>{% endfor %}</div></div>
+      <footer class="ma-dialog-actions"><button class="ma-button is-secondary" type="button" @click="close()">{% translate "Cancel" %}</button><button class="ma-button is-primary" type="submit">{% translate "Save view" %}<span class="ma-button-spinner"></span></button></footer>
     </form>
   </section>
 </div>

@@ -1,21 +1,23 @@
 {% extends "modern_admin/layouts/base.html" %}
+{% load i18n %}
 {% load static modern_admin %}
-{% block title %}Sign in · Northstar{% endblock %}
+{% block title %}{% translate "Sign in · Northstar" %}{% endblock %}
 {% block body %}
   <main class="demo-login">
     <section class="demo-login-panel">
-      <header class="demo-login-brand"><span class="ma-brand-mark"><span></span><span></span></span><span><strong>Northstar</strong><small>Operations</small></span></header>
-      <div class="demo-login-copy"><div class="ma-eyebrow">Internal workspace</div><h1>Welcome back</h1><p>Sign in to manage customers, orders, and company operations.</p></div>
+      {% include "modern_admin/partials/language_switcher.html" %}
+      <header class="demo-login-brand"><span class="ma-brand-mark"><span></span><span></span></span><span><strong>Northstar</strong><small>{% translate "Operations" %}</small></span></header>
+      <div class="demo-login-copy"><div class="ma-eyebrow">{% translate "Internal workspace" %}</div><h1>{% translate "Welcome back" %}</h1><p>{% translate "Sign in to manage customers, orders, and company operations." %}</p></div>
       <form method="post" class="ma-form demo-login-form">
         {% csrf_token %}
-        {% if form.non_field_errors %}<div class="ma-form-alert">The username or password was not recognized.</div>{% endif %}
-        <div class="ma-field"><label for="id_username">Username</label><input class="ma-input" type="text" name="username" id="id_username" value="{{ form.username.value|default:'' }}" autocomplete="username" autofocus required></div>
-        <div class="ma-field"><label for="id_password">Password</label><input class="ma-input" type="password" name="password" id="id_password" autocomplete="current-password" required></div>
-        <input type="hidden" name="next" value="{{ next }}"><button class="ma-button is-primary" type="submit">Sign in to workspace</button>
+        {% if form.non_field_errors %}<div class="ma-form-alert">{% translate "The username or password was not recognized." %}</div>{% endif %}
+        <div class="ma-field"><label for="id_username">{% translate "Username" %}</label><input class="ma-input" type="text" name="username" id="id_username" value="{{ form.username.value|default:'' }}" autocomplete="username" autofocus required></div>
+        <div class="ma-field"><label for="id_password">{% translate "Password" %}</label><input class="ma-input" type="password" name="password" id="id_password" autocomplete="current-password" required></div>
+        <input type="hidden" name="next" value="{{ next }}"><button class="ma-button is-primary" type="submit">{% translate "Sign in to workspace" %}</button>
       </form>
-      <footer><span>Demo credentials</span><code>demo / demo</code></footer>
+      <footer><span>{% translate "Demo credentials" %}</span><code>demo / demo</code></footer>
     </section>
-    <aside class="demo-login-aside"><div><span class="demo-login-kicker">Today at a glance</span><blockquote>“A calm operations surface where the next important decision is always visible.”</blockquote><div class="demo-login-signal"><span></span><p><strong>7 orders</strong> ready for fulfillment</p></div></div></aside>
+    <aside class="demo-login-aside"><div><span class="demo-login-kicker">{% translate "Today at a glance" %}</span><blockquote>{% translate "“A calm operations surface where the next important decision is always visible.”" %}</blockquote><div class="demo-login-signal"><span></span><p><strong>{% translate "7 orders" %}</strong> {% translate "ready for fulfillment" %}</p></div></div></aside>
     <button class="demo-theme-toggle ma-icon-button" type="button" @click="toggleTheme()">{% icon "moon" 16 %}</button>
   </main>
 {% endblock %}

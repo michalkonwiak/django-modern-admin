@@ -1,25 +1,27 @@
 {% extends "modern_admin/layouts/base.html" %}
+{% load i18n %}
 {% load modern_admin %}
-{% block title %}Sign in · {{ site_title }}{% endblock %}
+{% block title %}{% blocktranslate with site=site_title %}Sign in · {{ site }}{% endblocktranslate %}{% endblock %}
 {% block body %}
 <main class="ma-auth">
   <header class="ma-auth-topbar">
     <div class="ma-auth-brand"><span class="ma-brand-mark" aria-hidden="true"><i></i><i></i><i></i></span><span>{{ site_title }}</span></div>
-    <button type="button" class="ma-icon-button ma-auth-theme" @click="toggleTheme()" :aria-label="dark ? 'Use light mode' : 'Use dark mode'">
+    {% include "modern_admin/partials/language_switcher.html" %}
+    <button type="button" class="ma-icon-button ma-auth-theme" @click="toggleTheme()" aria-label="{% translate 'Toggle color theme' %}">
       <span x-show="!dark">{% icon "moon" 16 %}</span><span x-show="dark" x-cloak>{% icon "sun" 16 %}</span>
     </button>
   </header>
   <div class="ma-auth-content">
   <div class="ma-auth-window">
-  <aside class="ma-auth-identity" aria-label="Workspace">
-    <div class="ma-auth-identity-heading"><span>Workspace</span><h2>{{ site_title }}</h2></div>
+  <aside class="ma-auth-identity" aria-label="{% translate "Workspace" %}">
+    <div class="ma-auth-identity-heading"><span>{% translate "Workspace" %}</span><h2>{{ site_title }}</h2></div>
     <div class="ma-auth-material" aria-hidden="true"><div class="ma-auth-frame"></div><div class="ma-auth-frame"></div><div class="ma-auth-frame"></div><div class="ma-auth-material-axis"></div></div>
-    <div class="ma-auth-identity-footer"><span class="ma-brand-mark" aria-hidden="true"><i></i><i></i><i></i></span><span>Your work, in focus.</span></div>
+    <div class="ma-auth-identity-footer"><span class="ma-brand-mark" aria-hidden="true"><i></i><i></i><i></i></span><span>{% translate "Your work, in focus." %}</span></div>
   </aside>
   <section class="ma-auth-panel" aria-labelledby="login-title">
   <header class="ma-auth-heading">
-    <h1 id="login-title">Sign in</h1>
-    <p>Enter your details to access {{ site_title }}.</p>
+    <h1 id="login-title">{% translate "Sign in" %}</h1>
+    <p>{% blocktranslate with site=site_title %}Enter your details to access {{ site }}.{% endblocktranslate %}</p>
   </header>
   <form method="post" class="ma-form ma-auth-form">
     {% csrf_token %}
@@ -32,9 +34,9 @@
     </div>
     {% endfor %}
     <input type="hidden" name="next" value="{{ next }}">
-    <button type="submit" class="ma-button is-primary"><span>Sign in</span>{% icon "arrow-right" 15 %}</button>
+    <button type="submit" class="ma-button is-primary"><span>{% translate "Sign in" %}</span>{% icon "arrow-right" 15 %}</button>
   </form>
-  <p class="ma-auth-help">Need access? Contact your workspace administrator.</p>
+  <p class="ma-auth-help">{% translate "Need access? Contact your workspace administrator." %}</p>
   </section>
   </div>
   </div>

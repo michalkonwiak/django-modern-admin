@@ -1,6 +1,7 @@
+{% load i18n %}
 {% load modern_admin %}
-<header class="ma-widget-header demo-widget-title"><div><h2>{{ widget.title }}</h2><p>Latest work entering fulfillment</p></div><a href="{% url modern_admin_site.name|add:':order_list' %}">View all {% icon "chevron-right" 12 %}</a></header>
+<header class="ma-widget-header demo-widget-title"><div><h2>{{ widget.title }}</h2><p>{% translate "Latest work entering fulfillment" %}</p></div><a href="{% url modern_admin_site.name|add:':order_list' %}">{% translate "View all" %} {% icon "chevron-right" 12 %}</a></header>
 <div class="demo-compact-list">
-  {% for order in widget_context.orders %}<a href="{% url modern_admin_site.name|add:':order_detail' order.pk %}"><span class="demo-list-icon">{% icon "receipt" 14 %}</span><span><strong>{{ order.number }}</strong><small>{{ order.customer }}</small></span><span class="ma-badge is-{% if order.status == 'shipped' %}success{% elif order.status == 'processing' %}info{% elif order.status == 'cancelled' %}danger{% else %}neutral{% endif %}"><span class="ma-status-dot"></span>{{ order.get_status_display }}</span><b>${{ order.total|floatformat:2 }}</b></a>{% empty %}<div class="demo-widget-empty">No recent orders.</div>{% endfor %}
+  {% for order in widget_context.orders %}<a href="{% url modern_admin_site.name|add:':order_detail' order.pk %}"><span class="demo-list-icon">{% icon "receipt" 14 %}</span><span><strong>{{ order.number }}</strong><small>{{ order.customer }}</small></span><span class="ma-badge is-{% if order.status == 'shipped' %}success{% elif order.status == 'processing' %}info{% elif order.status == 'cancelled' %}danger{% else %}neutral{% endif %}"><span class="ma-status-dot"></span>{{ order.get_status_display }}</span><b>${{ order.total|floatformat:2 }}</b></a>{% empty %}<div class="demo-widget-empty">{% translate "No recent orders." %}</div>{% endfor %}
 </div>
 

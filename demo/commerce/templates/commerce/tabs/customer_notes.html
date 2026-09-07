@@ -1,2 +1,3 @@
-<div class="demo-note">{% if notes %}{{ notes|linebreaks }}{% else %}<div class="demo-widget-empty">No internal notes for this customer.</div>{% endif %}</div>
+{% load i18n %}
+<div class="demo-note">{% if notes %}{{ notes|linebreaks }}{% else %}<div class="demo-widget-empty">{% translate "No internal notes for this customer." %}</div>{% endif %}</div>
 

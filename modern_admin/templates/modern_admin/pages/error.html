@@ -1,3 +1,4 @@
 {% extends "modern_admin/layouts/app.html" %}
+{% load i18n %}
 {% block title %}{{ title }} · {{ site_title }}{% endblock %}
-{% block content %}<div class="ma-page"><div class="ma-error-page"><span class="ma-error-code">{{ status }}</span><h1>{{ title }}</h1><p>{{ message }}</p><a class="ma-button is-primary" href="{% url modern_admin_site.name|add:':dashboard' %}">Return to overview</a></div></div>{% endblock %}
+{% block content %}<div class="ma-page"><div class="ma-error-page"><span class="ma-error-code">{{ status }}</span><h1>{{ title }}</h1><p>{{ message }}</p><a class="ma-button is-primary" href="{% url modern_admin_site.name|add:':dashboard' %}">{% translate "Return to overview" %}</a></div></div>{% endblock %}

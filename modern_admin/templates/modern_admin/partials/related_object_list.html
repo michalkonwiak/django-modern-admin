@@ -1,17 +1,18 @@
+{% load i18n %}
 {% load modern_admin %}
 <div id="related-list" hx-get="{{ related_refresh_url }}" hx-trigger="ma:reload" hx-target="this" hx-swap="outerHTML">
 {% if related_denied %}
-<p class="ma-related-notice" role="status">You do not have access to these related records.</p>
+<p class="ma-related-notice" role="status">{% translate "You do not have access to these related records." %}</p>
 {% else %}
 <section class="ma-related-panel">
   <header>
     <h2>{{ related_label }}</h2>
-    <span>{{ related_page.paginator.count }} record{{ related_page.paginator.count|pluralize }}</span>
+    <span>{% blocktranslate count count=related_page.paginator.count %}{{ count }} record{% plural %}{{ count }} records{% endblocktranslate %}</span>
   </header>
   <div class="ma-table-scroll">
     <table class="ma-table">
       <caption class="ma-sr-only">{{ related_label }}</caption>
-      <thead><tr>{% for column in related_columns %}<th scope="col"{% if forloop.first %} class="is-identity"{% endif %}>{{ column.heading }}</th>{% endfor %}<th scope="col" class="is-actions">Actions</th></tr></thead>
+      <thead><tr>{% for column in related_columns %}<th scope="col"{% if forloop.first %} class="is-identity"{% endif %}>{{ column.heading }}</th>{% endfor %}<th scope="col" class="is-actions">{% translate "Actions" %}</th></tr></thead>
       <tbody>
         {% for row in related_rows %}
         <tr class="ma-data-row">
@@ -26,23 +27,23 @@
           </td>
           {% endfor %}
           <td class="is-actions"><div class="ma-row-actions">
-            {% if row.edit_url %}<a class="ma-button is-secondary is-small" href="{{ row.edit_url }}">{% icon "pencil" 13 %}Edit</a>{% endif %}
+            {% if row.edit_url %}<a class="ma-button is-secondary is-small" href="{{ row.edit_url }}">{% icon "pencil" 13 %}{% translate "Edit" %}</a>{% endif %}
             {% for link in row.actions %}
               {% if link.unavailable_reason %}<button type="button" class="ma-button is-secondary is-small" disabled title="{{ link.unavailable_reason }}">{{ link.action.label }}</button>
               {% else %}<a class="ma-button is-secondary is-small" href="{{ link.url }}" hx-get="{{ link.url }}" hx-target="#dialog-host" hx-swap="innerHTML">{{ link.action.label }}</a>{% endif %}
             {% endfor %}
           </div></td>
         </tr>
-        {% empty %}<tr><td class="ma-related-empty" colspan="{{ related_columns|length|add:1 }}">No related records yet.</td></tr>{% endfor %}
+        {% empty %}<tr><td class="ma-related-empty" colspan="{{ related_columns|length|add:1 }}">{% translate "No related records yet." %}</td></tr>{% endfor %}
       </tbody>
     </table>
   </div>
   {% if related_page.paginator.num_pages > 1 %}
     <footer>
-      <div><span>Page</span><strong>{{ related_page.number }}</strong><span>of {{ related_page.paginator.num_pages }}</span></div>
-      <nav aria-label="{{ related_label }} pages">
-        {% if related_previous_url %}<a class="ma-button is-secondary is-small" href="{{ related_previous_url }}">{% icon "chevron-left" 13 %}Previous</a>{% endif %}
-        {% if related_next_url %}<a class="ma-button is-secondary is-small" href="{{ related_next_url }}">Next{% icon "chevron-right" 13 %}</a>{% endif %}
+      <div><span>{% translate "Page" %}</span><strong>{{ related_page.number }}</strong><span>{% blocktranslate with pages=related_page.paginator.num_pages %}of {{ pages }}{% endblocktranslate %}</span></div>
+      <nav aria-label="{% blocktranslate with label=related_label %}{{ label }} pages{% endblocktranslate %}">
+        {% if related_previous_url %}<a class="ma-button is-secondary is-small" href="{{ related_previous_url }}">{% icon "chevron-left" 13 %}{% translate "Previous" %}</a>{% endif %}
+        {% if related_next_url %}<a class="ma-button is-secondary is-small" href="{{ related_next_url }}">{% translate "Next" %}{% icon "chevron-right" 13 %}</a>{% endif %}
       </nav>
     </footer>
   {% endif %}

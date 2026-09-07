@@ -8,6 +8,7 @@ from django import forms
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.http import HttpRequest
+from django.utils.translation import gettext_lazy as _
 
 ModelT = TypeVar("ModelT", bound=models.Model)
 ActionPlacement = Literal["row", "detail", "bulk", "resource"]
@@ -38,7 +39,7 @@ class ConfirmationForm(forms.Form):
 
 class ResourceAction(Generic[ModelT]):
     key = ""
-    label = "Action"
+    label = _("Action")
     description = ""
     icon = "zap"
     variant: ActionVariant = "secondary"

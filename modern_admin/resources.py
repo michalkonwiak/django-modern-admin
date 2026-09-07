@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 from datetime import date, datetime
 from decimal import Decimal
 from typing import TYPE_CHECKING, Any, ClassVar, Generic, TypeVar
@@ -13,6 +13,7 @@ from django.forms import modelform_factory
 from django.http import HttpRequest
 from django.utils.formats import date_format, number_format
 from django.utils.text import capfirst
+from django.utils.translation import gettext_lazy as _
 
 from modern_admin.actions import ResourceAction
 from modern_admin.columns import Column, infer_column, resolve_value
@@ -68,6 +69,8 @@ class ModelResource(Resource, Generic[ModelT]):
     form_class: type[forms.ModelForm[ModelT]] | None = None
     form_fields: ClassVar[Sequence[str] | str] = ()
     detail_sections: ClassVar[Sequence[DetailSection]] = ()
+    # Computed detail fields have no verbose_name to translate; name them here.
+    field_labels: ClassVar[Mapping[str, str]] = {}
     detail_tabs: ClassVar[Sequence[DetailTab | RelatedObjectList]] = ()
     actions: ClassVar[Sequence[type[ResourceAction[ModelT]] | ResourceAction[ModelT]]] = ()
     list_template_name = "modern_admin/pages/resource_list.html"
@@ -79,7 +82,7 @@ class ModelResource(Resource, Generic[ModelT]):
         self.model = model
         self.site = site
         self.key = model._meta.model_name.replace("_", "-")
-        self.title = self.title or capfirst(str(model._meta.verbose_name_plural))
+        self.title = self.title or capfirst(model._meta.verbose_name_plural)
         self.icon = self.icon or "database"
         self.navigation = self.navigation or Navigation(label=self.title, icon=self.icon)
         self.permission_policy = self.permission_policy_class(model)
@@ -256,7 +259,7 @@ class ModelResource(Resource, Generic[ModelT]):
             for field in self.model._meta.fields
             if field.name not in {"id", self.model._meta.pk.name}
         )
-        return (DetailSection(title="Overview", fields=field_names[:10]),)
+        return (DetailSection(title=_("Overview"), fields=field_names[:10]),)
 
     def get_detail_tabs(
         self, request: HttpRequest, obj: ModelT
@@ -267,8 +270,10 @@ class ModelResource(Resource, Generic[ModelT]):
         return str(obj)
 
     def get_field_label(self, path: str) -> str:
+        if path in self.field_labels:
+            return str(self.field_labels[path])
         try:
-            return capfirst(str(self.model._meta.get_field(path).verbose_name))
+            return capfirst(self.model._meta.get_field(path).verbose_name)
         except FieldDoesNotExist:
             return capfirst(path.replace("_", " "))
 
@@ -281,7 +286,7 @@ class ModelResource(Resource, Generic[ModelT]):
         if value in (None, ""):
             return "—"
         if isinstance(value, bool):
-            return "Yes" if value else "No"
+            return _("Yes") if value else _("No")
         if isinstance(value, models.Manager):
             # One extra row tells us whether the relation continues past the preview.
             labels = [str(item) for item in value.all()[:6]]
@@ -295,9 +300,9 @@ class ModelResource(Resource, Generic[ModelT]):
         if callable(display_method):
             return str(display_method())
         if isinstance(value, datetime):
-            return date_format(value, "M j, Y, P")
+            return date_format(value, "DATETIME_FORMAT")
         if isinstance(value, date):
-            return date_format(value, "M j, Y")
+            return date_format(value, "DATE_FORMAT")
         if isinstance(value, Decimal):
             return str(number_format(value, decimal_pos=2, use_l10n=True, force_grouping=True))
         return self.format_value(value)
@@ -323,8 +328,8 @@ class PageResource(Resource):
 
 class Dashboard(PageResource):
     path = ""
-    title = "Overview"
-    description = "A live view of the work that needs attention."
+    title = _("Overview")
+    description = _("A live view of the work that needs attention.")
     template_name = "modern_admin/pages/dashboard.html"
     widgets: ClassVar[Sequence[Widget]] = ()
 

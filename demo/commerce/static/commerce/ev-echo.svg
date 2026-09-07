@@ -1,0 +1,195 @@
+<svg id="ev-still" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid meet" role="img" aria-labelledby="ev-title ev-description">
+  <title id="ev-title">Galeria Echo w Kielcach — przyjazd i ładowanie SUV-a</title>
+  <desc id="ev-description">An electric SUV drives up to a charging pedestal in front of the curved glass facade of Galeria Echo, Świętokrzyska 20, Kielce. The building is reconstructed as a restrained vector illustration from a reference photograph. The charging layout and telemetry are illustrative. Reduced motion shows the parked vehicle at seventy-percent charge.</desc>
+  <!-- Building reference: https://www.epp-poland.com/obiekty/galeria-echo/
+       Charging location: https://galeriaecho.pl/udogodnienia/stacja-ladowania-samochodow-elektrycznych/
+       Original vector drawing; no external assets or live telemetry. -->
+  <defs>
+    <linearGradient id="ev-paint" x1="0" y1="0" x2=".1" y2="1"><stop stop-color="#CFD8D2"/><stop offset=".45" stop-color="#B7C1BC"/><stop offset="1" stop-color="#84968A"/></linearGradient>
+    <linearGradient id="ev-hood" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#CBD4CE"/><stop offset="1" stop-color="#A0B1A5"/></linearGradient>
+    <linearGradient id="ev-glass" x1="0" y1="0" x2=".7" y2="1"><stop stop-color="#4A5751"/><stop offset=".5" stop-color="#202B27"/><stop offset="1" stop-color="#101A16"/></linearGradient>
+    <linearGradient id="ev-stone" x1="0" y1="0" x2="1" y2="1"><stop class="ev-stone-light" stop-color="#A9B2AC"/><stop class="ev-stone-dark" offset="1" stop-color="#7F8B83"/></linearGradient>
+    <linearGradient id="ev-mirror" x1="0" y1="0" x2="1" y2=".3"><stop stop-color="#26342E"/><stop offset=".5" stop-color="#718279"/><stop offset="1" stop-color="#3B4740"/></linearGradient>
+    <linearGradient id="ev-half"><stop offset=".5" stop-color="#31E6A1" stop-opacity=".65"/><stop offset=".5" stop-color="#31E6A1" stop-opacity=".06"/></linearGradient>
+    <radialGradient id="ev-shadow"><stop stop-color="#111815" stop-opacity=".23"/><stop offset="1" stop-color="#111815" stop-opacity="0"/></radialGradient>
+    <linearGradient id="ev-edge-fade"><stop stop-color="black"/><stop offset=".035" stop-color="white"/><stop offset=".97" stop-color="white"/><stop offset="1" stop-color="black"/></linearGradient>
+    <mask id="ev-scene-mask"><rect width="1600" height="900" fill="url(#ev-edge-fade)"/></mask>
+    <clipPath id="ev-scene-clip"><rect width="1600" height="900"/></clipPath>
+    <clipPath id="ev-echo-glass-clip"><path d="M340 281C356 192 625 143 880 184C1067 214 1189 299 1195 357V566C952 544 611 549 340 585Z"/></clipPath>
+    <linearGradient id="ev-echo-glass"><stop stop-color="#829B8E" stop-opacity=".25"/><stop offset=".45" stop-color="#BBC8BE" stop-opacity=".1"/><stop offset="1" stop-color="#4A6757" stop-opacity=".28"/></linearGradient>
+    <path id="ev-cable-path" pathLength="1" d="M700 624C736 629 685 757 745 763S776 660 814 657"/>
+    <path id="ev-battery-route" pathLength="1" d="M814 657Q838 686 962 718L1256 711"/>
+    <path id="ev-contour" pathLength="1" d="M784 617L802 527Q809 495 852 487L1059 488Q1116 492 1192 582L1386 605Q1452 616 1473 650"/>
+    <filter id="ev-glow" x="-15%" y="-45%" width="130%" height="190%" color-interpolation-filters="sRGB"><feGaussianBlur stdDeviation="1.5" result="blur"/><feComponentTransfer in="blur" result="soft"><feFuncA type="linear" slope=".25"/></feComponentTransfer><feMerge><feMergeNode in="soft"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+  <style>
+    :root { --ev-building: #E0E5E1; --ev-building-side: #CBD3CD; --ev-trim: #AAB6AD; --ev-plaza: #A0AAA1; --ev-ink: #4A5751; --ev-campus-opacity: .72; }
+    @media (prefers-color-scheme: dark) {
+      :root { --ev-building: #303C35; --ev-building-side: #27332C; --ev-trim: #4A5A50; --ev-plaza: #536157; --ev-ink: #A8B6AB; --ev-campus-opacity: .72; }
+    }
+    @media (prefers-color-scheme: dark) { .ev-stone-light { stop-color: #637269; } .ev-stone-dark { stop-color: #3F4D43; } }
+    .ev-detail { fill: none; stroke: #7F8B86; stroke-width: 1.4; }
+    .ev-campus { opacity: var(--ev-campus-opacity); }
+    /* Twelve seconds: approach 0–25%, connect 28–34%, charge 34–86%, depart 92–100%. */
+    .ev-drive { animation: ev-arrive 12s infinite; }
+    @keyframes ev-arrive {
+      0% { transform: translateX(-1540px); animation-timing-function: cubic-bezier(.15,.65,.25,1); }
+      25%,92% { transform: translateX(0); animation-timing-function: cubic-bezier(.55,0,.85,.45); }
+      100% { transform: translateX(950px); }
+    }
+    .ev-wheel { animation: ev-roll 12s infinite; transform-box: fill-box; transform-origin: center; }
+    @keyframes ev-roll {
+      0% { transform: rotate(0deg); animation-timing-function: cubic-bezier(.15,.65,.25,1); }
+      25%,92% { transform: rotate(1800deg); animation-timing-function: cubic-bezier(.55,0,.85,.45); }
+      100% { transform: rotate(2910deg); }
+    }
+    /* Cable is drawn only after parking; it retracts before departure. */
+    .ev-connection { stroke-dasharray: 1; stroke-dashoffset: 1; animation: ev-connect 12s ease-in-out infinite; }
+    @keyframes ev-connect { 0%,28%,91%,100% { stroke-dashoffset: 1; opacity: 0; } 29% { opacity: 1; } 34%,87% { stroke-dashoffset: 0; opacity: 1; } }
+    .ev-charging { animation: ev-charge-window 12s ease-in-out infinite; opacity: 0; }
+    @keyframes ev-charge-window { 0%,33%,90%,100% { opacity: 0; } 36%,85% { opacity: 1; } }
+    .ev-stream { fill: none; stroke: #31E6A1; stroke-width: 2.4; stroke-linecap: round; stroke-dasharray: .035 .095; animation: ev-flow 1.8s linear infinite; }
+    @keyframes ev-flow { to { stroke-dashoffset: -.26; } }
+    /* Five battery cells remain synchronized with the parked charging interval. */
+    .ev-cell { fill: #31E6A1; opacity: .06; animation: ev-cell-5 12s ease-in-out infinite; }
+    .ev-cell-1 { animation-name: ev-cell-1; }
+    .ev-cell-2 { animation-name: ev-cell-2; }
+    .ev-cell-3 { animation-name: ev-cell-3; }
+    .ev-cell-4 { animation-name: ev-cell-4; }
+    @keyframes ev-cell-1 { 0%,32%,100% { opacity: .06; } 37%,94% { opacity: .65; } }
+    @keyframes ev-cell-2 { 0%,43%,100% { opacity: .06; } 48%,94% { opacity: .65; } }
+    @keyframes ev-cell-3 { 0%,54%,100% { opacity: .06; } 59%,94% { opacity: .65; } }
+    @keyframes ev-cell-4 { 0%,65%,100% { opacity: .06; } 70%,94% { opacity: .65; } }
+    @keyframes ev-cell-5 { 0%,76%,100% { opacity: .06; } 81%,94% { opacity: .65; } }
+    /* Small mathematical branches grow from the chassis, then dissolve together. */
+    .ev-branch { fill: none; stroke: #1FA978; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 1; stroke-dashoffset: 1; opacity: 0; animation: ev-grow 12s cubic-bezier(.22,.61,.36,1) infinite; }
+    .ev-twig { animation-name: ev-grow-twig; stroke-width: 1; }
+    @keyframes ev-grow { 0%,40% { stroke-dashoffset: 1; opacity: 0; } 48% { opacity: .45; } 74%,82% { stroke-dashoffset: 0; opacity: .45; } 90%,100% { stroke-dashoffset: 0; opacity: 0; } }
+    @keyframes ev-grow-twig { 0%,52% { stroke-dashoffset: 1; opacity: 0; } 60% { opacity: .3; } 78%,82% { stroke-dashoffset: 0; opacity: .3; } 90%,100% { stroke-dashoffset: 0; opacity: 0; } }
+    /* Sparse particles follow the cable into the pack. */
+    .ev-particle { fill: none; stroke: #76F7C1; stroke-width: 3.5; stroke-linecap: round; stroke-dasharray: .001 .999; animation: ev-particle 3s linear infinite; }
+    @keyframes ev-particle { from { stroke-dashoffset: 0; opacity: 0; } 12%,85% { opacity: .65; } to { stroke-dashoffset: -1; opacity: 0; } }
+    .ev-pulse { fill: none; stroke: #76F7C1; stroke-width: 2; stroke-dasharray: .14 .86; opacity: 0; animation: ev-complete 12s ease-in-out infinite; }
+    @keyframes ev-complete { 0%,80% { stroke-dashoffset: .14; opacity: 0; } 82% { opacity: .5; } 87% { opacity: .3; } 90%,100% { stroke-dashoffset: -1; opacity: 0; } }
+    /* An accessible still frame: parked, connected, 70% charged. */
+    @media (prefers-reduced-motion: reduce) {
+      .ev-drive, .ev-wheel, .ev-connection, .ev-charging, .ev-stream, .ev-cell, .ev-branch, .ev-particle, .ev-pulse { animation: none !important; }
+      .ev-drive, .ev-wheel { transform: none; }
+      .ev-connection { stroke-dashoffset: 0; opacity: 1; }
+      .ev-charging { opacity: 1; }
+      .ev-stream { stroke-dasharray: none; opacity: .4; }
+      .ev-particle, .ev-pulse { display: none; }
+      .ev-branch { stroke-dashoffset: 0; opacity: .2; }
+      .ev-cell { opacity: .06; }
+      .ev-cell-1, .ev-cell-2, .ev-cell-3 { opacity: .65; }
+      .ev-cell-4 { fill: url(#ev-half); opacity: 1; }
+    }
+    /* Static fragment also lets picture sources honor emulated motion preferences. */
+    :root:target .ev-drive, :root:target .ev-wheel, :root:target .ev-connection, :root:target .ev-charging, :root:target .ev-stream, :root:target .ev-cell, :root:target .ev-branch, :root:target .ev-particle, :root:target .ev-pulse { animation: none !important; }
+    :root:target .ev-drive, :root:target .ev-wheel { transform: none; }
+    :root:target .ev-connection { stroke-dashoffset: 0; opacity: 1; }
+    :root:target .ev-charging { opacity: 1; }
+    :root:target .ev-stream { stroke-dasharray: none; opacity: .4; }
+    :root:target .ev-particle, :root:target .ev-pulse { display: none; }
+    :root:target .ev-branch { stroke-dashoffset: 0; opacity: .2; }
+    :root:target .ev-cell { opacity: .06; }
+    :root:target .ev-cell-1, :root:target .ev-cell-2, :root:target .ev-cell-3 { opacity: .65; }
+    :root:target .ev-cell-4 { fill: url(#ev-half); opacity: 1; }
+  </style>
+  <g clip-path="url(#ev-scene-clip)" mask="url(#ev-scene-mask)">
+    <!-- Galeria Echo: curved glazed drum, horizontal facade bands and low entrance wing. -->
+    <g id="ambient-ui" class="ev-campus">
+      <path d="M340 281C356 192 625 143 880 184C1067 214 1189 299 1195 357V566C952 544 611 549 340 585Z" fill="var(--ev-building)" stroke="var(--ev-trim)" stroke-width="1.5"/>
+      <g clip-path="url(#ev-echo-glass-clip)">
+        <rect x="320" y="155" width="900" height="440" fill="url(#ev-echo-glass)"/>
+        <path d="M337 280C500 178 955 190 1195 357V403C952 281 533 245 337 343Z" fill="var(--ev-building-side)"/>
+        <path d="M337 416C551 333 946 350 1195 472V510C942 410 539 405 337 478Z" fill="var(--ev-building-side)" opacity=".6"/>
+        <path d="M337 517C550 463 935 460 1196 545V592H337Z" fill="#344D3D" opacity=".42"/>
+        <path d="M361 150V591 M385 150V591 M415 150V591 M450 150V591 M490 150V591 M534 150V591 M580 150V591 M628 150V591 M678 150V591 M728 150V591 M778 150V591 M828 150V591 M878 150V591 M925 150V591 M969 150V591 M1010 150V591 M1047 150V591 M1080 150V591 M1108 150V591 M1132 150V591 M1153 150V591 M1170 150V591 M1184 150V591" fill="none" stroke="var(--ev-trim)" stroke-width="1.2"/>
+        <path d="M337 280C500 178 955 190 1195 357M337 343C530 245 952 281 1195 403M337 416C551 333 946 350 1195 472M337 478C539 405 942 410 1195 510M337 517C550 463 935 460 1196 545" fill="none" stroke="var(--ev-trim)" stroke-width="2.2"/>
+        <path d="M490 164L558 164L498 587H466ZM870 178L905 189L982 580H936Z" fill="#C7D5CB" opacity=".12"/>
+        <path d="M542 292V453M700 282V444M859 295V455" stroke="var(--ev-trim)" stroke-width="6" opacity=".4"/>
+      </g>
+      <path d="M340 281C356 192 625 143 880 184C1067 214 1189 299 1195 357" fill="none" stroke="var(--ev-trim)" stroke-width="8"/>
+      <text x="747" y="231" fill="var(--ev-ink)" font-family="Arial, Helvetica, sans-serif" font-size="26" letter-spacing="5" text-anchor="middle">GALERIA ECHO</text>
+      <path d="M120 328L371 353V585L120 565Z" fill="var(--ev-building-side)" stroke="var(--ev-trim)" stroke-width="1.5"/>
+      <path d="M134 342L358 365V550L134 531Z" fill="url(#ev-echo-glass)"/>
+      <path d="M177 345V534M223 350V539M269 355V543M315 360V547M134 396L358 417M134 457L358 478" fill="none" stroke="var(--ev-trim)" stroke-width="2"/>
+      <path d="M113 527L378 550V566L113 544Z" fill="#35493C"/>
+      <path d="M155 548L328 563V582L155 570Z" fill="#344D3D" opacity=".7"/>
+      <path d="M186 551V573M228 555V577M269 559V580" stroke="var(--ev-trim)" stroke-width="2"/>
+      <path d="M372 563C650 530 990 544 1194 571L1194 584C923 555 622 547 372 578Z" fill="#52665A"/>
+      <path d="M116 590L628 610M727 603L1240 595M110 640H617M131 677H606" fill="none" stroke="var(--ev-plaza)" stroke-width="1.5" opacity=".3"/>
+      <path d="M48 798H1552M90 828H420M540 828H870M990 828H1320" fill="none" stroke="var(--ev-plaza)" stroke-width="2" opacity=".25"/>
+      <path d="M1180 604H1515L1550 779H801" fill="none" stroke="var(--ev-plaza)" stroke-width="2" opacity=".3"/>
+    </g>
+    <!-- Illustrative charging pedestal beside the foreground stopping position. -->
+    <g id="charger">
+      <ellipse cx="681" cy="753" rx="72" ry="16" fill="url(#ev-shadow)"/>
+      <path d="M648 551L689 540L715 553V734L674 748L648 735Z" fill="#B7C1BC" stroke="#7F8B86" stroke-width="1.2"/>
+      <path d="M689 540L715 553V734L689 743Z" fill="#29332F"/>
+      <path d="M648 551L674 562L715 553M674 562V748" class="ev-detail"/>
+      <path d="M655 577L668 582V635L655 630Z" fill="#1A211E"/>
+      <path d="M659 592L665 594M659 601L665 603" stroke="#B7C1BC" stroke-width="2"/>
+      <path d="M694 573L708 569" stroke="#31E6A1" stroke-width="3" stroke-linecap="round"/>
+      <rect x="695" y="614" width="9" height="18" rx="4" fill="#101A16"/>
+      <path d="M695 698L707 695M695 705L707 702" class="ev-detail"/>
+    </g>
+    <!-- Electric SUV: taller cabin, upright tail, roof rails and larger aero wheels. -->
+    <g id="vehicle" class="ev-drive">
+      <ellipse cx="1137" cy="757" rx="390" ry="36" fill="url(#ev-shadow)"/>
+      <path d="M807 687L848 748L1368 744L1450 699Z" fill="#18211D"/>
+      <path d="M784 617L802 527Q809 495 852 487L1059 488Q1116 492 1192 582L1386 605Q1452 616 1473 650L1477 702L1464 728L1390 738Q1381 651 1320 650Q1256 651 1250 742L954 751Q947 670 892 666Q831 669 831 745L798 733Q779 727 778 704Z" fill="url(#ev-paint)" stroke="#7F8B86" stroke-width="1.2"/>
+      <path d="M808 604L824 533Q828 514 855 510L1055 510Q1101 514 1165 578L1081 610Z" fill="url(#ev-glass)" stroke="#7F8B86" stroke-width="1.5"/>
+      <path d="M829 533Q869 514 1051 520L1111 549Q1018 526 829 545Z" fill="#B7C1BC" opacity=".2"/>
+      <path d="M921 510L911 607M1042 510L1081 610" stroke="#9AABA0" stroke-width="4"/>
+      <path d="M846 479L1046 480M854 487V479M1032 488V480" fill="none" stroke="#7F8B86" stroke-width="4" stroke-linecap="round"/>
+      <path d="M802 520L820 496L871 488" fill="none" stroke="#7F8B86" stroke-width="3"/>
+      <path d="M1192 582L1386 605Q1438 615 1461 646L1370 653L1101 627Z" fill="url(#ev-hood)"/>
+      <path d="M809 632L1230 629M928 633L930 695M1087 632L1099 696M1218 641L1224 699" class="ev-detail" opacity=".6"/>
+      <path d="M942 701L1089 699M1115 697L1211 695" class="ev-detail" opacity=".4"/>
+      <path d="M995 641H1017M1151 636H1173" stroke="#657A6C" stroke-width="3" stroke-linecap="round"/>
+      <path d="M1093 600L1129 592L1145 605L1137 619L1110 618Z" fill="#B7C1BC" stroke="#7F8B86"/>
+      <path d="M1390 641L1460 655" stroke="#F0F5F1" stroke-width="5" stroke-linecap="round"/>
+      <path d="M1460 669V690" stroke="#E8ECEA" stroke-width="4" stroke-linecap="round"/>
+      <path d="M1397 704L1457 691" stroke="#29332F" stroke-width="7" stroke-linecap="round"/>
+      <path d="M790 609L787 635L811 638" fill="none" stroke="#8C6864" stroke-width="4"/>
+      <path d="M957 742L1249 734M798 721L827 731" stroke="#40564A" stroke-width="6"/>
+      <g transform="translate(892 720)"><ellipse rx="51" ry="57" fill="#111815" stroke="#4A5751" stroke-width="2"/><ellipse rx="36" ry="42" fill="#85918B"/><g transform="scale(.95 1.1)"><g class="ev-wheel" fill="#29332F"><circle r="34" fill="#5E6C64"/><path d="M-4-8L-10-32Q2-37 15-28L7-5Z" transform="rotate(0)"/><path d="M-4-8L-10-32Q2-37 15-28L7-5Z" transform="rotate(72)"/><path d="M-4-8L-10-32Q2-37 15-28L7-5Z" transform="rotate(144)"/><path d="M-4-8L-10-32Q2-37 15-28L7-5Z" transform="rotate(216)"/><path d="M-4-8L-10-32Q2-37 15-28L7-5Z" transform="rotate(288)"/><circle r="8" fill="#AAB5AE"/></g></g></g>
+      <g transform="translate(1320 703)"><ellipse rx="51" ry="57" fill="#111815" stroke="#4A5751" stroke-width="2"/><ellipse rx="36" ry="42" fill="#85918B"/><g transform="scale(.95 1.1)"><g class="ev-wheel" fill="#29332F"><circle r="34" fill="#5E6C64"/><path d="M-4-8L-10-32Q2-37 15-28L7-5Z" transform="rotate(0)"/><path d="M-4-8L-10-32Q2-37 15-28L7-5Z" transform="rotate(72)"/><path d="M-4-8L-10-32Q2-37 15-28L7-5Z" transform="rotate(144)"/><path d="M-4-8L-10-32Q2-37 15-28L7-5Z" transform="rotate(216)"/><path d="M-4-8L-10-32Q2-37 15-28L7-5Z" transform="rotate(288)"/><circle r="8" fill="#AAB5AE"/></g></g></g>
+      <rect x="805" y="649" width="20" height="15" rx="5" fill="#29332F"/>
+      <path d="M811 656H818" stroke="#31E6A1" stroke-width="2"/>
+      <!-- Subtle battery cutaway on the sill. -->
+      <g id="battery" transform="matrix(.72 -.016 .03 .65 962 711)">
+        <rect x="-6" y="-5" width="402" height="31" rx="6" fill="#1A211E" stroke="#7F8B86"/>
+        <rect class="ev-cell ev-cell-1" width="70" height="21" rx="3"/>
+        <rect class="ev-cell ev-cell-2" x="80" width="70" height="21" rx="3"/>
+        <rect class="ev-cell ev-cell-3" x="160" width="70" height="21" rx="3"/>
+        <rect class="ev-cell ev-cell-4" x="240" width="70" height="21" rx="3"/>
+        <rect class="ev-cell" x="320" width="70" height="21" rx="3"/>
+      </g>
+      <use href="#ev-contour" class="ev-pulse"/>
+    </g>
+    <!-- Connection and current start only after the vehicle has stopped. -->
+    <g id="cable" fill="none" stroke-linecap="round">
+      <use href="#ev-cable-path" class="ev-connection" stroke="#7F8B86" stroke-width="9"/>
+      <use href="#ev-cable-path" class="ev-connection" stroke="#1A211E" stroke-width="6"/>
+    </g>
+    <g id="energy-flow" class="ev-charging">
+      <use href="#ev-cable-path" class="ev-stream"/>
+      <path d="M626 783L661 768L661 735" fill="none" stroke="#1FA978" stroke-width="1.5" opacity=".5"/>
+      <use href="#ev-battery-route" fill="none" stroke="#1FA978" stroke-width="1" opacity=".3"/>
+    </g>
+    <!-- Ordered topology, synchronized to charging and absent during driving. -->
+    <g id="fractal-network">
+      <path class="ev-branch" pathLength="1" d="M1023 733V766L972 787H896L869 803"/>
+      <path class="ev-branch" pathLength="1" style="animation-delay:.2s" d="M1200 728V759L1251 782H1325L1355 803"/>
+      <path class="ev-branch ev-twig" pathLength="1" d="M972 787V811L947 827M896 787L875 773H850"/>
+      <path class="ev-branch ev-twig" pathLength="1" style="animation-delay:.2s" d="M1251 782V811L1277 827M1325 782L1346 769H1374"/>
+    </g>
+    <g id="particles" class="ev-charging">
+      <path class="ev-particle" pathLength="1" d="M700 624C736 629 685 757 745 763S776 660 814 657Q838 686 962 718L1256 711"/>
+      <path class="ev-particle" pathLength="1" style="animation-delay:1.5s" d="M700 624C736 629 685 757 745 763S776 660 814 657Q838 686 962 718L1256 711"/>
+    </g>
+  </g>
+</svg>

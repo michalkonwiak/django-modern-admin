@@ -1,4 +1,5 @@
 from django import forms
+from django.utils.translation import gettext_lazy as _
 
 from demo.commerce.models import Customer, Order
 
@@ -42,19 +43,19 @@ class OrderForm(forms.ModelForm):
 
 class ArchiveCustomerForm(forms.Form):
     reason = forms.CharField(
-        label="Reason",
+        label=_("Reason"),
         max_length=240,
         widget=forms.Textarea(attrs={"rows": 3}),
-        help_text="This note is recorded in the customer activity timeline.",
+        help_text=_("This note is recorded in the customer activity timeline."),
     )
 
 
 class CancelOrderForm(forms.Form):
     reason = forms.CharField(
-        label="Cancellation reason",
+        label=_("Cancellation reason"),
         max_length=240,
         widget=forms.Textarea(attrs={"rows": 3}),
-        help_text="The reason is visible to operations and support.",
+        help_text=_("The reason is visible to operations and support."),
     )
 
 

@@ -1,19 +1,20 @@
 {% extends "modern_admin/layouts/base.html" %}
+{% load i18n %}
 {% load modern_admin %}
 
 {% block body %}
 <div class="ma-app" :class="{ 'is-compact': sidebarCompact }">
   <div class="ma-mobile-scrim" x-cloak x-show="mobileNav" x-transition.opacity @click="mobileNav=false"></div>
-  <aside id="app-sidebar" class="ma-sidebar" :class="{ 'is-open': mobileNav }" aria-label="Primary navigation">
+  <aside id="app-sidebar" class="ma-sidebar" :class="{ 'is-open': mobileNav }" aria-label="{% translate "Primary navigation" %}">
     <div class="ma-brand">
-      <a href="{% url modern_admin_site.name|add:':dashboard' %}" class="ma-brand-link" aria-label="{{ site_title }} workspace home">
+      <a href="{% url modern_admin_site.name|add:':dashboard' %}" class="ma-brand-link" aria-label="{% blocktranslate with site=site_title %}{{ site }} workspace home{% endblocktranslate %}">
         <span class="ma-brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>
         <span class="ma-brand-copy">
           <span class="ma-brand-title">{{ site_title }}</span>
         </span>
       </a>
-      <button class="ma-icon-button ma-desktop-only ma-sidebar-toggle" type="button" @click="toggleSidebar()" aria-label="Toggle compact sidebar">{% icon "panel-left" 16 %}</button>
-      <button class="ma-icon-button ma-mobile-trigger" type="button" @click="mobileNav=false" aria-label="Close navigation">
+      <button class="ma-icon-button ma-desktop-only ma-sidebar-toggle" type="button" @click="toggleSidebar()" aria-label="{% translate "Toggle compact sidebar" %}">{% icon "panel-left" 16 %}</button>
+      <button class="ma-icon-button ma-mobile-trigger" type="button" @click="mobileNav=false" aria-label="{% translate "Close navigation" %}">
         {% icon "x" 17 %}
       </button>
     </div>
@@ -36,7 +37,7 @@
     </nav>
 
     <div class="ma-sidebar-footer">
-      <button class="ma-user" type="button" @click="userMenu=!userMenu" :aria-expanded="userMenu" aria-label="Account menu">
+      <button class="ma-user" type="button" @click="userMenu=!userMenu" :aria-expanded="userMenu" aria-label="{% translate "Account menu" %}">
         <span class="ma-avatar ma-avatar-sm"><span>{{ request.user.get_full_name|default:request.user.username|initials }}</span></span>
         <span class="ma-user-copy">
           <span class="ma-user-name">{{ request.user.get_full_name|default:request.user.username }}</span>
@@ -46,10 +47,10 @@
       </button>
       <div class="ma-popover ma-user-popover" x-cloak x-show="userMenu" x-floating="userMenu" @click.outside="userMenu=false">
         <button type="button" @click="toggleTheme()">
-          <span x-show="!dark">{% icon "moon" 16 %} Use dark mode</span>
-          <span x-show="dark">{% icon "sun" 16 %} Use light mode</span>
+          <span x-show="!dark">{% icon "moon" 16 %} {% translate "Use dark mode" %}</span>
+          <span x-show="dark">{% icon "sun" 16 %} {% translate "Use light mode" %}</span>
         </button>
-        <form method="post" action="{{ logout_url }}">{% csrf_token %}<button type="submit">Sign out</button></form>
+        <form method="post" action="{{ logout_url }}">{% csrf_token %}<button type="submit">{% translate "Sign out" %}</button></form>
       </div>
     </div>
   </aside>
@@ -57,8 +58,8 @@
   <div class="ma-main">
     <header class="ma-topbar">
       <div class="ma-topbar-context">
-        <button class="ma-icon-button ma-mobile-trigger" type="button" @click="mobileNav=true" aria-label="Open navigation">{% icon "menu" 18 %}</button>
-        <nav class="ma-breadcrumbs" aria-label="Breadcrumb">
+        <button class="ma-icon-button ma-mobile-trigger" type="button" @click="mobileNav=true" aria-label="{% translate "Open navigation" %}">{% icon "menu" 18 %}</button>
+        <nav class="ma-breadcrumbs" aria-label="{% translate "Breadcrumb" %}">
           {% for label, url in breadcrumbs %}
             {% if not forloop.first %}<span class="ma-breadcrumb-separator">{% icon "chevron-right" 11 %}</span>{% endif %}
             {% if url %}<a href="{{ url }}">{{ label }}</a>{% else %}<span aria-current="page">{{ label }}</span>{% endif %}
@@ -66,10 +67,11 @@
         </nav>
       </div>
       <div class="ma-topbar-actions">
-        <button class="ma-command-trigger" type="button" @click="openCommand()" aria-label="Open command palette">
-          {% icon "search" 14 %}<span>Search workspace</span><kbd><span class="ma-mac-key">⌘</span><span class="ma-other-key">Ctrl</span>K</kbd>
+        {% include "modern_admin/partials/language_switcher.html" %}
+        <button class="ma-command-trigger" type="button" @click="openCommand()" aria-label="{% translate "Open command palette" %}">
+          {% icon "search" 14 %}<span>{% translate "Search workspace" %}</span><kbd><span class="ma-mac-key">⌘</span><span class="ma-other-key">Ctrl</span>K</kbd>
         </button>
-        <button class="ma-icon-button ma-topbar-icon" type="button" @click="toggleTheme()" aria-label="Toggle color theme">
+        <button class="ma-icon-button ma-topbar-icon" type="button" @click="toggleTheme()" aria-label="{% translate "Toggle color theme" %}">
           <span x-show="!dark">{% icon "moon" 16 %}</span><span x-cloak x-show="dark">{% icon "sun" 16 %}</span>
         </button>
       </div>
@@ -84,15 +86,15 @@
   <div id="preview-host"></div>
 
   <div class="ma-command-backdrop" x-cloak x-show="commandOpen" @keydown.escape.window="closeCommand()" @click.self="closeCommand()">
-    <section class="ma-command" role="dialog" aria-modal="true" aria-label="Command palette" x-show="commandOpen">
+    <section class="ma-command" role="dialog" aria-modal="true" aria-label="{% translate "Command palette" %}" x-show="commandOpen">
       <div class="ma-command-input">
         {% icon "search" 20 %}
-        <input x-ref="commandInput" type="search" name="q" placeholder="Search pages and records…" autocomplete="off"
+        <input x-ref="commandInput" type="search" name="q" placeholder="{% translate "Search pages and records…" %}" autocomplete="off"
                hx-get="{% url modern_admin_site.name|add:':commands' %}" hx-trigger="input changed delay:180ms, load" hx-target="#command-results" hx-sync="this:replace">
         <kbd>Esc</kbd>
       </div>
       <div id="command-results" class="ma-command-results" aria-live="polite"></div>
-      <footer class="ma-command-footer"><span><kbd>↑</kbd><kbd>↓</kbd> Navigate</span><span><kbd>↵</kbd> Open</span><span><kbd>Esc</kbd> Close</span></footer>
+      <footer class="ma-command-footer"><span><kbd>↑</kbd><kbd>↓</kbd> {% translate "Navigate" %}</span><span><kbd>↵</kbd> {% translate "Open" %}</span><span><kbd>Esc</kbd> {% translate "Close" %}</span></footer>
     </section>
   </div>
 
@@ -100,7 +102,7 @@
     {% for message in messages %}
       <div class="ma-toast is-{{ message.tags|default:'info' }}" x-data="toast" x-init="start()" x-show="visible" x-transition.opacity.duration.160ms>
         <span class="ma-toast-icon">{% if message.tags == 'success' %}{% icon "check" 15 %}{% else %}{% icon "activity" 15 %}{% endif %}</span>
-        <span>{{ message }}</span><button @click="visible=false" aria-label="Dismiss">{% icon "x" 14 %}</button>
+        <span>{{ message }}</span><button @click="visible=false" aria-label="{% translate "Dismiss" %}">{% icon "x" 14 %}</button>
       </div>
     {% endfor %}
   </div>

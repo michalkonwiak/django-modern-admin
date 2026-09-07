@@ -1,0 +1,1015 @@
+# Polish translation of the django-modern-admin demo project.
+# Copyright (C) django-modern-admin contributors
+# This file is distributed under the same license as the django-modern-admin package.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: django-modern-admin\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-09-07 22:36+0200\n"
+"PO-Revision-Date: 2026-09-07 22:30+0200\n"
+"Last-Translator: django-modern-admin\n"
+"Language-Team: Polish\n"
+"Language: pl\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+
+#: demo/commerce/apps.py:8
+msgid "Commercial operations"
+msgstr "Operacje handlowe"
+
+#: demo/commerce/forms.py:46
+msgid "Reason"
+msgstr "Powód"
+
+#: demo/commerce/forms.py:49
+msgid "This note is recorded in the customer activity timeline."
+msgstr "Ta notatka zostanie zapisana w historii aktywności klienta."
+
+#: demo/commerce/forms.py:55
+msgid "Cancellation reason"
+msgstr "Powód anulowania"
+
+#: demo/commerce/forms.py:58
+msgid "The reason is visible to operations and support."
+msgstr "Powód jest widoczny dla zespołu operacji i wsparcia."
+
+#: demo/commerce/models.py:11 demo/commerce/models.py:58
+#: demo/commerce/models.py:92 demo/commerce/models.py:113
+msgid "name"
+msgstr "nazwa"
+
+#: demo/commerce/models.py:12
+msgid "domain"
+msgstr "domena"
+
+#: demo/commerce/models.py:13
+msgid "industry"
+msgstr "branża"
+
+#: demo/commerce/models.py:14
+msgid "website"
+msgstr "strona www"
+
+#: demo/commerce/models.py:15
+msgid "employee count"
+msgstr "liczba pracowników"
+
+#: demo/commerce/models.py:16 demo/commerce/models.py:76
+#: demo/commerce/models.py:96 demo/commerce/models.py:120
+#: demo/commerce/models.py:155 demo/commerce/models.py:192
+#: demo/commerce/models.py:219 demo/commerce/models.py:240
+msgid "created at"
+msgstr "utworzono"
+
+#: demo/commerce/models.py:19 demo/commerce/models.py:54
+msgid "organization"
+msgstr "organizacja"
+
+#: demo/commerce/models.py:20
+msgid "organizations"
+msgstr "organizacje"
+
+#: demo/commerce/models.py:37 demo/commerce/models.py:38
+msgid "workspace access"
+msgstr "dostęp do przestrzeni roboczej"
+
+#: demo/commerce/models.py:47
+msgid "Lead"
+msgstr "Potencjalny"
+
+#: demo/commerce/models.py:48 demo/commerce/models.py:109
+msgid "Active"
+msgstr "Aktywny"
+
+#: demo/commerce/models.py:49
+msgid "At risk"
+msgstr "Zagrożony"
+
+#: demo/commerce/models.py:50
+msgid "Inactive"
+msgstr "Nieaktywny"
+
+#: demo/commerce/models.py:59 demo/commerce/models.py:93
+msgid "email"
+msgstr "e-mail"
+
+#: demo/commerce/models.py:60
+msgid "phone"
+msgstr "telefon"
+
+#: demo/commerce/models.py:62 demo/commerce/models.py:116
+#: demo/commerce/models.py:143 demo/commerce/models.py:187
+#: demo/commerce/models.py:215
+msgid "status"
+msgstr "status"
+
+#: demo/commerce/models.py:65
+msgid "lifetime value"
+msgstr "wartość klienta"
+
+#: demo/commerce/models.py:69
+msgid "owner"
+msgstr "opiekun"
+
+#: demo/commerce/models.py:75
+msgid "notes"
+msgstr "notatki"
+
+#: demo/commerce/models.py:77 demo/commerce/models.py:156
+msgid "updated at"
+msgstr "zaktualizowano"
+
+#: demo/commerce/models.py:80 demo/commerce/models.py:90
+#: demo/commerce/models.py:140 demo/commerce/models.py:183
+#: demo/commerce/models.py:232
+msgid "customer"
+msgstr "klient"
+
+#: demo/commerce/models.py:81
+msgid "customers"
+msgstr "klienci"
+
+#: demo/commerce/models.py:94
+msgid "role"
+msgstr "rola"
+
+#: demo/commerce/models.py:95
+msgid "is primary"
+msgstr "kontakt główny"
+
+#: demo/commerce/models.py:99
+msgid "contact"
+msgstr "kontakt"
+
+#: demo/commerce/models.py:100
+msgid "contacts"
+msgstr "kontakty"
+
+#: demo/commerce/models.py:110 demo/commerce/models.py:133
+#: demo/commerce/models.py:173
+msgid "Draft"
+msgstr "Szkic"
+
+#: demo/commerce/models.py:111
+msgid "Retired"
+msgstr "Wycofany"
+
+#: demo/commerce/models.py:114
+msgid "sku"
+msgstr "SKU"
+
+#: demo/commerce/models.py:118
+msgid "unit price"
+msgstr "cena jednostkowa"
+
+#: demo/commerce/models.py:119
+msgid "stock"
+msgstr "stan magazynowy"
+
+#: demo/commerce/models.py:123
+msgid "product"
+msgstr "produkt"
+
+#: demo/commerce/models.py:124
+msgid "products"
+msgstr "produkty"
+
+#: demo/commerce/models.py:134
+msgid "Processing"
+msgstr "W realizacji"
+
+#: demo/commerce/models.py:135
+#: demo/commerce/templates/commerce/tabs/order_fulfillment.html:6
+msgid "Shipped"
+msgstr "Wysłane"
+
+#: demo/commerce/models.py:136
+msgid "Cancelled"
+msgstr "Anulowane"
+
+#: demo/commerce/models.py:137 demo/commerce/models.py:208
+msgid "Refunded"
+msgstr "Zwrócone"
+
+#: demo/commerce/models.py:145
+msgid "subtotal"
+msgstr "wartość netto"
+
+#: demo/commerce/models.py:147
+msgid "tax"
+msgstr "podatek"
+
+#: demo/commerce/models.py:149 demo/commerce/models.py:189
+msgid "total"
+msgstr "suma"
+
+#: demo/commerce/models.py:150
+msgid "currency"
+msgstr "waluta"
+
+#: demo/commerce/models.py:151
+msgid "placed at"
+msgstr "złożono"
+
+#: demo/commerce/models.py:152
+msgid "expected at"
+msgstr "oczekiwane na"
+
+#: demo/commerce/models.py:153
+msgid "cancellation reason"
+msgstr "powód anulowania"
+
+#: demo/commerce/models.py:154
+msgid "internal note"
+msgstr "notatka wewnętrzna"
+
+#: demo/commerce/models.py:159 demo/commerce/models.py:180
+msgid "order"
+msgstr "zamówienie"
+
+#: demo/commerce/models.py:160
+msgid "orders"
+msgstr "zamówienia"
+
+#: demo/commerce/models.py:168
+msgid "New order"
+msgstr "Nowe zamówienie"
+
+#: demo/commerce/models.py:174
+msgid "Open"
+msgstr "Otwarta"
+
+#: demo/commerce/models.py:175
+msgid "Paid"
+msgstr "Opłacona"
+
+#: demo/commerce/models.py:176
+msgid "Void"
+msgstr "Unieważniona"
+
+#: demo/commerce/models.py:177 demo/commerce/resources.py:271
+msgid "Overdue"
+msgstr "Przeterminowana"
+
+#: demo/commerce/models.py:185
+msgid "number"
+msgstr "numer"
+
+#: demo/commerce/models.py:190
+msgid "due date"
+msgstr "termin płatności"
+
+#: demo/commerce/models.py:191
+msgid "issued at"
+msgstr "wystawiono"
+
+#: demo/commerce/models.py:195 demo/commerce/models.py:211
+msgid "invoice"
+msgstr "faktura"
+
+#: demo/commerce/models.py:196
+msgid "invoices"
+msgstr "faktury"
+
+#: demo/commerce/models.py:205
+msgid "Pending"
+msgstr "Oczekująca"
+
+#: demo/commerce/models.py:206
+msgid "Succeeded"
+msgstr "Zrealizowana"
+
+#: demo/commerce/models.py:207
+msgid "Failed"
+msgstr "Nieudana"
+
+#: demo/commerce/models.py:213
+msgid "reference"
+msgstr "referencja"
+
+#: demo/commerce/models.py:217
+msgid "amount"
+msgstr "kwota"
+
+#: demo/commerce/models.py:218
+msgid "processed at"
+msgstr "przetworzono"
+
+#: demo/commerce/models.py:222
+msgid "payment"
+msgstr "płatność"
+
+#: demo/commerce/models.py:223
+msgid "payments"
+msgstr "płatności"
+
+#: demo/commerce/models.py:235
+msgid "actor"
+msgstr "wykonawca"
+
+#: demo/commerce/models.py:237
+msgid "verb"
+msgstr "czynność"
+
+#: demo/commerce/models.py:238
+msgid "summary"
+msgstr "podsumowanie"
+
+#: demo/commerce/models.py:239
+msgid "metadata"
+msgstr "metadane"
+
+#: demo/commerce/models.py:243
+msgid "activity"
+msgstr "aktywność"
+
+#: demo/commerce/models.py:245
+msgid "Activities"
+msgstr "Aktywności"
+
+#: demo/commerce/resources.py:66
+msgid "Archive customer"
+msgstr "Archiwizuj klienta"
+
+#: demo/commerce/resources.py:67
+msgid "The customer becomes inactive. Existing commercial records are retained."
+msgstr "Klient staje się nieaktywny. Istniejące dokumenty handlowe zostają zachowane."
+
+#: demo/commerce/resources.py:83
+msgid "Customer archived."
+msgstr "Klient zarchiwizowany."
+
+#: demo/commerce/resources.py:96
+#, python-format
+msgid "Archived %(count)d customer."
+msgid_plural "Archived %(count)d customers."
+msgstr[0] "Zarchiwizowano %(count)d klienta."
+msgstr[1] "Zarchiwizowano %(count)d klientów."
+msgstr[2] "Zarchiwizowano %(count)d klientów."
+
+#: demo/commerce/resources.py:104
+msgid "Cancel order"
+msgstr "Anuluj zamówienie"
+
+#: demo/commerce/resources.py:105
+msgid "This stops fulfillment. The reason is recorded for the support team."
+msgstr "To wstrzymuje realizację. Powód zostanie zapisany dla zespołu wsparcia."
+
+#: demo/commerce/resources.py:110 demo/commerce/services.py:28
+msgid "Only draft or processing orders can be cancelled."
+msgstr "Anulować można tylko zamówienia robocze lub w realizacji."
+
+#: demo/commerce/resources.py:117
+msgid "Order cancelled."
+msgstr "Zamówienie anulowane."
+
+#: demo/commerce/resources.py:123
+msgid "Mark shipped"
+msgstr "Oznacz jako wysłane"
+
+#: demo/commerce/resources.py:124
+msgid "Confirm that fulfillment handed this order to the carrier."
+msgstr "Potwierdź, że realizacja przekazała to zamówienie przewoźnikowi."
+
+#: demo/commerce/resources.py:129 demo/commerce/services.py:44
+msgid "Only processing orders can be marked as shipped."
+msgstr "Jako wysłane można oznaczyć tylko zamówienia w realizacji."
+
+#: demo/commerce/resources.py:136
+msgid "Order marked as shipped."
+msgstr "Zamówienie oznaczone jako wysłane."
+
+#: demo/commerce/resources.py:159
+msgid "Assigned to me"
+msgstr "Przypisane do mnie"
+
+#: demo/commerce/resources.py:162 demo/commerce/resources.py:487
+#: demo/commerce/templates/commerce/dashboard.html:37
+msgid "Needs attention"
+msgstr "Wymaga uwagi"
+
+#: demo/commerce/resources.py:164
+msgid "Accounts at risk. Review the relationship before taking action."
+msgstr "Konta zagrożone. Przejrzyj relację, zanim podejmiesz działanie."
+
+#: demo/commerce/resources.py:166
+msgid "New leads"
+msgstr "Nowi potencjalni klienci"
+
+#: demo/commerce/resources.py:169 demo/commerce/resources.py:171
+msgid "Customers"
+msgstr "Klienci"
+
+#: demo/commerce/resources.py:170
+msgid "Accounts, relationships, and commercial health across the workspace."
+msgstr "Konta, relacje i kondycja handlowa w całej przestrzeni roboczej."
+
+#: demo/commerce/resources.py:171 demo/commerce/resources.py:248
+msgid "Relationships"
+msgstr "Relacje"
+
+#: demo/commerce/resources.py:173
+msgid "Customer"
+msgstr "Klient"
+
+#: demo/commerce/resources.py:176
+msgid "Lifetime value"
+msgstr "Wartość klienta"
+
+#: demo/commerce/resources.py:178 demo/commerce/resources.py:372
+msgid "Created"
+msgstr "Utworzono"
+
+#: demo/commerce/resources.py:181
+msgid "Orders count"
+msgstr "Liczba zamówień"
+
+#: demo/commerce/resources.py:182
+msgid "Open invoice total"
+msgstr "Suma otwartych faktur"
+
+#: demo/commerce/resources.py:195
+msgid "Profile"
+msgstr "Profil"
+
+#: demo/commerce/resources.py:196
+msgid "Primary relationship and contact details."
+msgstr "Podstawowe dane relacji i kontaktu."
+
+#: demo/commerce/resources.py:200
+msgid "Commercial summary"
+msgstr "Podsumowanie handlowe"
+
+#: demo/commerce/resources.py:205 demo/commerce/resources.py:278
+#: demo/commerce/resources.py:280
+msgid "Orders"
+msgstr "Zamówienia"
+
+#: demo/commerce/resources.py:208
+msgid "Contacts"
+msgstr "Kontakty"
+
+#: demo/commerce/resources.py:215
+msgid "Notes"
+msgstr "Notatki"
+
+#: demo/commerce/resources.py:231
+#, python-format
+msgid "%(count)d order"
+msgid_plural "%(count)d orders"
+msgstr[0] "%(count)d zamówienie"
+msgstr[1] "%(count)d zamówienia"
+msgstr[2] "%(count)d zamówień"
+
+#: demo/commerce/resources.py:245 demo/commerce/resources.py:248
+msgid "Companies"
+msgstr "Firmy"
+
+#: demo/commerce/resources.py:246
+msgid "Organizations connected to your customer portfolio."
+msgstr "Organizacje powiązane z portfelem klientów."
+
+#: demo/commerce/resources.py:251
+msgid "Company"
+msgstr "Firma"
+
+#: demo/commerce/resources.py:253
+msgid "Employees"
+msgstr "Pracownicy"
+
+#: demo/commerce/resources.py:265
+msgid "Ready to ship"
+msgstr "Gotowe do wysyłki"
+
+#: demo/commerce/resources.py:267
+msgid "Review each order and confirm handover to the carrier."
+msgstr "Przejrzyj każde zamówienie i potwierdź przekazanie przewoźnikowi."
+
+#: demo/commerce/resources.py:273
+msgid "Processing orders past their expected date."
+msgstr "Zamówienia w realizacji po oczekiwanym terminie."
+
+#: demo/commerce/resources.py:275
+
+msgid "Drafts"
+msgstr "Robocze"
+
+#: demo/commerce/resources.py:279
+msgid "Track fulfillment, value, and exceptions from placement to delivery."
+msgstr "Śledź realizację, wartość i wyjątki od złożenia do dostawy."
+
+#: demo/commerce/resources.py:280 demo/commerce/resources.py:366
+#: demo/commerce/templates/commerce/dashboard.html:9
+#: demo/templates/registration/login.html:9
+msgid "Operations"
+msgstr "Operacje"
+
+#: demo/commerce/resources.py:282
+msgid "Order"
+msgstr "Zamówienie"
+
+#: demo/commerce/resources.py:286
+msgid "Placed"
+msgstr "Złożono"
+
+#: demo/commerce/resources.py:287
+msgid "Expected"
+msgstr "Oczekiwane"
+
+#: demo/commerce/resources.py:289
+
+msgid "Number"
+msgstr "Numer"
+
+#: demo/commerce/resources.py:297
+msgid "Order summary"
+msgstr "Podsumowanie zamówienia"
+
+#: demo/commerce/resources.py:300
+msgid "Financials"
+msgstr "Finanse"
+
+#: demo/commerce/resources.py:305 demo/commerce/resources.py:322
+#: demo/commerce/resources.py:323
+msgid "Invoices"
+msgstr "Faktury"
+
+#: demo/commerce/resources.py:311
+msgid "Fulfillment"
+msgstr "Realizacja"
+
+#: demo/commerce/resources.py:323 demo/commerce/resources.py:344
+#: demo/commerce/templates/commerce/settings.html:9
+msgid "Billing"
+msgstr "Rozliczenia"
+
+#: demo/commerce/resources.py:325
+msgid "Invoice"
+msgstr "Faktura"
+
+#: demo/commerce/resources.py:329
+msgid "Due"
+msgstr "Termin"
+
+#: demo/commerce/resources.py:342 demo/commerce/resources.py:344
+msgid "Payments"
+msgstr "Płatności"
+
+#: demo/commerce/resources.py:347
+msgid "Reference"
+msgstr "Referencja"
+
+#: demo/commerce/resources.py:351
+msgid "Processed"
+msgstr "Przetworzono"
+
+#: demo/commerce/resources.py:365 demo/commerce/resources.py:366
+msgid "Products"
+msgstr "Produkty"
+
+#: demo/commerce/resources.py:368
+msgid "Product"
+msgstr "Produkt"
+
+#: demo/commerce/resources.py:370
+msgid "Unit price"
+msgstr "Cena jednostkowa"
+
+#: demo/commerce/resources.py:428
+msgid "Collected revenue"
+msgstr "Zebrane przychody"
+
+#: demo/commerce/resources.py:431
+msgid "versus last month"
+msgstr "wobec zeszłego miesiąca"
+
+#: demo/commerce/resources.py:436
+msgid "Orders in motion"
+msgstr "Zamówienia w toku"
+
+#: demo/commerce/resources.py:439
+msgid "currently processing"
+msgstr "obecnie realizowane"
+
+#: demo/commerce/resources.py:444
+msgid "Active customers"
+msgstr "Aktywni klienci"
+
+#: demo/commerce/resources.py:447
+msgid "healthy accounts"
+msgstr "zdrowe konta"
+
+#: demo/commerce/resources.py:452
+msgid "Invoices to collect"
+msgstr "Faktury do ściągnięcia"
+
+#: demo/commerce/resources.py:455
+msgid "open or overdue"
+msgstr "otwarte lub przeterminowane"
+
+#: demo/commerce/resources.py:460
+msgid "Recent orders"
+msgstr "Ostatnie zamówienia"
+
+#: demo/commerce/resources.py:467
+msgid "Customer health"
+msgstr "Kondycja klientów"
+
+#: demo/commerce/resources.py:474
+msgid "September revenue goal"
+msgstr "Wrześniowy cel przychodowy"
+
+#: demo/commerce/resources.py:483
+msgid "collected"
+msgstr "zebrane"
+
+#: demo/commerce/resources.py:504
+#, python-format
+msgid "%(count)d overdue invoice"
+msgid_plural "%(count)d overdue invoices"
+msgstr[0] "%(count)d przeterminowana faktura"
+msgstr[1] "%(count)d przeterminowane faktury"
+msgstr[2] "%(count)d przeterminowanych faktur"
+
+#: demo/commerce/resources.py:507
+msgid "Collections work is waiting for review."
+msgstr "Windykacja czeka na przegląd."
+
+#: demo/commerce/resources.py:513
+msgid "Settings"
+msgstr "Ustawienia"
+
+#: demo/commerce/resources.py:513
+#: demo/commerce/templates/commerce/settings.html:7
+msgid "System"
+msgstr "System"
+
+#: demo/commerce/resources.py:516
+msgid "Workspace settings"
+msgstr "Ustawienia przestrzeni roboczej"
+
+#: demo/commerce/resources.py:517
+msgid "Configuration shared across operations."
+msgstr "Konfiguracja wspólna dla wszystkich operacji."
+
+#: demo/commerce/services.py:15
+msgid "This customer is already inactive."
+msgstr "Ten klient jest już nieaktywny."
+
+#: demo/commerce/services.py:18
+#, python-format
+msgid "Archived: %(reason)s"
+msgstr "Zarchiwizowano: %(reason)s"
+
+#: demo/commerce/services.py:51
+#, python-format
+msgid "%(order)s was marked shipped at %(time)s."
+msgstr "Zamówienie %(order)s oznaczono jako wysłane o %(time)s."
+
+#: demo/commerce/templates/commerce/dashboard.html:4
+#, python-format
+msgid "Overview · %(site)s"
+msgstr "Przegląd · %(site)s"
+
+#: demo/commerce/templates/commerce/dashboard.html:9
+msgid "Northstar Industries"
+msgstr "Northstar Industries"
+
+#: demo/commerce/templates/commerce/dashboard.html:9
+msgid "Current period"
+msgstr "Bieżący okres"
+
+#: demo/commerce/templates/commerce/dashboard.html:10
+msgid "Review pipeline"
+msgstr "Przejrzyj kolejkę"
+
+#: demo/commerce/templates/commerce/dashboard.html:10
+msgid "Run command"
+msgstr "Uruchom polecenie"
+
+#: demo/commerce/templates/commerce/dashboard.html:14
+msgid "Charging infrastructure · Kielce"
+msgstr "Infrastruktura ładowania · Kielce"
+
+#: demo/commerce/templates/commerce/dashboard.html:14
+msgid "An electric sedan passes the pyramids of Kielce University of Technology, pulls up to the demo charger, and tops up its battery."
+msgstr "Elektryczny sedan przejeżdża obok piramid Politechniki Świętokrzyskiej, zatrzymuje się przy demonstracyjnej stacji i ładuje baterię."
+
+#: demo/commerce/templates/commerce/dashboard.html:15
+msgid "20 Świętokrzyska Street · Kielce"
+msgstr "ul. Świętokrzyska 20 · Kielce"
+
+#: demo/commerce/templates/commerce/dashboard.html:15
+msgid "An electric SUV rolls up to the curved glass facade of Galeria Echo in Kielce, stops at the charger, and tops up its battery."
+msgstr "Elektryczny SUV podjeżdża pod przeszkloną, zaokrągloną fasadę Galerii Echo w Kielcach, zatrzymuje się przy stacji i ładuje baterię."
+
+#: demo/commerce/templates/commerce/dashboard.html:20
+msgid "PRIMARY SIGNAL"
+msgstr "SYGNAŁ GŁÓWNY"
+
+#: demo/commerce/templates/commerce/dashboard.html:20
+msgid "Current records"
+msgstr "Bieżące rekordy"
+
+#: demo/commerce/templates/commerce/dashboard.html:22
+msgid "Successfully collected payments"
+msgstr "Skutecznie pobrane płatności"
+
+#: demo/commerce/templates/commerce/dashboard.html:24
+msgid "Monthly target"
+msgstr "Cel miesięczny"
+
+#: demo/commerce/templates/commerce/dashboard.html:25
+msgid "Target captured"
+msgstr "Realizacja celu"
+
+#: demo/commerce/templates/commerce/dashboard.html:26
+msgid "Collection queue"
+msgstr "Kolejka windykacji"
+
+#: demo/commerce/templates/commerce/dashboard.html:26
+#, python-format
+msgid "%(count)s invoice"
+msgid_plural "%(count)s invoices"
+msgstr[0] "%(count)s faktura"
+msgstr[1] "%(count)s faktury"
+msgstr[2] "%(count)s faktur"
+
+#: demo/commerce/templates/commerce/dashboard.html:37
+msgid "FOCUS QUEUE"
+msgstr "KOLEJKA PRIORYTETÓW"
+
+#: demo/commerce/templates/commerce/dashboard.html:38
+msgid "Exceptions with financial or customer impact."
+msgstr "Wyjątki o skutkach finansowych lub wpływie na klienta."
+
+#: demo/commerce/templates/commerce/dashboard.html:40
+#: demo/commerce/templates/commerce/widgets/attention.html:5
+#, python-format
+msgid "%(customer)s · due %(due_date)s"
+msgstr "%(customer)s · termin %(due_date)s"
+
+#: demo/commerce/templates/commerce/dashboard.html:40
+msgid "Nothing is blocked"
+msgstr "Nic nie jest zablokowane"
+
+#: demo/commerce/templates/commerce/dashboard.html:40
+msgid "The attention queue is clear."
+msgstr "Kolejka spraw pilnych jest pusta."
+
+#: demo/commerce/templates/commerce/dashboard.html:42
+msgid "Open collections workspace"
+msgstr "Otwórz obszar windykacji"
+
+#: demo/commerce/templates/commerce/settings.html:7
+msgid "Save changes"
+msgstr "Zapisz zmiany"
+
+#: demo/commerce/templates/commerce/settings.html:9
+msgid "Settings sections"
+msgstr "Sekcje ustawień"
+
+#: demo/commerce/templates/commerce/settings.html:9
+msgid "General"
+msgstr "Ogólne"
+
+#: demo/commerce/templates/commerce/settings.html:9
+msgid "Members"
+msgstr "Członkowie"
+
+#: demo/commerce/templates/commerce/settings.html:9
+msgid "Integrations"
+msgstr "Integracje"
+
+#: demo/commerce/templates/commerce/settings.html:11
+msgid "Workspace profile"
+msgstr "Profil przestrzeni roboczej"
+
+#: demo/commerce/templates/commerce/settings.html:11
+msgid "Shared identity and regional defaults."
+msgstr "Wspólna tożsamość i domyślne ustawienia regionalne."
+
+#: demo/commerce/templates/commerce/settings.html:11
+msgid "Workspace name"
+msgstr "Nazwa przestrzeni roboczej"
+
+#: demo/commerce/templates/commerce/settings.html:11
+msgid "Operating region"
+msgstr "Region działania"
+
+#: demo/commerce/templates/commerce/settings.html:11
+msgid "Timezone"
+msgstr "Strefa czasowa"
+
+#: demo/commerce/templates/commerce/settings.html:11
+msgid "Default currency"
+msgstr "Waluta domyślna"
+
+#: demo/commerce/templates/commerce/settings.html:12
+msgid "Appearance"
+msgstr "Wygląd"
+
+#: demo/commerce/templates/commerce/settings.html:12
+msgid "Theme follows each member's preference."
+msgstr "Motyw dostosowuje się do preferencji każdego użytkownika."
+
+#: demo/commerce/templates/commerce/settings.html:12
+msgid "Color theme"
+msgstr "Motyw kolorystyczny"
+
+#: demo/commerce/templates/commerce/settings.html:12
+msgid "Switch between designed light and dark palettes."
+msgstr "Przełączaj między zaprojektowaną paletą jasną i ciemną."
+
+#: demo/commerce/templates/commerce/settings.html:12
+msgid "Toggle theme"
+msgstr "Przełącz motyw"
+
+#: demo/commerce/templates/commerce/settings.html:12
+msgid "Interface language"
+msgstr "Język interfejsu"
+
+#: demo/commerce/templates/commerce/settings.html:12
+msgid "Every screen and message follows this choice."
+msgstr "Każdy ekran i komunikat podąża za tym wyborem."
+
+#: demo/commerce/templates/commerce/settings.html:13
+msgid "Danger zone"
+msgstr "Strefa ryzyka"
+
+#: demo/commerce/templates/commerce/settings.html:13
+msgid "Destructive workspace-level operations."
+msgstr "Nieodwracalne operacje na całej przestrzeni roboczej."
+
+#: demo/commerce/templates/commerce/settings.html:13
+msgid "Archive workspace"
+msgstr "Zarchiwizuj przestrzeń roboczą"
+
+#: demo/commerce/templates/commerce/settings.html:13
+msgid "Data remains exportable for 30 days."
+msgstr "Dane pozostają dostępne do eksportu przez 30 dni."
+
+#: demo/commerce/templates/commerce/settings.html:13
+msgid "Archive"
+msgstr "Archiwizuj"
+
+#: demo/commerce/templates/commerce/tabs/customer_contacts.html:4
+msgid "· Primary"
+msgstr "· Główny"
+
+#: demo/commerce/templates/commerce/tabs/customer_contacts.html:4
+msgid "No contacts have been added."
+msgstr "Nie dodano żadnych kontaktów."
+
+#: demo/commerce/templates/commerce/tabs/customer_notes.html:2
+msgid "No internal notes for this customer."
+msgstr "Brak notatek wewnętrznych dla tego klienta."
+
+#: demo/commerce/templates/commerce/tabs/customer_orders.html:4
+msgid "No orders for this customer."
+msgstr "Brak zamówień tego klienta."
+
+#: demo/commerce/templates/commerce/tabs/order_fulfillment.html:4
+msgid "Order created"
+msgstr "Zamówienie utworzone"
+
+#: demo/commerce/templates/commerce/tabs/order_fulfillment.html:5
+msgid "Payment authorized"
+msgstr "Płatność autoryzowana"
+
+#: demo/commerce/templates/commerce/tabs/order_fulfillment.html:5
+msgid "Waiting"
+msgstr "Oczekuje"
+
+#: demo/commerce/templates/commerce/tabs/order_fulfillment.html:6
+msgid "Handed to carrier"
+msgstr "Przekazane przewoźnikowi"
+
+#: demo/commerce/templates/commerce/tabs/order_fulfillment.html:6
+msgid "Not yet shipped"
+msgstr "Jeszcze nie wysłane"
+
+#: demo/commerce/templates/commerce/tabs/order_invoices.html:4
+#, python-format
+msgid "Due %(due_date)s"
+msgstr "Termin %(due_date)s"
+
+#: demo/commerce/templates/commerce/tabs/order_invoices.html:4
+msgid "No invoices are attached to this order."
+msgstr "Do tego zamówienia nie dołączono faktur."
+
+#: demo/commerce/templates/commerce/widgets/attention.html:3
+msgid "Exceptions worth resolving today"
+msgstr "Wyjątki warte rozwiązania dzisiaj"
+
+#: demo/commerce/templates/commerce/widgets/attention.html:5
+#, python-format
+msgid "%(number)s is overdue"
+msgstr "%(number)s jest przeterminowana"
+
+#: demo/commerce/templates/commerce/widgets/attention.html:5
+msgid "Nothing needs attention right now."
+msgstr "Nic nie wymaga teraz uwagi."
+
+#: demo/commerce/templates/commerce/widgets/charging_location.html:6
+msgid "Demo data"
+msgstr "Dane demo"
+
+#: demo/commerce/templates/commerce/widgets/charging_location.html:15
+msgid "Charged today"
+msgstr "Naładowane dziś"
+
+#: demo/commerce/templates/commerce/widgets/charging_location.html:15
+#, python-format
+msgid "%(count)s car"
+msgid_plural "%(count)s cars"
+msgstr[0] "%(count)s auto"
+msgstr[1] "%(count)s auta"
+msgstr[2] "%(count)s aut"
+
+#: demo/commerce/templates/commerce/widgets/charging_location.html:16
+msgid "Energy today"
+msgstr "Energia dziś"
+
+#: demo/commerce/templates/commerce/widgets/charging_location.html:17
+msgid "Available points"
+msgstr "Dostępne punkty"
+
+#: demo/commerce/templates/commerce/widgets/customer_health.html:2
+#, python-format
+msgid "Portfolio distribution across %(total)s account"
+msgid_plural "Portfolio distribution across %(total)s accounts"
+msgstr[0] "Rozkład portfela na %(total)s koncie"
+msgstr[1] "Rozkład portfela na %(total)s kontach"
+msgstr[2] "Rozkład portfela na %(total)s kontach"
+
+#: demo/commerce/templates/commerce/widgets/customer_health.html:2
+msgid "Explore"
+msgstr "Przeglądaj"
+
+#: demo/commerce/templates/commerce/widgets/recent_orders.html:3
+msgid "Latest work entering fulfillment"
+msgstr "Najnowsze prace wchodzące do realizacji"
+
+#: demo/commerce/templates/commerce/widgets/recent_orders.html:3
+msgid "View all"
+msgstr "Zobacz wszystkie"
+
+#: demo/commerce/templates/commerce/widgets/recent_orders.html:5
+msgid "No recent orders."
+msgstr "Brak ostatnich zamówień."
+
+#: demo/templates/registration/login.html:4
+msgid "Sign in · Northstar"
+msgstr "Logowanie · Northstar"
+
+#: demo/templates/registration/login.html:10
+msgid "Internal workspace"
+msgstr "Wewnętrzna przestrzeń robocza"
+
+#: demo/templates/registration/login.html:10
+msgid "Welcome back"
+msgstr "Witaj ponownie"
+
+#: demo/templates/registration/login.html:10
+msgid "Sign in to manage customers, orders, and company operations."
+msgstr "Zaloguj się, aby zarządzać klientami, zamówieniami i operacjami firmy."
+
+#: demo/templates/registration/login.html:13
+msgid "The username or password was not recognized."
+msgstr "Nie rozpoznano nazwy użytkownika lub hasła."
+
+#: demo/templates/registration/login.html:14
+msgid "Username"
+msgstr "Nazwa użytkownika"
+
+#: demo/templates/registration/login.html:15
+msgid "Password"
+msgstr "Hasło"
+
+#: demo/templates/registration/login.html:16
+msgid "Sign in to workspace"
+msgstr "Zaloguj się do przestrzeni"
+
+#: demo/templates/registration/login.html:18
+msgid "Demo credentials"
+msgstr "Dane demonstracyjne"
+
+#: demo/templates/registration/login.html:20
+msgid "Today at a glance"
+msgstr "Dziś w skrócie"
+
+#: demo/templates/registration/login.html:20
+msgid "“A calm operations surface where the next important decision is always visible.”"
+msgstr "„Spokojna powierzchnia operacyjna, na której kolejna ważna decyzja jest zawsze widoczna.”"
+
+#: demo/templates/registration/login.html:20
+msgid "7 orders"
+msgstr "7 zamówień"
+
+#: demo/templates/registration/login.html:20
+msgid "ready for fulfillment"
+msgstr "gotowych do realizacji"

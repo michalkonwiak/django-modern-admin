@@ -1,18 +1,19 @@
+{% load i18n %}
 {% load modern_admin %}
 <details class="ma-choice-filter{% if filter.active_label %} is-active{% endif %}" x-data="relationFilter" data-label="{{ filter.label }}" data-selected-label="{{ filter.options.0.label }}" :class="{ 'is-active': hasValue }" data-url="{{ filter.autocomplete_url }}" data-auto-submit="{{ auto_submit|yesno:'true,false' }}" @toggle="toggled" @click.outside="closeOptions" @keydown.escape.stop="escape">
   <summary aria-label="{{ filter.label }}"><span x-text="summary()">{{ filter.active_label|default:filter.label }}</span>{% icon "chevron-down" 13 %}</summary>
   <div class="ma-popover ma-choice-options"{% if auto_submit %} x-floating="opened"{% endif %}>
-    <input class="ma-choice-search" type="search" placeholder="Search all records…" aria-label="Search {{ filter.label }} options" x-model="term" @input.debounce.200ms="search" @keydown.enter.prevent>
-    <button type="button" class="ma-relation-option" @click="clearValue" :aria-pressed="!hasValue">Any {{ filter.label|lower }}</button>
+    <input class="ma-choice-search" type="search" placeholder="{% translate "Search all records…" %}" aria-label="{% blocktranslate with label=filter.label %}Search {{ label }} options{% endblocktranslate %}" x-model="term" @input.debounce.200ms="search" @keydown.enter.prevent>
+    <button type="button" class="ma-relation-option" @click="clearValue" :aria-pressed="!hasValue">{% blocktranslate with label=filter.label|lower %}Any {{ label }}{% endblocktranslate %}</button>
     <div class="ma-choice-list" x-ref="results"></div>
     <p class="ma-choice-notice" aria-live="polite" x-show="notice" x-text="notice" x-cloak></p>
     <footer class="ma-choice-footer">
       <p class="ma-choice-status" role="status" aria-live="polite" x-text="status"></p>
       <div class="ma-choice-pager">
-        <button type="button" class="ma-button is-quiet is-small" @click="previous" :disabled="!hasPrevious">Previous</button>
-        <button type="button" class="ma-button is-quiet is-small" @click="next" :disabled="!hasNext">Next</button>
+        <button type="button" class="ma-button is-quiet is-small" @click="previous" :disabled="!hasPrevious">{% translate "Previous" %}</button>
+        <button type="button" class="ma-button is-quiet is-small" @click="next" :disabled="!hasNext">{% translate "Next" %}</button>
       </div>
     </footer>
-    <input class="ma-input" type="text" :type="'hidden'" name="{{ filter.key }}" value="{{ filter.value }}" x-ref="value" placeholder="Record ID" aria-label="{{ filter.label }} record ID">
+    <input class="ma-input" type="text" :type="'hidden'" name="{{ filter.key }}" value="{{ filter.value }}" x-ref="value" placeholder="{% translate "Record ID" %}" aria-label="{% blocktranslate with label=filter.label %}{{ label }} record ID{% endblocktranslate %}">
   </div>
 </details>

@@ -1,4 +1,5 @@
-<header class="ma-widget-header demo-widget-title"><div><h2>{{ widget.title }}</h2><p>Portfolio distribution across {{ widget_context.total }} accounts</p></div><a href="{% url modern_admin_site.name|add:':customer_list' %}">Explore {% load modern_admin %}{% icon "chevron-right" 12 %}</a></header>
+{% load i18n %}
+<header class="ma-widget-header demo-widget-title"><div><h2>{{ widget.title }}</h2><p>{% blocktranslate count total=widget_context.total %}Portfolio distribution across {{ total }} account{% plural %}Portfolio distribution across {{ total }} accounts{% endblocktranslate %}</p></div><a href="{% url modern_admin_site.name|add:':customer_list' %}">{% translate "Explore" %} {% load modern_admin %}{% icon "chevron-right" 12 %}</a></header>
 <div class="demo-health-stack">
   <div class="demo-health-bar">{% for row in widget_context.pipeline %}<span class="is-{{ row.variant }}" style="width:{{ row.percent }}%" title="{{ row.label }}: {{ row.count }}"></span>{% endfor %}</div>
   <div class="demo-health-legend">{% for row in widget_context.pipeline %}<a href="{% url modern_admin_site.name|add:':customer_list' %}?status={{ row.value }}"><span class="ma-status-dot is-{{ row.variant }}"></span><span>{{ row.label }}</span><strong>{{ row.count }}</strong><small>{{ row.percent }}%</small></a>{% endfor %}</div>

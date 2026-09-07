@@ -7,6 +7,9 @@ from typing import Any, TypeVar, overload
 from django.db import models
 from django.http import HttpRequest
 from django.urls import URLPattern, include, path, reverse
+from django.utils.translation import gettext_lazy as _
+from django.views.decorators.http import require_POST
+from django.views.i18n import JavaScriptCatalog, set_language
 
 from modern_admin.navigation import (
     Navigation,
@@ -23,14 +26,14 @@ PageT = TypeVar("PageT", bound=PageResource)
 
 class ModernAdminSite:
     site_title = "Northstar"
-    site_subtitle = "Operations"
+    site_subtitle = _("Operations")
     extra_css: tuple[str, ...] = ()
     navigation_group_order: tuple[str, ...] = (
-        "Workspace",
-        "Relationships",
-        "Operations",
-        "Billing",
-        "System",
+        _("Workspace"),
+        _("Relationships"),
+        _("Operations"),
+        _("Billing"),
+        _("System"),
     )
 
     def __init__(self, name: str = "modern_admin") -> None:
@@ -63,7 +66,7 @@ class ModernAdminSite:
         path: str,
         label: str,
         icon: str = "file",
-        group: str = "Workspace",
+        group: str = _("Workspace"),
         order: int = 100,
     ) -> Callable[[type[PageT]], type[PageT]]:
         def decorator(cls: type[PageT]) -> type[PageT]:
@@ -102,10 +105,10 @@ class ModernAdminSite:
         if dashboard.has_permission(request):
             items.append(
                 ResolvedNavigationItem(
-                    label=dashboard.title or "Overview",
+                    label=dashboard.title or _("Overview"),
                     icon="layout-dashboard",
                     url=self.reverse("dashboard"),
-                    group="Workspace",
+                    group=_("Workspace"),
                     order=0,
                     active=request.path == self.reverse("dashboard"),
                 )
@@ -285,6 +288,12 @@ class ModernAdminSite:
             return secured
 
         return [
+            path("language/", require_POST(set_language), name="set_language"),
+            path(
+                "jsi18n/",
+                JavaScriptCatalog.as_view(packages=["modern_admin"]),
+                name="javascript_catalog",
+            ),
             path(
                 "login/",
                 LoginView.as_view(

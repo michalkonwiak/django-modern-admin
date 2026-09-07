@@ -12,6 +12,7 @@ from django.db.models import Q, QuerySet
 from django.http import QueryDict
 from django.utils.dateparse import parse_date
 from django.utils.text import capfirst
+from django.utils.translation import gettext_lazy as _
 
 from modern_admin.exceptions import InvalidResourceConfiguration, NotRegistered
 
@@ -74,7 +75,7 @@ class Filter(Generic[ModelT]):
                 f"{resource.__class__.__name__}.filters references '{self.accessor}', "
                 f"but {model.__name__} has no field named '{root}'."
             ) from exc
-        self._bound_label = self.label or capfirst(str(model_field.verbose_name))
+        self._bound_label = self.label or capfirst(model_field.verbose_name)
         return self
 
     @property
@@ -156,7 +157,7 @@ class MultipleChoiceFilter(ChoiceFilter[ModelT]):
             FilterOption(str(option_value), str(option_label), str(option_value) in values)
             for option_value, option_label in self._choices(request, resource)
         )
-        labels = ", ".join(option.label for option in options if option.selected)
+        labels = ", ".join(str(option.label) for option in options if option.selected)
         return FilterState(
             key=self.key,
             label=self.heading,
@@ -169,9 +170,8 @@ class MultipleChoiceFilter(ChoiceFilter[ModelT]):
 
 @dataclass(slots=True)
 class BooleanFilter(ChoiceFilter[ModelT]):
-    choices: ChoiceIterable | Callable[[HttpRequest], ChoiceIterable] | None = (
-        ("1", "Yes"),
-        ("0", "No"),
+    choices: ChoiceIterable | Callable[[HttpRequest], ChoiceIterable] | None = field(
+        default_factory=lambda: (("1", _("Yes")), ("0", _("No")))
     )
 
     def apply(self, queryset: QuerySet[ModelT], params: QueryDict) -> QuerySet[ModelT]:

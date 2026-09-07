@@ -1,0 +1,19 @@
+{% load i18n %}
+{% load static %}
+<section class="demo-energy-panel" aria-labelledby="demo-energy-{{ location_id }}">
+  <header class="ma-widget-header demo-widget-title">
+    <div><h2 id="demo-energy-{{ location_id }}">{{ location_name }}</h2><p>{{ location_address }}</p></div>
+    <span class="demo-live-tag">{% translate "Demo data" %}</span>
+  </header>
+  <div class="demo-energy-visual">
+    <picture>
+      <source media="(prefers-reduced-motion: reduce)" srcset="{% static image_path %}#ev-still">
+      <img src="{% static image_path %}" width="1600" height="900" alt="{{ image_alt }}" decoding="async">
+    </picture>
+  </div>
+  <div class="demo-performance-ledger demo-energy-metrics">
+    <div><span>{% translate "Charged today" %}</span><strong>{% blocktranslate count count=charged %}{{ count }} car{% plural %}{{ count }} cars{% endblocktranslate %}</strong></div>
+    <div><span>{% translate "Energy today" %}</span><strong>{{ energy }}</strong></div>
+    <div><span>{% translate "Available points" %}</span><strong>{{ available }}</strong></div>
+  </div>
+</section>

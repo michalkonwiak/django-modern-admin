@@ -1,3 +1,4 @@
 {% extends "modern_admin/layouts/app.html" %}
-{% block title %}Save view · {{ resource.title }}{% endblock %}
+{% load i18n %}
+{% block title %}{% blocktranslate with title=resource.title %}Save view · {{ title }}{% endblocktranslate %}{% endblock %}
 {% block content %}<div class="ma-page" aria-hidden="true"></div>{% include "modern_admin/partials/saved_view_dialog.html" %}{% endblock %}

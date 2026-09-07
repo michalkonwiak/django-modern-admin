@@ -1,6 +1,8 @@
-{% load static modern_admin %}
+{% load static modern_admin i18n %}
+{% get_current_language as LANGUAGE_CODE %}
+{% get_current_language_bidi as LANGUAGE_BIDI %}
 <!doctype html>
-<html lang="en" x-data="appShell" :class="{ 'dark': dark }">
+<html lang="{{ LANGUAGE_CODE }}" dir="{{ LANGUAGE_BIDI|yesno:'rtl,ltr' }}" x-data="appShell" :class="{ 'dark': dark }">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -12,7 +14,8 @@
   <link rel="stylesheet" href="{% static 'modern_admin/app.css' %}?v=20260907-2">
   {% for stylesheet in modern_admin_site.extra_css %}<link rel="stylesheet" href="{% static stylesheet %}">{% endfor %}
   <script defer src="{% static 'modern_admin/vendor/htmx.min.js' %}"></script>
-  <script defer src="{% static 'modern_admin/app.js' %}?v=20260907-2"></script>
+  <script defer src="{% url modern_admin_site.name|add:':javascript_catalog' %}?language={{ LANGUAGE_CODE }}"></script>
+  <script defer src="{% static 'modern_admin/app.js' %}?v=20260907-i18n"></script>
   <script defer src="{% static 'modern_admin/vendor/alpine.min.js' %}"></script>
   {% block extra_head %}{% endblock %}
 </head>

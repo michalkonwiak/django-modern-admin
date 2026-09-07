@@ -372,12 +372,71 @@ Treat the workspace as part of your Django application's security boundary.
 - Provide login throttling, MFA or SSO, monitoring, backups, audit retention, and
   authorized upload handling in your project.
 
+### PostgreSQL
+
+Install the PostgreSQL driver alongside the library:
+
+```bash
+pip install 'django-modern-admin[postgres]'
+```
+
+Configure your application's standard Django `DATABASES` setting (PostgreSQL 14+
+for the supported Django versions). Credentials belong in your environment or
+secret manager:
+
+```python
+import os
+
+DATABASES = {
+    "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": os.environ["PGDATABASE"],
+        "USER": os.environ["PGUSER"],
+        "PASSWORD": os.environ["PGPASSWORD"],
+        "HOST": os.environ["PGHOST"],
+        "PORT": os.environ.get("PGPORT", "5432"),
+        "CONN_MAX_AGE": 0,
+        "OPTIONS": {"connect_timeout": 10},
+    }
+}
+```
+
+Run `python manage.py migrate` before serving requests. Configure TLS through
+`OPTIONS` (`sslmode` and `sslrootcert`) according to your database provider.
+See [Django's PostgreSQL documentation](https://docs.djangoproject.com/en/6.0/ref/databases/#postgresql-notes)
+for connection pooling, persistent connections, and isolation settings.
+
+Atomic actions lock selected base rows in primary-key order, then reload records
+and check permissions and business preconditions while holding those locks.
+Scoped querysets may include nullable joins, `distinct()`, and aggregations.
+Form saves and their audit entries share a transaction on the write database;
+custom hooks and audit routers must write to that same database for rollback to
+cover every write. Actions with `atomic=False` have no framework locking or
+rollback guarantee. Use `transaction.on_commit()` for external side effects such
+as queued jobs; database rollback cannot undo an HTTP call or sent email.
+Ordinary edit forms do not provide optimistic conflict detection for stale edits.
+
+The repository's demo and test settings enable PostgreSQL with
+`MODERN_ADMIN_POSTGRES=1` and the `PG*` variables above. To run the suite against
+a dedicated local PostgreSQL instance:
+
+```bash
+uv sync --extra test --extra postgres
+MODERN_ADMIN_POSTGRES=1 PGDATABASE=modern_admin PGUSER=postgres \
+  PGHOST=127.0.0.1 PGPORT=5432 uv run --extra test --extra postgres pytest
+```
+
+Supply `PGPASSWORD` separately. The test role needs permission to create test
+databases. CI runs the non-browser suite on PostgreSQL 14 and 18 with Django 5.2
+and 6.0, including simultaneous action requests on independent connections,
+rollback, JSON audit metadata, and queries with joins and aggregation.
+
 ### Current limitations
 
 | Area | Boundary |
 | --- | --- |
 | Content Security Policy | The bundled Alpine CSP build requires no `unsafe-eval`. Enable nonce middleware/context processing as described below; inline CSS attributes remain explicitly allowed. |
-| Database concurrency | The automated local suite uses SQLite; it does not establish PostgreSQL row-lock correctness or multi-database transaction guarantees. Test against your deployment database. |
+| Database concurrency | PostgreSQL action locking is covered by integration tests. Transactions spanning multiple databases and conflict detection for ordinary stale edit forms are not provided. Test custom services and routers against your deployment database. |
 | Authentication | Built-in Django login does not add MFA or rate limiting. Existing SSO may authenticate the same Django session. |
 | Localization | UI copy is primarily English; full localization is not complete. |
 | Migration from Django Admin | Resource definitions, operational permissions, and custom actions must be ported explicitly. |

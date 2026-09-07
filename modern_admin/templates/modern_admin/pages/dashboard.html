@@ -1,15 +1,16 @@
 {% extends "modern_admin/layouts/app.html" %}
+{% load i18n %}
 {% load modern_admin %}
-{% block title %}Overview · {{ site_title }}{% endblock %}
+{% block title %}{% blocktranslate with site=site_title %}Overview · {{ site }}{% endblocktranslate %}{% endblock %}
 {% block content %}
 <div class="ma-page">
-  <header class="ma-dashboard-header"><div><div class="ma-eyebrow">Workspace pulse</div><h1>{{ dashboard.title }}</h1><p>{{ dashboard.description }}</p></div><div class="ma-dashboard-date">{% icon "calendar" 14 %}{% now "D, M j" %}</div></header>
-  {% if dashboard.alerts %}<div class="ma-alert-strip">{% icon "sparkles" 16 %}<div><strong>{{ dashboard.alerts.title }}</strong><span>{{ dashboard.alerts.message }}</span></div><a href="{{ dashboard.alerts.url }}">Review now {% icon "chevron-right" 13 %}</a></div>{% endif %}
+  <header class="ma-dashboard-header"><div><div class="ma-eyebrow">{% translate "Workspace pulse" %}</div><h1>{{ dashboard.title }}</h1><p>{{ dashboard.description }}</p></div><div class="ma-dashboard-date">{% icon "calendar" 14 %}{% now "D, M j" %}</div></header>
+  {% if dashboard.alerts %}<div class="ma-alert-strip">{% icon "sparkles" 16 %}<div><strong>{{ dashboard.alerts.title }}</strong><span>{{ dashboard.alerts.message }}</span></div><a href="{{ dashboard.alerts.url }}">{% translate "Review now" %} {% icon "chevron-right" 13 %}</a></div>{% endif %}
   <div class="ma-dashboard-grid">
     {% for widget, widget_context in widgets %}
       {% include "modern_admin/partials/widget.html" %}
     {% empty %}
-      <section class="ma-dashboard-empty"><span>{% icon "layout-dashboard" 22 %}</span><div><h2>Your workspace is ready</h2><p>Register dashboard widgets to surface decisions, exceptions, and current work here.</p></div></section>
+      <section class="ma-dashboard-empty"><span>{% icon "layout-dashboard" 22 %}</span><div><h2>{% translate "Your workspace is ready" %}</h2><p>{% translate "Register dashboard widgets to surface decisions, exceptions, and current work here." %}</p></div></section>
     {% endfor %}
   </div>
 </div>

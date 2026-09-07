@@ -39,7 +39,7 @@
     const message = document.createElement("span");
     message.textContent = detail.message;
     const dismiss = document.createElement("button");
-    dismiss.setAttribute("aria-label", "Dismiss");
+    dismiss.setAttribute("aria-label", gettext("Dismiss"));
     dismiss.innerHTML = '<svg class="ma-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>';
     dismiss.addEventListener("click", () => toast.remove());
     toast.append(icon, message, dismiss);
@@ -176,7 +176,7 @@
         const controller = new AbortController();
         this.controller = controller;
         this.status = "";
-        this.notice = "Loading…";
+        this.notice = gettext("Loading…");
         this.hasNext = this.hasPrevious = false;
         this.$refs.results.replaceChildren();
         const url = new URL(this.$root.dataset.url, location.origin);
@@ -189,8 +189,8 @@
           if (controller.signal.aborted) return;
           this.page = data.page;
           this.hasNext = data.has_next; this.hasPrevious = data.has_previous;
-          this.status = data.results.length ? `Page ${data.page} of ${data.pages}` : "";
-          this.notice = data.results.length ? "" : "No matching records.";
+          this.status = data.results.length ? interpolate(gettext("Page %(page)s of %(pages)s"), { page: data.page, pages: data.pages }, true) : "";
+          this.notice = data.results.length ? "" : gettext("No matching records.");
           data.results.forEach(option => {
             const button = document.createElement("button");
             button.type = "button"; button.className = "ma-relation-option";
@@ -201,7 +201,7 @@
             this.$refs.results.append(button);
           });
         } catch (error) {
-          if (error.name !== "AbortError") this.notice = "Could not load records. Reopen or search to retry.";
+          if (error.name !== "AbortError") this.notice = gettext("Could not load records. Reopen or search to retry.");
         }
       }
     }));
@@ -343,6 +343,9 @@
     Alpine.data("tableSelection", () => ({
       wideMobile: false,
       selected: [],
+      get selectionSummary() {
+        return interpolate(ngettext("%(count)s row selected", "%(count)s rows selected", this.selected.length), { count: this.selected.length }, true);
+      },
       get allSelected() {
         const inputs = this.$root.querySelectorAll('input[name="selected"]');
         return inputs.length > 0 && this.selected.length === inputs.length;
@@ -387,6 +390,12 @@
       total: 0,
       revision: 0,
       init() { this.sync(); },
+      get selectionSummary() {
+        return interpolate(gettext("%(selected)s of %(total)s selected"), { selected: this.selected, total: this.total }, true);
+      },
+      get noMatchMessage() {
+        return interpolate(gettext("No match for “%(query)s”."), { query: this.query }, true);
+      },
       options(root) {
         return Array.from((root || this.$root).querySelectorAll('.ma-access-option input[type="checkbox"]'));
       },
@@ -470,7 +479,7 @@
 
   document.addEventListener("htmx:responseError", event => {
     if (event.detail.xhr.status === 403) return;
-    showToast({ level: "error", message: "That request could not be completed. Please try again." });
+    showToast({ level: "error", message: gettext("That request could not be completed. Please try again.") });
   });
 
   document.addEventListener("ma:toast", event => showToast(event.detail));

@@ -25,6 +25,8 @@ from django.forms import modelform_factory
 from django.forms.models import ModelChoiceIterator
 from django.http import HttpRequest
 from django.utils.text import capfirst
+from django.utils.translation import gettext_lazy as _
+from django.utils.translation import ngettext
 
 from modern_admin.actions import ActionResult, ResourceAction
 from modern_admin.columns import AvatarColumn, BooleanColumn, DateTimeColumn, TextColumn
@@ -46,7 +48,9 @@ def permission_group_label(permission: Permission) -> str:
     if model is None:
         return f"{capfirst(content_type.app_label)} · {capfirst(content_type.model)}"
     options = model._meta
-    return f"{capfirst(str(options.app_config.verbose_name))} · {capfirst(str(options.verbose_name))}"  # noqa: E501
+    return (
+        f"{capfirst(str(options.app_config.verbose_name))} · {capfirst(str(options.verbose_name))}"  # noqa: E501
+    )
 
 
 class GroupedPermissionIterator(ModelChoiceIterator):
@@ -119,7 +123,7 @@ def describe_permissions(manager: Any) -> str:
 
 def _permission_summary(group: Group) -> str:
     total = len(group.permissions.all())
-    return f"{total} permission{'' if total == 1 else 's'}"
+    return ngettext("%(count)d permission", "%(count)d permissions", total) % {"count": total}
 
 
 def _has_field(model: type[models.Model], name: str) -> bool:
@@ -138,15 +142,15 @@ class AccountFormMixin:
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
         if "is_staff" in self.fields:
-            self.fields["is_staff"].help_text = (
+            self.fields["is_staff"].help_text = _(
                 "Required to reach the workspace. Permissions below decide what is visible."
             )
         if "is_superuser" in self.fields:
-            self.fields["is_superuser"].help_text = (
+            self.fields["is_superuser"].help_text = _(
                 "Grants every permission, including the ones not listed below."
             )
         if "user_permissions" in self.fields:
-            self.fields["user_permissions"].label = "Individual permissions"
+            self.fields["user_permissions"].label = _("Individual permissions")
 
 
 class AccountChangeForm(AccountFormMixin, forms.ModelForm):
@@ -188,8 +192,8 @@ def build_account_form(
 
 class GroupForm(forms.ModelForm):
     permissions = PermissionsField(
-        label="Permissions",
-        help_text="Everyone in this group receives these permissions.",
+        label=_("Permissions"),
+        help_text=_("Everyone in this group receives these permissions."),
     )
 
     class Meta:
@@ -217,8 +221,8 @@ class AccountPolicy(PermissionPolicy[Any]):
 
 class SetAccountPassword(ResourceAction[Any]):
     key = "password"
-    label = "Set password"
-    description = "Replace this account's password. The operator is not shown the old one."
+    label = _("Set password")
+    description = _("Replace this account's password. The operator is not shown the old one.")
     icon = "key"
     form_class = SetPasswordForm
     placements = ("detail", "row")
@@ -237,24 +241,24 @@ class SetAccountPassword(ResourceAction[Any]):
         if obj.pk == request.user.pk:
             # Django rotates the session hash on password change; keep this operator signed in.
             update_session_auth_hash(request, obj)
-        return ActionResult.success(f"Password updated for {obj}.")
+        return ActionResult.success(_("Password updated for %(user)s.") % {"user": obj})
 
 
 class UserResource(ModelResource[Any]):
     """Manage accounts, group membership, and individual permissions."""
 
-    title = "Users"
-    description = "Accounts that can reach this workspace, and what each one may see."
+    title = _("Users")
+    description = _("Accounts that can reach this workspace, and what each one may see.")
     icon = "users"
-    navigation = Navigation(label="Users", icon="users", group="System", order=20)
+    navigation = Navigation(label=_("Users"), icon="users", group=_("System"), order=20)
     permission_policy_class = AccountPolicy
     list_display = (
-        AvatarColumn("username", label="Account", secondary="email"),
-        TextColumn("full_name", label="Name"),
-        TextColumn("group_names", label="Groups"),
-        BooleanColumn("is_active", label="Active"),
-        BooleanColumn("is_staff", label="Workspace access"),
-        BooleanColumn("is_superuser", label="Superuser"),
+        AvatarColumn("username", label=_("Account"), secondary="email"),
+        TextColumn("full_name", label=_("Name")),
+        TextColumn("group_names", label=_("Groups")),
+        BooleanColumn("is_active", label=_("Active")),
+        BooleanColumn("is_staff", label=_("Workspace access")),
+        BooleanColumn("is_superuser", label=_("Superuser")),
         DateTimeColumn("last_login"),
     )
     search_fields = ("username", "email", "first_name", "last_name")
@@ -263,13 +267,13 @@ class UserResource(ModelResource[Any]):
     page_size = 25
     actions = (SetAccountPassword,)
     detail_sections = (
-        DetailSection("Profile", ("username", "email", "first_name", "last_name")),
+        DetailSection(_("Profile"), ("username", "email", "first_name", "last_name")),
         DetailSection(
-            "Access",
+            _("Access"),
             ("is_active", "is_staff", "is_superuser", "groups", "user_permissions"),
-            description="Group membership and individual permissions decide what is visible.",
+            description=_("Group membership and individual permissions decide what is visible."),
         ),
-        DetailSection("Activity", ("last_login", "date_joined")),
+        DetailSection(_("Activity"), ("last_login", "date_joined")),
     )
 
     def get_queryset(self, request: HttpRequest) -> models.QuerySet[Any]:
@@ -297,18 +301,18 @@ class UserResource(ModelResource[Any]):
 class GroupResource(ModelResource[Group]):
     """Reusable permission bundles, shared by any number of accounts."""
 
-    title = "Groups"
-    description = "Permission bundles you assign to accounts instead of one-off grants."
+    title = _("Groups")
+    description = _("Permission bundles you assign to accounts instead of one-off grants.")
     icon = "shield"
-    navigation = Navigation(label="Groups", icon="shield", group="System", order=30)
+    navigation = Navigation(label=_("Groups"), icon="shield", group=_("System"), order=30)
     list_display = (
-        TextColumn("name", label="Group", secondary=lambda group: _permission_summary(group)),
-        TextColumn("member_count", label="Members"),
+        TextColumn("name", label=_("Group"), secondary=lambda group: _permission_summary(group)),
+        TextColumn("member_count", label=_("Members")),
     )
     search_fields = ("name",)
     ordering = ("name",)
     form_class = GroupForm
-    detail_sections = (DetailSection("Group", ("name", "permissions")),)
+    detail_sections = (DetailSection(_("Group"), ("name", "permissions")),)
 
     def get_queryset(self, request: HttpRequest) -> models.QuerySet[Group]:
         return (

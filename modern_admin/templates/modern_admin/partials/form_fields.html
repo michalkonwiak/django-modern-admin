@@ -1,7 +1,8 @@
+{% load i18n %}
 {% load modern_admin %}
 <form method="post" enctype="multipart/form-data" class="ma-form" hx-disabled-elt="find button[type=submit]"{% if dialog %} hx-post="{{ request.path }}" hx-target="#dialog-host" hx-swap="innerHTML"{% endif %}>
   {% csrf_token %}{% if dialog %}<input type="hidden" name="surface" value="dialog">{% endif %}
-  <div class="ma-form-intro"><span>Record fields</span><small><i>*</i> Required information</small></div>
+  <div class="ma-form-intro"><span>{% translate "Record fields" %}</span><small><i>*</i> {% translate "Required information" %}</small></div>
   {% if form.non_field_errors %}<div class="ma-form-alert" role="alert">{% icon "activity" 16 %}<div>{% for error in form.non_field_errors %}<p>{{ error }}</p>{% endfor %}</div></div>{% endif %}
   <div class="ma-form-grid">
     {% for field in form.hidden_fields %}{{ field }}{% endfor %}
@@ -21,7 +22,7 @@
     {% endfor %}
   </div>
   <footer class="ma-form-actions">
-    <a href="{{ cancel_url }}" class="ma-button is-secondary"{% if dialog %} @click.prevent="$dispatch('ma:dialog-close')"{% endif %}>Cancel</a>
+    <a href="{{ cancel_url }}" class="ma-button is-secondary"{% if dialog %} @click.prevent="$dispatch('ma:dialog-close')"{% endif %}>{% translate "Cancel" %}</a>
     <button class="ma-button is-primary" type="submit"><span class="ma-submit-label">{{ submit_label }}</span><span class="ma-button-spinner" aria-hidden="true"></span></button>
   </footer>
 </form>

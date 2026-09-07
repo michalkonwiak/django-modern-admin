@@ -1,3 +1,4 @@
+{% load i18n %}
 {% load modern_admin %}
-<div class="ma-inline-error" role="alert"><span>{% icon "activity" 18 %}</span><div><h3>{{ title }}</h3><p>{{ message }}</p></div><button class="ma-button is-secondary is-small" type="button" onclick="location.reload()">Try again</button></div>
+<div class="ma-inline-error" role="alert"><span>{% icon "activity" 18 %}</span><div><h3>{{ title }}</h3><p>{{ message }}</p></div><button class="ma-button is-secondary is-small" type="button" onclick="location.reload()">{% translate "Try again" %}</button></div>
 

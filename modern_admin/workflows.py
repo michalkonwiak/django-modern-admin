@@ -5,6 +5,7 @@ from typing import TypeVar
 from django.core.exceptions import FieldDoesNotExist
 from django.db import models
 from django.http import HttpRequest
+from django.utils.translation import gettext_lazy as _
 
 from modern_admin.actions import ResourceAction
 from modern_admin.exceptions import InvalidResourceConfiguration
@@ -17,7 +18,9 @@ class TransitionAction(ResourceAction[ModelT]):
 
     state_field: str = "status"
     from_states: tuple[str, ...] = ()
-    unavailable_message: str = "The record's state has changed. This action is no longer available."
+    unavailable_message: str = _(
+        "The record's state has changed. This action is no longer available."
+    )
 
     def validate_configuration(self, model: type[ModelT]) -> None:
         try:

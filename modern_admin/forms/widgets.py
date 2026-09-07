@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import Any
 
 from django import forms
+from django.utils.translation import gettext_lazy as _
 
 
 class SwitchInput(forms.CheckboxInput):
@@ -36,7 +37,7 @@ class TagsInput(forms.TextInput):
         attributes = {
             "autocomplete": "off",
             "data-tags-input": "true",
-            "placeholder": "Add comma-separated tags",
+            "placeholder": _("Add comma-separated tags"),
             **(attrs or {}),
         }
         super().__init__(attributes)
@@ -52,7 +53,7 @@ class AccessChecklist(forms.CheckboxSelectMultiple):
 
     template_name = "modern_admin/widgets/access_checklist.html"
     group_label = ""
-    search_placeholder = "Filter options…"
+    search_placeholder = _("Filter options…")
 
     def __init__(
         self,

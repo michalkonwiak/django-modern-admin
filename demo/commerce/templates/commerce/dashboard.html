@@ -1,23 +1,29 @@
 {% extends "modern_admin/layouts/app.html" %}
-{% load modern_admin %}
-{% block title %}Overview · {{ site_title }}{% endblock %}
+{% load i18n %}
+{% load modern_admin static %}
+{% block title %}{% blocktranslate with site=site_title %}Overview · {{ site }}{% endblocktranslate %}{% endblock %}
 {% block content %}
 {% with revenue=widget_map|get_item:"revenue" orders=widget_map|get_item:"orders" customers=widget_map|get_item:"customers" invoices=widget_map|get_item:"invoices" recent=widget_map|get_item:"recent-orders" pipeline=widget_map|get_item:"pipeline" goal=widget_map|get_item:"monthly-goal" attention=widget_map|get_item:"attention" %}
 <div class="ma-page demo-command-center">
   <header class="ma-dashboard-header">
-    <div class="ma-page-heading"><div class="ma-title-line"><h1>Operations</h1></div><div class="ma-page-context"><span>Northstar Industries</span><i></i><span>Current period</span><i></i><span>{% now "l, M j" %}</span></div></div>
-    <div class="demo-dashboard-actions"><a class="ma-button is-secondary" href="{% url modern_admin_site.name|add:':order_list' %}?status=processing">{% icon "receipt" 14 %}Review pipeline</a><button class="ma-button is-primary" type="button" @click="openCommand()">{% icon "command" 14 %}Run command</button></div>
+    <div class="ma-page-heading"><div class="ma-title-line"><h1>{% translate "Operations" %}</h1></div><div class="ma-page-context"><span>{% translate "Northstar Industries" %}</span><i></i><span>{% translate "Current period" %}</span><i></i><span>{% now "l, M j" %}</span></div></div>
+    <div class="demo-dashboard-actions"><a class="ma-button is-secondary" href="{% url modern_admin_site.name|add:':order_list' %}?status=processing">{% icon "receipt" 14 %}{% translate "Review pipeline" %}</a><button class="ma-button is-primary" type="button" @click="openCommand()">{% icon "command" 14 %}{% translate "Run command" %}</button></div>
   </header>
+
+  <div class="demo-energy-grid">
+    {% include "commerce/widgets/charging_location.html" with location_id="campus" location_name="Politechnika Świętokrzyska" location_address=_("Charging infrastructure · Kielce") image_path="commerce/ev-energy.svg" image_alt=_("An electric sedan passes the pyramids of Kielce University of Technology, pulls up to the demo charger, and tops up its battery.") charged=20 energy="428 kWh" available="6" %}
+    {% include "commerce/widgets/charging_location.html" with location_id="echo" location_name="Galeria Echo" location_address=_("20 Świętokrzyska Street · Kielce") image_path="commerce/ev-echo.svg" image_alt=_("An electric SUV rolls up to the curved glass facade of Galeria Echo in Kielce, stops at the charger, and tops up its battery.") charged=28 energy="612 kWh" available="4" %}
+  </div>
 
   <section class="demo-pulse-plane">
     <div class="demo-revenue-stage">
-      <header><div><span class="ma-section-index">PRIMARY SIGNAL</span><h2>{{ revenue.widget.title }}</h2></div><span class="demo-live-tag"><i></i>Current records</span></header>
+      <header><div><span class="ma-section-index">{% translate "PRIMARY SIGNAL" %}</span><h2>{{ revenue.widget.title }}</h2></div><span class="demo-live-tag"><i></i>{% translate "Current records" %}</span></header>
       <div class="demo-revenue-value">{{ revenue.context.value }}</div>
-      <div class="demo-revenue-change"><span>Successfully collected payments</span></div>
+      <div class="demo-revenue-change"><span>{% translate "Successfully collected payments" %}</span></div>
       <div class="demo-performance-ledger">
-        <div><span>Monthly target</span><strong>${{ goal.context.total|floatformat:0 }}</strong></div>
-        <div><span>Target captured</span><strong>{{ goal.context.percent }}%</strong></div>
-        <div><span>Collection queue</span><strong>{{ invoices.context.value }} invoices</strong></div>
+        <div><span>{% translate "Monthly target" %}</span><strong>${{ goal.context.total|floatformat:0 }}</strong></div>
+        <div><span>{% translate "Target captured" %}</span><strong>{{ goal.context.percent }}%</strong></div>
+        <div><span>{% translate "Collection queue" %}</span><strong>{% blocktranslate count count=invoices.context.value %}{{ count }} invoice{% plural %}{{ count }} invoices{% endblocktranslate %}</strong></div>
         <div class="demo-ledger-progress"><span style="width:{{ goal.context.percent }}%"></span></div>
       </div>
       <div class="demo-signal-strip">
@@ -28,14 +34,15 @@
     </div>
 
     <aside class="demo-attention-stage">
-      <header><div><span class="ma-section-index">FOCUS QUEUE</span><h2>Needs attention</h2></div><span class="demo-queue-count">{{ attention.context.invoices|length }}</span></header>
-      <p class="demo-stage-copy">Exceptions with financial or customer impact.</p>
+      <header><div><span class="ma-section-index">{% translate "FOCUS QUEUE" %}</span><h2>{% translate "Needs attention" %}</h2></div><span class="demo-queue-count">{{ attention.context.invoices|length }}</span></header>
+      <p class="demo-stage-copy">{% translate "Exceptions with financial or customer impact." %}</p>
       <div class="demo-focus-list">
-        {% for invoice in attention.context.invoices %}<a href="{% url modern_admin_site.name|add:':invoice_detail' invoice.pk %}"><span class="demo-focus-severity"><i></i></span><span><strong>{{ invoice.number }}</strong><small>{{ invoice.customer }} · due {{ invoice.due_date|date:"M j" }}</small></span><b>${{ invoice.total|floatformat:0 }}</b><em>{% icon "chevron-right" 13 %}</em></a>{% empty %}<div class="demo-focus-empty"><span>{% icon "check" 16 %}</span><strong>Nothing is blocked</strong><small>The attention queue is clear.</small></div>{% endfor %}
+        {% for invoice in attention.context.invoices %}<a href="{% url modern_admin_site.name|add:':invoice_detail' invoice.pk %}"><span class="demo-focus-severity"><i></i></span><span><strong>{{ invoice.number }}</strong><small>{% blocktranslate with customer=invoice.customer due_date=invoice.due_date|date:"M j" %}{{ customer }} · due {{ due_date }}{% endblocktranslate %}</small></span><b>${{ invoice.total|floatformat:0 }}</b><em>{% icon "chevron-right" 13 %}</em></a>{% empty %}<div class="demo-focus-empty"><span>{% icon "check" 16 %}</span><strong>{% translate "Nothing is blocked" %}</strong><small>{% translate "The attention queue is clear." %}</small></div>{% endfor %}
       </div>
-      <a class="demo-stage-link" href="{% url modern_admin_site.name|add:':invoice_list' %}?status=overdue"><span>Open collections workspace</span>{% icon "chevron-right" 13 %}</a>
+      <a class="demo-stage-link" href="{% url modern_admin_site.name|add:':invoice_list' %}?status=overdue"><span>{% translate "Open collections workspace" %}</span>{% icon "chevron-right" 13 %}</a>
     </aside>
   </section>
+
 
   <div class="demo-operations-grid">
     <section class="demo-stream-stage">

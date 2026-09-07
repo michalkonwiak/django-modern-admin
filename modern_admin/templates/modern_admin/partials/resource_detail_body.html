@@ -1,10 +1,11 @@
+{% load i18n %}
 {% load modern_admin %}
 <div id="resource-detail" class="ma-page ma-record-page" hx-get="{{ request.path }}?fragment=detail" hx-trigger="ma:reload" hx-target="this" hx-swap="outerHTML" x-data="detailTabs('{{ active_tab_key }}')">
   <header class="ma-detail-header">
     <div class="ma-detail-identity">
       <span class="ma-avatar ma-avatar-lg"><span>{{ object_label|initials }}</span><i></i></span>
       <div class="ma-detail-title">
-        <div class="ma-record-kicker"><span>{{ resource.verbose_name }}</span><i></i><span>Record #{{ object.pk }}</span></div>
+        <div class="ma-record-kicker"><span>{{ resource.verbose_name }}</span><i></i><span>{% blocktranslate with pk=object.pk %}Record #{{ pk }}{% endblocktranslate %}</span></div>
         <h1>{{ object_label }}</h1>
         
       </div>
@@ -13,12 +14,12 @@
       {% for link in detail_actions %}
         <a href="{{ link.url }}" class="ma-button{% if link.action.variant == 'danger' %} is-danger-quiet{% else %} is-secondary{% endif %}" hx-get="{{ link.url }}" hx-target="#dialog-host" hx-swap="innerHTML">{% icon link.action.icon 14 %}<span>{{ link.action.label }}</span></a>
       {% endfor %}
-      {% if can_change %}<a href="{{ edit_url }}" class="ma-button is-primary" hx-get="{{ edit_url }}?surface=dialog" hx-target="#dialog-host" hx-swap="innerHTML">{% icon "pencil" 14 %}<span>Edit record</span></a>{% endif %}
+      {% if can_change %}<a href="{{ edit_url }}" class="ma-button is-primary" hx-get="{{ edit_url }}?surface=dialog" hx-target="#dialog-host" hx-swap="innerHTML">{% icon "pencil" 14 %}<span>{% translate "Edit record" %}</span></a>{% endif %}
     </div>
   </header>
 
-  <nav class="ma-record-tabs" aria-label="Record workspace">
-    <a href="{{ request.path }}" role="tab" :aria-selected="active === 'overview'" :class="{ 'is-active': active === 'overview' }" @click.prevent="overview('{{ request.path }}')">Overview</a>
+  <nav class="ma-record-tabs" aria-label="{% translate "Record workspace" %}">
+    <a href="{{ request.path }}" role="tab" :aria-selected="active === 'overview'" :class="{ 'is-active': active === 'overview' }" @click.prevent="overview('{{ request.path }}')">{% translate "Overview" %}</a>
     {% for tab in tabs %}<a href="{{ request.path }}?tab={{ tab.key }}" role="tab" :aria-selected="active === '{{ tab.key }}'" :class="{ 'is-active': active === '{{ tab.key }}' }" @click.prevent="select('{{ tab.key }}', $el)" data-tab-url="{% url modern_admin_site.name|add:':'|add:resource.key|add:'_tab' object.pk tab.key %}" data-tab-key="{{ tab.key }}">{% if tab.icon %}{% icon tab.icon 13 %}{% endif %}{{ tab.label }}</a>{% endfor %}
     <span class="ma-record-tab-line" aria-hidden="true"></span>
   </nav>
@@ -39,12 +40,12 @@
       </div>
       <aside class="ma-detail-aside">
         <section class="ma-activity-section">
-          <header><h2>Activity</h2><span class="ma-section-rule"></span></header>
+          <header><h2>{% translate "Activity" %}</h2><span class="ma-section-rule"></span></header>
           <ol class="ma-timeline">
             {% for event in audit_events %}
-              <li><span class="ma-timeline-marker"></span><div><p><strong>{{ event.actor.get_full_name|default:event.actor.username|default:"System" }}</strong> {{ event.action }} this {{ resource.verbose_name }}.</p><time datetime="{{ event.created_at|date:'c' }}">{{ event.created_at|timesince }} ago</time></div></li>
+              <li><span class="ma-timeline-marker"></span><div><p><strong>{{ event.actor.get_full_name|default:event.actor.username|default:"System" }}</strong> {% blocktranslate with action=event.display_action record=resource.verbose_name %}{{ action }} this {{ record }}.{% endblocktranslate %}</p><time datetime="{{ event.created_at|date:'c' }}">{% blocktranslate with age=event.created_at|timesince %}{{ age }} ago{% endblocktranslate %}</time></div></li>
             {% empty %}
-              <li class="ma-timeline-empty"><span class="ma-empty-icon">{% icon "activity" 16 %}</span><div><strong>No activity yet</strong><p>Changes to this record will be listed here.</p></div></li>
+              <li class="ma-timeline-empty"><span class="ma-empty-icon">{% icon "activity" 16 %}</span><div><strong>{% translate "No activity yet" %}</strong><p>{% translate "Changes to this record will be listed here." %}</p></div></li>
             {% endfor %}
           </ol>
         </section>

@@ -10,7 +10,7 @@ from django.contrib import messages
 from django.contrib.auth.views import redirect_to_login
 from django.core.exceptions import ValidationError
 from django.core.paginator import Paginator
-from django.db import connections, models, transaction
+from django.db import models, router, transaction
 from django.http import (
     Http404,
     HttpRequest,
@@ -21,8 +21,10 @@ from django.http import (
 )
 from django.shortcuts import get_object_or_404, render
 from django.utils.http import url_has_allowed_host_and_scheme
+from django.utils.text import capfirst
+from django.utils.translation import gettext_lazy as _
 
-from modern_admin.audit import events_for, record_event
+from modern_admin.audit import action_label, events_for, record_event
 from modern_admin.columns import Cell, Column
 from modern_admin.filters import RelationFilter
 from modern_admin.forms.widgets import AccessChecklist
@@ -67,7 +69,7 @@ def _guard(request: HttpRequest) -> HttpResponse | None:
 def _permission_denied(
     request: HttpRequest,
     site: ModernAdminSite,
-    message: str = "You do not have access to this page.",
+    message: str = _("You do not have access to this page."),
 ) -> HttpResponse:
     template = (
         "modern_admin/partials/error_state.html"
@@ -76,9 +78,9 @@ def _permission_denied(
     )
     context = site.each_context(request) | {
         "status": 403,
-        "title": "Access restricted",
+        "title": _("Access restricted"),
         "message": message,
-        "breadcrumbs": (("Access restricted", ""),),
+        "breadcrumbs": ((_("Access restricted"), ""),),
     }
     return render(request, template, context, status=403)
 
@@ -88,7 +90,7 @@ def _first_permitted_destination(request: HttpRequest, site: ModernAdminSite) ->
     for group in site.get_navigation(request).values():
         for item in group:
             return HttpResponseRedirect(item.url)
-    return _permission_denied(request, site, "You do not have access to any workspace page.")
+    return _permission_denied(request, site, _("You do not have access to any workspace page."))
 
 
 def _site_context(site: ModernAdminSite, request: HttpRequest, **context: Any) -> dict[str, Any]:
@@ -134,7 +136,7 @@ def _list_context(
     queue_key = request.GET.get("queue", "")
     selected_queue = next((queue for queue in queues if queue.key == queue_key), None)
     if queue_key and selected_queue is None:
-        raise Http404("Unknown or unavailable work queue")
+        raise Http404(_("Unknown or unavailable work queue"))
     # Counts describe the scoped workload, not the current search result.
     queue_conditions = {queue.key: queue.get_condition(request) for queue in queues}
     counts = (
@@ -296,7 +298,7 @@ def _list_context(
             + "?"
             + urlencode({"query": current_view_query})
         ),
-        breadcrumbs=(("Overview", site.reverse("dashboard")), (resource.title, "")),
+        breadcrumbs=((_("Overview"), site.reverse("dashboard")), (resource.title, "")),
     )
 
 
@@ -318,7 +320,7 @@ def resource_list_view(
 
 
 class SavedViewForm(forms.Form):
-    name = forms.CharField(max_length=100, label="View name")
+    name = forms.CharField(max_length=100, label=_("View name"))
     query = forms.CharField(max_length=2000, widget=forms.HiddenInput)
 
 
@@ -361,7 +363,7 @@ def saved_view_view(
             name=form.cleaned_data["name"],
             defaults={"query_string": canonical.urlencode()},
         )
-        message = f"Saved view “{form.cleaned_data['name']}”."
+        message = _("Saved view “%(name)s”.") % {"name": form.cleaned_data["name"]}
         if is_htmx(request):
             return htmx_events(
                 HttpResponse(status=204),
@@ -378,9 +380,9 @@ def saved_view_view(
         resource=resource,
         form=form,
         breadcrumbs=(
-            ("Overview", site.reverse("dashboard")),
+            (_("Overview"), site.reverse("dashboard")),
             (resource.title, site.reverse(f"{resource.key}_list")),
-            ("Save view", ""),
+            (_("Save view"), ""),
         ),
     )
     template_name = (
@@ -392,6 +394,15 @@ def saved_view_view(
     if request.method == "POST" and form.errors:
         response.status_code = 422
     return response
+
+
+def _labelled_events(resource: ModelResource, obj: models.Model) -> list[Any]:
+    """Attach a display verb to each event: resource actions carry their label."""
+    events = list(events_for(obj)[:20])
+    for event in events:
+        action = resource.get_action(event.action)
+        event.display_action = action.label if action else action_label(event.action)
+    return events
 
 
 def resource_detail_view(
@@ -464,9 +475,9 @@ def resource_detail_view(
         edit_url=site.reverse(f"{resource.key}_edit", args=(obj.pk,)),
         list_url=site.reverse(f"{resource.key}_list"),
         detail_url=site.reverse(f"{resource.key}_detail", args=(obj.pk,)),
-        audit_events=events_for(obj)[:20],
+        audit_events=_labelled_events(resource, obj),
         breadcrumbs=(
-            ("Overview", site.reverse("dashboard")),
+            (_("Overview"), site.reverse("dashboard")),
             (resource.title, site.reverse(f"{resource.key}_list")),
             (resource.get_object_label(obj), ""),
         ),
@@ -536,7 +547,7 @@ def resource_form_view(
     if not allowed:
         return _permission_denied(request, site)
     if not resource.has_form:
-        raise Http404("Forms are not configured for this resource.")
+        raise Http404(_("Forms are not configured for this resource."))
     form_class = resource.get_form_class(request, obj)
     form = form_class(
         request.POST if request.method == "POST" else None,
@@ -550,10 +561,14 @@ def resource_form_view(
         or request.POST.get("surface") == "dialog"
     )
     if request.method == "POST" and form.is_valid():
-        saved = resource.save_form(request, form, change=obj is not None)
-        action_name = "updated" if obj else "created"
-        record_event(request=request, action=action_name, obj=saved)
-        message = f"{resource.model._meta.verbose_name.title()} {action_name} successfully."
+        using = router.db_for_write(resource.model, instance=form.instance)
+        with transaction.atomic(using=using):
+            saved = resource.save_form(request, form, change=obj is not None)
+            action_name = "updated" if obj else "created"
+            record_event(request=request, action=action_name, obj=saved)
+        message = (
+            _("%(model)s updated successfully.") if obj else _("%(model)s created successfully.")
+        ) % {"model": capfirst(resource.model._meta.verbose_name)}
         detail_url = site.reverse(f"{resource.key}_detail", args=(saved.pk,))
         if is_htmx(request):
             response = HttpResponse(status=204)
@@ -568,19 +583,21 @@ def resource_form_view(
         object=obj,
         form=form,
         dialog=dialog,
-        page_title=f"Edit {resource.get_object_label(obj)}"
+        page_title=_("Edit %(object)s") % {"object": resource.get_object_label(obj)}
         if obj
-        else f"New {resource.model._meta.verbose_name}",
-        submit_label="Save changes" if obj else f"Create {resource.model._meta.verbose_name}",
+        else _("New %(model)s") % {"model": resource.model._meta.verbose_name},
+        submit_label=_("Save changes")
+        if obj
+        else _("Create %(model)s") % {"model": resource.model._meta.verbose_name},
         cancel_url=(
             site.reverse(f"{resource.key}_detail", args=(obj.pk,))
             if obj
             else site.reverse(f"{resource.key}_list")
         ),
         breadcrumbs=(
-            ("Overview", site.reverse("dashboard")),
+            (_("Overview"), site.reverse("dashboard")),
             (resource.title, site.reverse(f"{resource.key}_list")),
-            ("Edit" if obj else "New", ""),
+            (_("Edit") if obj else _("New"), ""),
         ),
     )
     if dialog:
@@ -590,6 +607,19 @@ def resource_form_view(
     if request.method == "POST" and form.errors and is_htmx(request):
         response.status_code = 422
     return response
+
+
+def _lock_action_rows(queryset: models.QuerySet) -> None:
+    # Lock only base rows: PostgreSQL forbids FOR UPDATE on DISTINCT/GROUP BY
+    # queries. Keep the scoped selection in a subquery, and acquire bulk locks
+    # in primary-key order to avoid inconsistent ordering between operators.
+    rows = (
+        queryset.model._base_manager.using(queryset.db)
+        .filter(pk__in=queryset.order_by().values("pk"))
+        .order_by("pk")
+        .select_for_update()
+    )
+    list(rows.values_list("pk", flat=True))
 
 
 def action_view(
@@ -605,13 +635,13 @@ def action_view(
     resource = site.get_resource(resource_key)
     action = resource.get_action(action_key)
     if action is None:
-        raise Http404("Unknown resource action")
+        raise Http404(_("Unknown resource action"))
     placements = {"row", "detail"} if object_id is not None else {"bulk", "resource"}
     if not placements.intersection(action.placements):
-        raise Http404("Action is not available at this endpoint")
+        raise Http404(_("Action is not available at this endpoint"))
     obj = get_object_or_404(resource.get_queryset(request), pk=object_id) if object_id else None
     if not action.has_permission(request, obj):
-        return _permission_denied(request, site, "You cannot run this action.")
+        return _permission_denied(request, site, _("You cannot run this action."))
     form = action.get_form_class()(**action.get_form_kwargs(request=request, obj=obj))
     _style_form(form)
     if request.method == "POST" and form.is_valid():
@@ -626,16 +656,10 @@ def action_view(
                     # loaded before a concurrent operator committed their action.
                     execution_queryset = resource.get_queryset(request)
                     if action.atomic:
-                        connection = connections[execution_queryset.db]
-                        lock_options = (
-                            {"of": ("self",)}
-                            if connection.features.has_select_for_update_of
-                            else {}
-                        )
-                        execution_queryset = execution_queryset.select_for_update(**lock_options)
+                        _lock_action_rows(execution_queryset.filter(pk=object_id))
                     obj = get_object_or_404(execution_queryset, pk=object_id)
                     if not action.has_permission(request, obj):
-                        return _permission_denied(request, site, "You cannot run this action.")
+                        return _permission_denied(request, site, _("You cannot run this action."))
                     action.validate_execution(request, obj)
                     result = action.execute(
                         request=request, obj=obj, cleaned_data=form.cleaned_data
@@ -644,13 +668,15 @@ def action_view(
                 else:
                     selected = request.POST.getlist("selected")
                     if not selected or len(selected) > 1000:
-                        raise ValidationError("Select between 1 and 1,000 records.")
+                        raise ValidationError(_("Select between 1 and 1,000 records."))
                     queryset = resource.get_queryset(request).filter(pk__in=selected)
+                    if action.atomic:
+                        _lock_action_rows(queryset)
                     objects = list(queryset)
                     if len(objects) != len(set(selected)) or any(
                         not action.has_permission(request, item) for item in objects
                     ):
-                        return _permission_denied(request, site, "Selection is not permitted.")
+                        return _permission_denied(request, site, _("Selection is not permitted."))
                     for item in objects:
                         action.validate_execution(request, item)
                     result = action.execute_bulk(
@@ -661,7 +687,7 @@ def action_view(
                     allowed_hosts={request.get_host()},
                     require_https=request.is_secure(),
                 ):
-                    raise ValidationError("The action returned an unsafe redirect URL.")
+                    raise ValidationError(_("The action returned an unsafe redirect URL."))
         except ValidationError as exc:
             form.add_error(None, exc)
         else:
@@ -696,7 +722,7 @@ def action_view(
         form=form,
         selected=request.GET.getlist("selected") or request.POST.getlist("selected"),
         breadcrumbs=(
-            ("Overview", site.reverse("dashboard")),
+            (_("Overview"), site.reverse("dashboard")),
             (resource.title, site.reverse(f"{resource.key}_list")),
             (action.label, ""),
         ),
@@ -735,7 +761,7 @@ def resource_tab_view(
         None,
     )
     if tab is None:
-        raise Http404("Unknown detail tab")
+        raise Http404(_("Unknown detail tab"))
     context = {
         "resource": resource,
         "object": obj,
@@ -763,7 +789,7 @@ def dashboard_view(request: HttpRequest, *, site: ModernAdminSite) -> HttpRespon
         dashboard=dashboard,
         widgets=widgets,
         widget_map=widget_map,
-        breadcrumbs=(("Overview", ""),),
+        breadcrumbs=((_("Overview"), ""),),
     )
     context = dashboard.get_context_data(request, **context)
     return render(request, dashboard.template_name, context)
@@ -777,7 +803,7 @@ def widget_view(request: HttpRequest, *, site: ModernAdminSite, widget_key: str)
         return _permission_denied(request, site)
     widget = next((item for item in dashboard.get_widgets(request) if item.key == widget_key), None)
     if widget is None:
-        raise Http404("Unknown dashboard widget")
+        raise Http404(_("Unknown dashboard widget"))
     return render(
         request,
         "modern_admin/partials/widget.html",
@@ -799,13 +825,13 @@ def page_view(
         return response
     page = next((item for item in site.registry.pages if item.key == page_key), None)
     if page is None:
-        raise Http404("Unknown custom page")
+        raise Http404(_("Unknown custom page"))
     if not page.has_permission(request):
         return _permission_denied(request, site)
     context = _site_context(
         site,
         request,
-        breadcrumbs=(("Overview", site.reverse("dashboard")), (page.title, "")),
+        breadcrumbs=((_("Overview"), site.reverse("dashboard")), (page.title, "")),
     )
     context = page.get_context_data(request, **context)
     return render(request, page.template_name, context)
@@ -833,7 +859,7 @@ def command_palette_view(request: HttpRequest, *, site: ModernAdminSite) -> Http
                 object_results.append(
                     {
                         "label": resource.get_object_label(obj),
-                        "meta": resource.model._meta.verbose_name.title(),
+                        "meta": capfirst(resource.model._meta.verbose_name),
                         "url": site.reverse(f"{resource.key}_detail", args=(obj.pk,)),
                         "icon": resource.icon,
                     }
@@ -843,7 +869,7 @@ def command_palette_view(request: HttpRequest, *, site: ModernAdminSite) -> Http
             if resource.has_form and resource.permission_policy.can_add(request.user):
                 create_results.append(
                     {
-                        "label": f"New {resource.verbose_name}",
+                        "label": _("New %(model)s") % {"model": resource.verbose_name},
                         "meta": resource.title,
                         "url": site.reverse(f"{resource.key}_create"),
                         "icon": resource.icon,
@@ -871,7 +897,7 @@ def relation_filter_choices_view(request, *, site, resource_key, filter_key):
         return _permission_denied(request, site)
     filter_ = next((f for f in resource.get_filters(request) if f.key == filter_key), None)
     if not isinstance(filter_, RelationFilter) or filter_.choices is not None:
-        raise Http404("Unknown relation filter")
+        raise Http404(_("Unknown relation filter"))
     page = Paginator(
         filter_.search(request, resource, request.GET.get("q", "").strip()),
         min(filter_.limit, 100),

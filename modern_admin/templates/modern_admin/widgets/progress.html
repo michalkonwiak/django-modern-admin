@@ -1,4 +1,7 @@
+{% load i18n %}
 <header class="ma-widget-header"><h2>{{ widget.title }}</h2><span>{{ widget_context.percent }}%</span></header>
 <div class="ma-progress"><span style="width:{{ widget_context.percent }}%"></span></div>
-<div class="ma-progress-meta"><strong>{{ widget_context.value }}</strong><span>of {{ widget_context.total }} {{ widget_context.description }}</span></div>
+<div class="ma-progress-meta">
+    <strong>{{ widget_context.value }}</strong><span>{% blocktranslate with total=widget_context.total label=widget_context.description %}of {{ total }} {{ label }}{% endblocktranslate %}</span>
+</div>
 

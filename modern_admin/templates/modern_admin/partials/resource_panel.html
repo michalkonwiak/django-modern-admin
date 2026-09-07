@@ -1,3 +1,4 @@
+{% load i18n %}
 {% load modern_admin %}
 <div id="resource-panel" class="ma-page ma-list-page" hx-get="{{ request.get_full_path }}" hx-trigger="ma:reload" hx-target="this" hx-swap="outerHTML" x-data="resourceTable()">
   <header class="ma-page-header ma-list-header">
@@ -5,20 +6,20 @@
       <div class="ma-title-line"><h1>{{ resource.title }}</h1></div>
       <div class="ma-page-context">
         <span><strong>{{ paginator.count }}</strong> {{ resource.verbose_name_plural }}</span>
-        {% if active_filters %}<i></i><span><strong>{{ active_filters|length }}</strong> active constraint{{ active_filters|length|pluralize }}</span>{% endif %}
-        {% if query %}<i></i><span>Matching “{{ query }}”</span>{% endif %}
+        {% if active_filters %}<i></i><span>{% blocktranslate count count=active_filters|length %}{{ count }} active constraint{% plural %}{{ count }} active constraints{% endblocktranslate %}</span>{% endif %}
+        {% if query %}<i></i><span>{% blocktranslate with query=query %}Matching “{{ query }}”{% endblocktranslate %}</span>{% endif %}
       </div>
     </div>
     {% if can_add %}
-      <a href="{{ create_url }}" aria-label="New {{ resource.verbose_name }}" class="ma-button is-primary" hx-get="{{ create_url }}?surface=dialog" hx-target="#dialog-host" hx-swap="innerHTML">
-        {% icon "plus" 14 %}<span>New {{ resource.verbose_name }}</span>
+      <a href="{{ create_url }}" aria-label="{% blocktranslate with record=resource.verbose_name %}New {{ record }}{% endblocktranslate %}" class="ma-button is-primary" hx-get="{{ create_url }}?surface=dialog" hx-target="#dialog-host" hx-swap="innerHTML">
+        {% icon "plus" 14 %}<span>{% blocktranslate with record=resource.verbose_name %}New {{ record }}{% endblocktranslate %}</span>
       </a>
     {% endif %}
   </header>
 
   {% if queue_links %}
-    <nav class="ma-work-queues" aria-label="Work queues">
-      <a href="{{ all_queue_url }}" hx-get="{{ all_queue_url }}" hx-target="#resource-panel" hx-push-url="true"{% if not selected_queue %} aria-current="page"{% endif %}>All records</a>
+    <nav class="ma-work-queues" aria-label="{% translate "Work queues" %}">
+      <a href="{{ all_queue_url }}" hx-get="{{ all_queue_url }}" hx-target="#resource-panel" hx-push-url="true"{% if not selected_queue %} aria-current="page"{% endif %}>{% translate "All records" %}</a>
       {% for queue in queue_links %}<a href="{{ queue.url }}" hx-get="{{ queue.url }}" hx-target="#resource-panel" hx-push-url="true"{% if queue.active %} aria-current="page"{% endif %}>{{ queue.label }}<span>{{ queue.count }}</span></a>{% endfor %}
     </nav>
     {% if selected_queue.description %}<p class="ma-queue-description">{{ selected_queue.description }}</p>{% endif %}
@@ -31,11 +32,11 @@
         {% if selected_queue %}<input type="hidden" name="queue" value="{{ selected_queue.key }}">{% endif %}
         {% if applied_ordering %}<input type="hidden" name="ordering" value="{{ applied_ordering }}">{% endif %}
         <label class="ma-search-field">
-          <span class="ma-sr-only">Search {{ resource.title|lower }}</span>{% icon "search" 15 %}
-          <input id="resource-search" type="search" name="q" value="{{ query }}" placeholder="Search {{ resource.title|lower }}" autocomplete="off"
+          <span class="ma-sr-only">{% blocktranslate with title=resource.title|lower %}Search {{ title }}{% endblocktranslate %}</span>{% icon "search" 15 %}
+          <input id="resource-search" type="search" name="q" value="{{ query }}" placeholder="{% blocktranslate with title=resource.title|lower %}Search {{ title }}{% endblocktranslate %}" autocomplete="off"
                  hx-get="{{ request.path }}" hx-trigger="input changed delay:250ms, search" hx-target="#resource-panel" hx-push-url="true" hx-include="#resource-filters" hx-sync="#resource-filters:replace">
           <span class="ma-search-pending" aria-hidden="true"></span>
-          {% if query %}<a href="{{ clear_search_url }}" hx-get="{{ clear_search_url }}" hx-target="#resource-panel" hx-push-url="true" aria-label="Clear search">{% icon "x" 13 %}</a>{% else %}<kbd>/</kbd>{% endif %}
+          {% if query %}<a href="{{ clear_search_url }}" hx-get="{{ clear_search_url }}" hx-target="#resource-panel" hx-push-url="true" aria-label="{% translate "Clear search" %}">{% icon "x" 13 %}</a>{% else %}<kbd>/</kbd>{% endif %}
         </label>
         <span class="ma-toolbar-separator" aria-hidden="true"></span>
         <div class="ma-toolbar-filters">
@@ -48,10 +49,10 @@
                 {% icon "calendar" 13 %}<span>{{ filter.label }}</span>{% icon "chevron-down" 11 %}
               </button>
               <div class="ma-popover ma-range-popover" x-cloak x-show="activeFilter === '{{ filter.key }}'" x-floating="activeFilter === '{{ filter.key }}'" @click.outside="activeFilter=''">
-                <header><strong>{{ filter.label }}</strong><small>Choose a range</small></header>
-                <div class="ma-field"><label>From</label><input class="ma-input" type="{% if filter.kind == 'date_range' %}date{% else %}number{% endif %}" name="{{ filter.key }}__gte" value="{{ filter.value }}"></div>
-                <div class="ma-field"><label>To</label><input class="ma-input" type="{% if filter.kind == 'date_range' %}date{% else %}number{% endif %}" name="{{ filter.key }}__lte" value="{{ filter.value_to }}"></div>
-                <button class="ma-button is-primary is-small" type="submit">Apply range</button>
+                <header><strong>{{ filter.label }}</strong><small>{% translate "Choose a range" %}</small></header>
+                <div class="ma-field"><label>{% translate "From" %}</label><input class="ma-input" type="{% if filter.kind == 'date_range' %}date{% else %}number{% endif %}" name="{{ filter.key }}__gte" value="{{ filter.value }}"></div>
+                <div class="ma-field"><label>{% translate "To" %}</label><input class="ma-input" type="{% if filter.kind == 'date_range' %}date{% else %}number{% endif %}" name="{{ filter.key }}__lte" value="{{ filter.value_to }}"></div>
+                <button class="ma-button is-primary is-small" type="submit">{% translate "Apply range" %}</button>
               </div>
             {% else %}<label class="ma-filter-control"><span class="ma-sr-only">{{ filter.label }}</span><input name="{{ filter.key }}" value="{{ filter.value }}" placeholder="{{ filter.label }}" @change="$el.form.requestSubmit()"></label>{% endif %}
           {% endfor %}
@@ -60,18 +61,18 @@
 
       <div class="ma-toolbar-end">
         <div class="ma-relative">
-          <button class="ma-toolbar-button" type="button" @click="viewsOpen=!viewsOpen" :aria-expanded="viewsOpen" aria-label="Saved views">{% icon "filter" 14 %}<span>Views</span>{% if saved_views %}<b>{{ saved_views|length }}</b>{% endif %}{% icon "chevron-down" 11 %}</button>
+          <button class="ma-toolbar-button" type="button" @click="viewsOpen=!viewsOpen" :aria-expanded="viewsOpen" aria-label="{% translate "Saved views" %}">{% icon "filter" 14 %}<span>{% translate "Views" %}</span>{% if saved_views %}<b>{{ saved_views|length }}</b>{% endif %}{% icon "chevron-down" 11 %}</button>
           <div class="ma-popover ma-views-popover" x-cloak x-show="viewsOpen" x-floating.end="viewsOpen" @click.outside="viewsOpen=false">
-            <div class="ma-popover-title"><span>Saved views</span><small>Personal</small></div>
-            {% for saved in saved_views %}<a href="{{ saved.url }}" hx-get="{{ saved.url }}" hx-target="#resource-panel" hx-push-url="true" @click="viewsOpen=false">{% icon "filter" 14 %}<span>{{ saved.name }}</span></a>{% empty %}<p>No saved views yet.</p>{% endfor %}
-            {% if current_view_query %}<a class="ma-views-save" href="{{ save_view_url }}" hx-get="{{ save_view_url }}" hx-target="#dialog-host" hx-swap="innerHTML" @click="viewsOpen=false">{% icon "plus" 14 %}<span>Save current view</span></a>{% endif %}
+            <div class="ma-popover-title"><span>{% translate "Saved views" %}</span><small>{% translate "Personal" %}</small></div>
+            {% for saved in saved_views %}<a href="{{ saved.url }}" hx-get="{{ saved.url }}" hx-target="#resource-panel" hx-push-url="true" @click="viewsOpen=false">{% icon "filter" 14 %}<span>{{ saved.name }}</span></a>{% empty %}<p>{% translate "No saved views yet." %}</p>{% endfor %}
+            {% if current_view_query %}<a class="ma-views-save" href="{{ save_view_url }}" hx-get="{{ save_view_url }}" hx-target="#dialog-host" hx-swap="innerHTML" @click="viewsOpen=false">{% icon "plus" 14 %}<span>{% translate "Save current view" %}</span></a>{% endif %}
           </div>
         </div>
-        {% if filter_states %}<button class="ma-icon-button ma-toolbar-icon{% if active_filters %} is-active{% endif %}" type="button" @click="filterPanel=!filterPanel" aria-label="More filters" :aria-expanded="filterPanel">{% icon "filter" 14 %}{% if active_filters %}<i></i>{% endif %}</button>{% endif %}
+        {% if filter_states %}<button class="ma-icon-button ma-toolbar-icon{% if active_filters %} is-active{% endif %}" type="button" @click="filterPanel=!filterPanel" aria-label="{% translate "More filters" %}" :aria-expanded="filterPanel">{% icon "filter" 14 %}{% if active_filters %}<i></i>{% endif %}</button>{% endif %}
         <div class="ma-relative">
-          <button class="ma-icon-button ma-toolbar-icon" type="button" @click="columnsOpen=!columnsOpen" aria-label="Choose columns">{% icon "panel-left" 14 %}</button>
+          <button class="ma-icon-button ma-toolbar-icon" type="button" @click="columnsOpen=!columnsOpen" aria-label="{% translate "Choose columns" %}">{% icon "panel-left" 14 %}</button>
           <div class="ma-popover ma-column-picker" x-cloak x-show="columnsOpen" x-floating.end="columnsOpen" @click.outside="columnsOpen=false">
-            <div class="ma-popover-title"><span>Visible columns</span><small>{{ columns|length }} total</small></div>
+            <div class="ma-popover-title"><span>{% translate "Visible columns" %}</span><small>{% blocktranslate with count=columns|length %}{{ count }} total{% endblocktranslate %}</small></div>
             {% for column in columns %}<label><input type="checkbox" checked value="{{ forloop.counter0 }}" @change="toggleColumn({{ forloop.counter0 }})"><span>{{ column.heading }}</span></label>{% endfor %}
           </div>
         </div>
@@ -79,9 +80,9 @@
     </div>
     {% if active_filters %}
       <div class="ma-active-filters">
-        <span class="ma-active-filter-label">Filtered by</span>
+        <span class="ma-active-filter-label">{% translate "Filtered by" %}</span>
         {% for filter in active_filters %}<span class="ma-filter-token"><i></i>{{ filter.active_label }}</span>{% endfor %}
-        <a href="{{ clear_filters_url }}" hx-get="{{ clear_filters_url }}" hx-target="#resource-panel" hx-push-url="true">Reset</a>
+        <a href="{{ clear_filters_url }}" hx-get="{{ clear_filters_url }}" hx-target="#resource-panel" hx-push-url="true">{% translate "Reset" %}</a>
       </div>
     {% endif %}
   </div>
@@ -89,7 +90,7 @@
   {% if filter_states %}
     <div class="ma-drawer-backdrop" x-cloak x-show="filterPanel" @click.self="filterPanel=false" @keydown.escape.window="filterPanel=false">
       <aside class="ma-filter-drawer" role="dialog" aria-modal="true" aria-labelledby="filter-drawer-title" x-show="filterPanel">
-        <header><div><span class="ma-drawer-orb">{% icon "filter" 15 %}</span><div><div class="ma-eyebrow">Query builder</div><h2 id="filter-drawer-title">Refine {{ resource.title|lower }}</h2></div></div><button class="ma-icon-button" type="button" @click="filterPanel=false" aria-label="Close filters">{% icon "x" 16 %}</button></header>
+        <header><div><span class="ma-drawer-orb">{% icon "filter" 15 %}</span><div><div class="ma-eyebrow">{% translate "Query builder" %}</div><h2 id="filter-drawer-title">{% blocktranslate with title=resource.title|lower %}Refine {{ title }}{% endblocktranslate %}</h2></div></div><button class="ma-icon-button" type="button" @click="filterPanel=false" aria-label="{% translate "Close filters" %}">{% icon "x" 16 %}</button></header>
         <form method="get" action="{{ request.path }}" hx-get="{{ request.path }}" hx-target="#resource-panel" hx-push-url="true" @htmx:after-request="filterPanel=false">
           {% if selected_queue %}<input type="hidden" name="queue" value="{{ selected_queue.key }}">{% endif %}
           {% if query %}<input type="hidden" name="q" value="{{ query }}">{% endif %}
@@ -100,12 +101,12 @@
               <div class="ma-field">
                 <label>{{ filter.label }}</label>
                 {% if filter.kind == "relation" %}{% include "modern_admin/partials/relation_filter.html" with auto_submit=False %}{% elif filter.kind == "choice" or filter.kind == "multiple_choice" %}{% include "modern_admin/partials/choice_filter.html" with auto_submit=False %}
-                {% elif filter.kind == "date_range" or filter.kind == "number_range" %}<div class="ma-drawer-range"><input class="ma-input" aria-label="{{ filter.label }} from" type="{% if filter.kind == 'date_range' %}date{% else %}number{% endif %}" name="{{ filter.key }}__gte" value="{{ filter.value }}"><span>to</span><input class="ma-input" aria-label="{{ filter.label }} to" type="{% if filter.kind == 'date_range' %}date{% else %}number{% endif %}" name="{{ filter.key }}__lte" value="{{ filter.value_to }}"></div>
+                {% elif filter.kind == "date_range" or filter.kind == "number_range" %}<div class="ma-drawer-range"><input class="ma-input" aria-label="{% blocktranslate with label=filter.label %}{{ label }} from{% endblocktranslate %}" type="{% if filter.kind == 'date_range' %}date{% else %}number{% endif %}" name="{{ filter.key }}__gte" value="{{ filter.value }}"><span>{% translate "to" %}</span><input class="ma-input" aria-label="{% blocktranslate with label=filter.label %}{{ label }} to{% endblocktranslate %}" type="{% if filter.kind == 'date_range' %}date{% else %}number{% endif %}" name="{{ filter.key }}__lte" value="{{ filter.value_to }}"></div>
                 {% else %}<input class="ma-input" type="text" name="{{ filter.key }}" value="{{ filter.value }}">{% endif %}
               </div>
             {% endfor %}
           </div>
-          <footer><a class="ma-button is-secondary" href="{{ clear_filters_url }}">Reset all</a><button class="ma-button is-primary" type="submit">Show results</button></footer>
+          <footer><a class="ma-button is-secondary" href="{{ clear_filters_url }}">{% translate "Reset all" %}</a><button class="ma-button is-primary" type="submit">{% translate "Show results" %}</button></footer>
         </form>
       </aside>
     </div>
@@ -113,23 +114,23 @@
 
   <form id="resource-table-form" class="ma-table-shell" :class="{ 'is-wide-mobile': wideMobile }" x-data="tableSelection({{ rows|length }})">
     <div class="ma-bulk-bar" x-cloak x-show="selected.length">
-      <span class="ma-bulk-count"><i></i><strong x-text="selected.length"></strong> selected</span><span class="ma-toolbar-separator"></span>
+      <span class="ma-bulk-count"><i></i><strong x-text="selectionSummary"></strong></span><span class="ma-toolbar-separator"></span>
       {% for link in bulk_actions %}<button type="button" class="ma-button is-small{% if link.action.variant == 'danger' %} is-danger{% endif %}" hx-get="{{ link.url }}" hx-include="#resource-table-form" hx-target="#dialog-host" hx-swap="innerHTML">{% icon link.action.icon 14 %}{{ link.action.label }}</button>{% endfor %}
-      <button type="button" class="ma-button is-quiet is-small" @click="clear()">Clear selection</button>
+      <button type="button" class="ma-button is-quiet is-small" @click="clear()">{% translate "Clear selection" %}</button>
     </div>
     <button type="button" class="ma-mobile-columns" @click="wideMobile=!wideMobile" :aria-pressed="wideMobile"><span x-text="wideMobile ? 'Compact view' : 'Show all columns'"></span></button>
     <div class="ma-table-scroll">
       <table class="ma-table">
         <caption class="ma-sr-only">{{ resource.title }}</caption>
         <thead><tr>
-          <th class="ma-select-cell"><input class="ma-checkbox" type="checkbox" @change="toggleAll($event)" :checked="allSelected" x-effect="syncIndeterminate($el)" aria-label="Select all rows"></th>
+          <th class="ma-select-cell"><input class="ma-checkbox" type="checkbox" @change="toggleAll($event)" :checked="allSelected" x-effect="syncIndeterminate($el)" aria-label="{% translate "Select all rows" %}"></th>
           {% for header in column_headers %}<th class="{% if header.numeric %}is-numeric {% endif %}{% if forloop.first %}is-identity{% elif header.is_status %}is-status{% endif %}" x-show="!hiddenColumns.includes({{ forloop.counter0 }})"{% if header.column.width %} style="width:{{ header.column.width }}"{% endif %}>{% if header.sort_url %}<a href="{{ header.sort_url }}" hx-get="{{ header.sort_url }}" hx-target="#resource-panel" hx-push-url="true" class="ma-sort">{{ header.column.heading }}{% if header.direction == 'asc' %}{% icon "arrow-up" 12 %}{% elif header.direction == 'desc' %}{% icon "arrow-down" 12 %}{% endif %}</a>{% else %}{{ header.column.heading }}{% endif %}</th>{% endfor %}
-          <th class="ma-actions-cell"><span class="ma-sr-only">Actions</span></th>
+          <th class="ma-actions-cell"><span class="ma-sr-only">{% translate "Actions" %}</span></th>
         </tr></thead>
         <tbody>
           {% for row in rows %}
             <tr class="ma-data-row" :class="{ 'is-selected': selected.includes('{{ row.obj.pk }}') }" data-row-url="{{ row.detail_url }}">
-              <td class="ma-select-cell"><input class="ma-checkbox" type="checkbox" name="selected" value="{{ row.obj.pk }}" @change="toggle('{{ row.obj.pk }}')" @click.stop aria-label="Select {{ row.obj }}"></td>
+              <td class="ma-select-cell"><input class="ma-checkbox" type="checkbox" name="selected" value="{{ row.obj.pk }}" @change="toggle('{{ row.obj.pk }}')" @click.stop aria-label="{% blocktranslate with record=row.obj %}Select {{ record }}{% endblocktranslate %}"></td>
               {% for column, cell in row.cells %}
                 <td x-show="!hiddenColumns.includes({{ forloop.counter0 }})" class="{% if cell.numeric %}is-numeric {% endif %}{% if forloop.first %}is-identity{% elif cell.kind == 'badge' %}is-status{% endif %}">
                   {% if forloop.first %}<div class="ma-record-identity"><a class="ma-cell-link" href="{{ row.detail_url }}">{% endif %}
@@ -138,10 +139,10 @@
                   {% elif cell.kind == "avatar" %}<span class="ma-person-cell"><span class="ma-avatar"><span>{{ cell.display|initials }}</span></span><span><strong>{{ cell.display }}</strong>{% if cell.secondary %}<small>{{ cell.secondary }}</small>{% endif %}</span></span>
                   {% elif cell.kind == "html" %}{{ cell.display|safe }}
                   {% else %}<span class="{% if forloop.first %}ma-primary-cell{% endif %}" title="{{ cell.display }}">{{ cell.display }}</span>{% if cell.secondary %}<small class="ma-cell-secondary">{{ cell.secondary }}</small>{% endif %}{% endif %}
-                  {% if forloop.first %}</a><a class="ma-preview-trigger" href="{{ row.detail_url }}" hx-get="{{ row.preview_url }}" hx-target="#preview-host" hx-swap="innerHTML" aria-label="Preview {{ row.obj }}" title="Quick preview" @click.stop>{% icon "panel-left" 14 %}</a></div>{% endif %}
+                  {% if forloop.first %}</a><a class="ma-preview-trigger" href="{{ row.detail_url }}" hx-get="{{ row.preview_url }}" hx-target="#preview-host" hx-swap="innerHTML" aria-label="{% blocktranslate with record=row.obj %}Preview {{ record }}{% endblocktranslate %}" title="{% translate "Quick preview" %}" @click.stop>{% icon "panel-left" 14 %}</a></div>{% endif %}
                 </td>
               {% endfor %}
-              <td class="ma-actions-cell">{% if row.actions %}<div class="ma-relative" x-data="{ open: false }"><button class="ma-row-menu" type="button" @click.stop="open=!open" aria-label="Actions for {{ row.obj }}">{% icon "ellipsis" 17 %}</button><div class="ma-popover ma-row-popover" x-cloak x-show="open" x-floating="open" @click.outside="open=false">{% for link in row.actions %}<a href="{{ link.url }}" hx-get="{{ link.url }}" hx-target="#dialog-host" hx-swap="innerHTML" @click="open=false" class="{% if link.action.variant == 'danger' %}is-danger{% endif %}">{% icon link.action.icon 15 %}{{ link.action.label }}</a>{% endfor %}</div></div>{% endif %}</td>
+              <td class="ma-actions-cell">{% if row.actions %}<div class="ma-relative" x-data="{ open: false }"><button class="ma-row-menu" type="button" @click.stop="open=!open" aria-label="{% blocktranslate with record=row.obj %}Actions for {{ record }}{% endblocktranslate %}">{% icon "ellipsis" 17 %}</button><div class="ma-popover ma-row-popover" x-cloak x-show="open" x-floating="open" @click.outside="open=false">{% for link in row.actions %}<a href="{{ link.url }}" hx-get="{{ link.url }}" hx-target="#dialog-host" hx-swap="innerHTML" @click="open=false" class="{% if link.action.variant == 'danger' %}is-danger{% endif %}">{% icon link.action.icon 15 %}{{ link.action.label }}</a>{% endfor %}</div></div>{% endif %}</td>
             </tr>
           {% empty %}<tr><td colspan="{{ columns|length|add:2 }}">{% include "modern_admin/partials/empty_state.html" %}</td></tr>{% endfor %}
         </tbody>
@@ -149,8 +150,8 @@
     </div>
     {% if paginator.count %}
       <footer class="ma-pagination">
-        <div><span>Rows</span><strong>{{ page.start_index }}–{{ page.end_index }}</strong><span>of {{ paginator.count }}</span><label class="ma-page-size"><select name="page_size" form="resource-filters" @change="$el.form.requestSubmit()" aria-label="Rows per page">{% for option in page_size_options %}<option value="{{ option }}"{% if option == page_size %} selected{% endif %}>{{ option }} per page</option>{% endfor %}</select>{% icon "chevron-down" 11 %}</label></div>
-        <nav aria-label="Pagination">{% if previous_url %}<a href="{{ previous_url }}" hx-get="{{ previous_url }}" hx-target="#resource-panel" hx-push-url="true" aria-label="Previous page">{% icon "chevron-left" 14 %}</a>{% else %}<span class="is-disabled">{% icon "chevron-left" 14 %}</span>{% endif %}{% for link in page_links %}<a href="{{ link.url }}" hx-get="{{ link.url }}" hx-target="#resource-panel" hx-push-url="true"{% if link.number == page.number %} class="is-current" aria-current="page"{% endif %}>{{ link.number }}</a>{% endfor %}{% if next_url %}<a href="{{ next_url }}" hx-get="{{ next_url }}" hx-target="#resource-panel" hx-push-url="true" aria-label="Next page">{% icon "chevron-right" 14 %}</a>{% else %}<span class="is-disabled">{% icon "chevron-right" 14 %}</span>{% endif %}</nav>
+        <div><span>{% translate "Rows" %}</span><strong>{{ page.start_index }}–{{ page.end_index }}</strong><span>{% blocktranslate with count=paginator.count %}of {{ count }}{% endblocktranslate %}</span><label class="ma-page-size"><select name="page_size" form="resource-filters" @change="$el.form.requestSubmit()" aria-label="{% translate "Rows per page" %}">{% for option in page_size_options %}<option value="{{ option }}"{% if option == page_size %} selected{% endif %}>{% blocktranslate with size=option %}{{ size }} per page{% endblocktranslate %}</option>{% endfor %}</select>{% icon "chevron-down" 11 %}</label></div>
+        <nav aria-label="{% translate "Pagination" %}">{% if previous_url %}<a href="{{ previous_url }}" hx-get="{{ previous_url }}" hx-target="#resource-panel" hx-push-url="true" aria-label="{% translate "Previous page" %}">{% icon "chevron-left" 14 %}</a>{% else %}<span class="is-disabled">{% icon "chevron-left" 14 %}</span>{% endif %}{% for link in page_links %}<a href="{{ link.url }}" hx-get="{{ link.url }}" hx-target="#resource-panel" hx-push-url="true"{% if link.number == page.number %} class="is-current" aria-current="page"{% endif %}>{{ link.number }}</a>{% endfor %}{% if next_url %}<a href="{{ next_url }}" hx-get="{{ next_url }}" hx-target="#resource-panel" hx-push-url="true" aria-label="{% translate "Next page" %}">{% icon "chevron-right" 14 %}</a>{% else %}<span class="is-disabled">{% icon "chevron-right" 14 %}</span>{% endif %}</nav>
       </footer>
     {% endif %}
   </form>

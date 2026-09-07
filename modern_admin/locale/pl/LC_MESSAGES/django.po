@@ -1,0 +1,922 @@
+# Polish translation of django-modern-admin.
+# Copyright (C) django-modern-admin contributors
+# This file is distributed under the same license as the django-modern-admin package.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: django-modern-admin\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-09-07 22:36+0200\n"
+"PO-Revision-Date: 2026-09-07 22:30+0200\n"
+"Last-Translator: django-modern-admin\n"
+"Language-Team: Polish\n"
+"Language: pl\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+
+#: modern_admin/access.py:29
+msgid "You do not have access to this workspace."
+msgstr "Nie masz dostępu do tej przestrzeni roboczej."
+
+#: modern_admin/accounts.py:126
+#, python-format
+msgid "%(count)d permission"
+msgid_plural "%(count)d permissions"
+msgstr[0] "%(count)d uprawnienie"
+msgstr[1] "%(count)d uprawnienia"
+msgstr[2] "%(count)d uprawnień"
+
+#: modern_admin/accounts.py:146
+msgid "Required to reach the workspace. Permissions below decide what is visible."
+msgstr "Wymagane, aby wejść do przestrzeni roboczej. O tym, co jest widoczne, decydują uprawnienia poniżej."
+
+#: modern_admin/accounts.py:150
+msgid "Grants every permission, including the ones not listed below."
+msgstr "Nadaje wszystkie uprawnienia, także te niewymienione poniżej."
+
+#: modern_admin/accounts.py:153
+msgid "Individual permissions"
+msgstr "Uprawnienia indywidualne"
+
+#: modern_admin/accounts.py:195
+msgid "Permissions"
+msgstr "Uprawnienia"
+
+#: modern_admin/accounts.py:196
+msgid "Everyone in this group receives these permissions."
+msgstr "Każdy w tej grupie otrzymuje te uprawnienia."
+
+#: modern_admin/accounts.py:224
+msgid "Set password"
+msgstr "Ustaw hasło"
+
+#: modern_admin/accounts.py:225
+msgid "Replace this account's password. The operator is not shown the old one."
+msgstr "Zastąp hasło tego konta. Operator nie zobaczy starego hasła."
+
+#: modern_admin/accounts.py:244
+#, python-format
+msgid "Password updated for %(user)s."
+msgstr "Zaktualizowano hasło dla %(user)s."
+
+#: modern_admin/accounts.py:250 modern_admin/accounts.py:253
+msgid "Users"
+msgstr "Użytkownicy"
+
+#: modern_admin/accounts.py:251
+msgid "Accounts that can reach this workspace, and what each one may see."
+msgstr "Konta z dostępem do tej przestrzeni roboczej i zakres tego, co widzą."
+
+#: modern_admin/accounts.py:253 modern_admin/accounts.py:307
+#: modern_admin/sites.py:36
+msgid "System"
+msgstr "System"
+
+#: modern_admin/accounts.py:256
+msgid "Account"
+msgstr "Konto"
+
+#: modern_admin/accounts.py:257
+msgid "Name"
+msgstr "Imię i nazwisko"
+
+#: modern_admin/accounts.py:258 modern_admin/accounts.py:304
+#: modern_admin/accounts.py:307
+msgid "Groups"
+msgstr "Grupy"
+
+#: modern_admin/accounts.py:259
+msgid "Active"
+msgstr "Aktywne"
+
+#: modern_admin/accounts.py:260
+msgid "Workspace access"
+msgstr "Dostęp do przestrzeni"
+
+#: modern_admin/accounts.py:261
+msgid "Superuser"
+msgstr "Superużytkownik"
+
+#: modern_admin/accounts.py:270
+msgid "Profile"
+msgstr "Profil"
+
+#: modern_admin/accounts.py:272
+msgid "Access"
+msgstr "Dostęp"
+
+#: modern_admin/accounts.py:274
+msgid "Group membership and individual permissions decide what is visible."
+msgstr "O tym, co jest widoczne, decyduje przynależność do grup i uprawnienia indywidualne."
+
+#: modern_admin/accounts.py:276
+#: modern_admin/templates/modern_admin/partials/record_preview_body.html:17
+#: modern_admin/templates/modern_admin/partials/resource_detail_body.html:43
+msgid "Activity"
+msgstr "Aktywność"
+
+#: modern_admin/accounts.py:305
+msgid "Permission bundles you assign to accounts instead of one-off grants."
+msgstr "Pakiety uprawnień przypisywane kontom zamiast pojedynczych nadań."
+
+#: modern_admin/accounts.py:309 modern_admin/accounts.py:315
+msgid "Group"
+msgstr "Grupa"
+
+#: modern_admin/accounts.py:310
+msgid "Members"
+msgstr "Członkowie"
+
+#: modern_admin/actions.py:42
+msgid "Action"
+msgstr "Akcja"
+
+#: modern_admin/apps.py:8
+msgid "Modern Admin"
+msgstr "Modern Admin"
+
+#: modern_admin/audit.py:16
+msgid "created"
+msgstr "utworzono"
+
+#: modern_admin/audit.py:16
+msgid "updated"
+msgstr "zaktualizowano"
+
+#: modern_admin/columns.py:197 modern_admin/filters.py:174
+#: modern_admin/resources.py:289
+msgid "Yes"
+msgstr "Tak"
+
+#: modern_admin/columns.py:197 modern_admin/filters.py:174
+#: modern_admin/resources.py:289
+msgid "No"
+msgstr "Nie"
+
+#: modern_admin/forms/widgets.py:40
+msgid "Add comma-separated tags"
+msgstr "Dodaj tagi rozdzielone przecinkami"
+
+#: modern_admin/forms/widgets.py:56
+msgid "Filter options…"
+msgstr "Filtruj opcje…"
+
+#: modern_admin/navigation.py:20 modern_admin/navigation.py:30
+#: modern_admin/sites.py:32 modern_admin/sites.py:69 modern_admin/sites.py:111
+#: modern_admin/templates/modern_admin/pages/login.html:16
+#: modern_admin/templates/modern_admin/pages/login.html:17
+#: modern_admin/templates/modern_admin/partials/command_results.html:6
+msgid "Workspace"
+msgstr "Przestrzeń robocza"
+
+#: modern_admin/resources.py:262 modern_admin/resources.py:331
+#: modern_admin/sites.py:108
+#: modern_admin/templates/modern_admin/partials/resource_detail_body.html:22
+#: modern_admin/views.py:301 modern_admin/views.py:383
+#: modern_admin/views.py:480 modern_admin/views.py:598
+#: modern_admin/views.py:725 modern_admin/views.py:792
+#: modern_admin/views.py:834
+msgid "Overview"
+msgstr "Przegląd"
+
+#: modern_admin/resources.py:332
+msgid "A live view of the work that needs attention."
+msgstr "Bieżący widok pracy, która wymaga uwagi."
+
+#: modern_admin/sites.py:29 modern_admin/sites.py:34
+msgid "Operations"
+msgstr "Operacje"
+
+#: modern_admin/sites.py:33
+msgid "Relationships"
+msgstr "Relacje"
+
+#: modern_admin/sites.py:35
+msgid "Billing"
+msgstr "Rozliczenia"
+
+#: modern_admin/templates/modern_admin/components/skeleton.html:2
+msgid "Loading"
+msgstr "Wczytywanie"
+
+#: modern_admin/templates/modern_admin/layouts/app.html:8
+msgid "Primary navigation"
+msgstr "Nawigacja główna"
+
+#: modern_admin/templates/modern_admin/layouts/app.html:10
+#, python-format
+msgid "%(site)s workspace home"
+msgstr "Strona główna przestrzeni %(site)s"
+
+#: modern_admin/templates/modern_admin/layouts/app.html:16
+msgid "Toggle compact sidebar"
+msgstr "Przełącz wąski panel boczny"
+
+#: modern_admin/templates/modern_admin/layouts/app.html:17
+msgid "Close navigation"
+msgstr "Zamknij nawigację"
+
+#: modern_admin/templates/modern_admin/layouts/app.html:40
+msgid "Account menu"
+msgstr "Menu konta"
+
+#: modern_admin/templates/modern_admin/layouts/app.html:50
+msgid "Use dark mode"
+msgstr "Włącz tryb ciemny"
+
+#: modern_admin/templates/modern_admin/layouts/app.html:51
+msgid "Use light mode"
+msgstr "Włącz tryb jasny"
+
+#: modern_admin/templates/modern_admin/layouts/app.html:53
+msgid "Sign out"
+msgstr "Wyloguj się"
+
+#: modern_admin/templates/modern_admin/layouts/app.html:61
+msgid "Open navigation"
+msgstr "Otwórz nawigację"
+
+#: modern_admin/templates/modern_admin/layouts/app.html:62
+msgid "Breadcrumb"
+msgstr "Ścieżka nawigacji"
+
+#: modern_admin/templates/modern_admin/layouts/app.html:71
+msgid "Open command palette"
+msgstr "Otwórz paletę poleceń"
+
+#: modern_admin/templates/modern_admin/layouts/app.html:72
+msgid "Search workspace"
+msgstr "Szukaj w przestrzeni"
+
+#: modern_admin/templates/modern_admin/layouts/app.html:74
+#: modern_admin/templates/modern_admin/pages/login.html:10
+msgid "Toggle color theme"
+msgstr "Przełącz motyw kolorystyczny"
+
+#: modern_admin/templates/modern_admin/layouts/app.html:89
+msgid "Command palette"
+msgstr "Paleta poleceń"
+
+#: modern_admin/templates/modern_admin/layouts/app.html:92
+msgid "Search pages and records…"
+msgstr "Szukaj stron i rekordów…"
+
+#: modern_admin/templates/modern_admin/layouts/app.html:97
+#: modern_admin/templates/modern_admin/partials/command_results.html:6
+msgid "Navigate"
+msgstr "Nawiguj"
+
+#: modern_admin/templates/modern_admin/layouts/app.html:97
+#: modern_admin/templates/modern_admin/partials/command_results.html:4
+msgid "Open"
+msgstr "Otwórz"
+
+#: modern_admin/templates/modern_admin/layouts/app.html:97
+msgid "Close"
+msgstr "Zamknij"
+
+#: modern_admin/templates/modern_admin/layouts/app.html:105
+msgid "Dismiss"
+msgstr "Odrzuć"
+
+#: modern_admin/templates/modern_admin/pages/dashboard.html:4
+#, python-format
+msgid "Overview · %(site)s"
+msgstr "Przegląd · %(site)s"
+
+#: modern_admin/templates/modern_admin/pages/dashboard.html:7
+msgid "Workspace pulse"
+msgstr "Puls przestrzeni"
+
+#: modern_admin/templates/modern_admin/pages/dashboard.html:8
+msgid "Review now"
+msgstr "Przejrzyj teraz"
+
+#: modern_admin/templates/modern_admin/pages/dashboard.html:13
+msgid "Your workspace is ready"
+msgstr "Przestrzeń robocza jest gotowa"
+
+#: modern_admin/templates/modern_admin/pages/dashboard.html:13
+msgid "Register dashboard widgets to surface decisions, exceptions, and current work here."
+msgstr "Zarejestruj widżety pulpitu, aby pokazywać tu decyzje, wyjątki i bieżącą pracę."
+
+#: modern_admin/templates/modern_admin/pages/error.html:4
+msgid "Return to overview"
+msgstr "Wróć do przeglądu"
+
+#: modern_admin/templates/modern_admin/pages/login.html:4
+#, python-format
+msgid "Sign in · %(site)s"
+msgstr "Logowanie · %(site)s"
+
+#: modern_admin/templates/modern_admin/pages/login.html:19
+msgid "Your work, in focus."
+msgstr "Twoja praca, w centrum uwagi."
+
+#: modern_admin/templates/modern_admin/pages/login.html:23
+#: modern_admin/templates/modern_admin/pages/login.html:37
+msgid "Sign in"
+msgstr "Zaloguj się"
+
+#: modern_admin/templates/modern_admin/pages/login.html:24
+#, python-format
+msgid "Enter your details to access %(site)s."
+msgstr "Podaj dane, aby uzyskać dostęp do %(site)s."
+
+#: modern_admin/templates/modern_admin/pages/login.html:39
+msgid "Need access? Contact your workspace administrator."
+msgstr "Potrzebujesz dostępu? Skontaktuj się z administratorem przestrzeni."
+
+#: modern_admin/templates/modern_admin/pages/resource_form.html:9
+msgid "EDITOR"
+msgstr "EDYTOR"
+
+#: modern_admin/templates/modern_admin/pages/resource_form.html:9
+msgid "Core information"
+msgstr "Podstawowe informacje"
+
+#: modern_admin/templates/modern_admin/pages/resource_form.html:9
+msgid "Enter the details used by your team. Required fields are marked below."
+msgstr "Wprowadź dane używane przez zespół. Pola wymagane są oznaczone poniżej."
+
+#: modern_admin/templates/modern_admin/pages/resource_form.html:9
+msgid "Autosave is off"
+msgstr "Autozapis wyłączony"
+
+#: modern_admin/templates/modern_admin/pages/resource_form.html:9
+msgid "Review and submit when ready."
+msgstr "Sprawdź i zapisz, gdy będzie gotowe."
+
+#: modern_admin/templates/modern_admin/pages/saved_view.html:3
+#, python-format
+msgid "Save view · %(title)s"
+msgstr "Zapisz widok · %(title)s"
+
+#: modern_admin/templates/modern_admin/partials/action_dialog.html:8
+msgid "Business action"
+msgstr "Akcja biznesowa"
+
+#: modern_admin/templates/modern_admin/partials/action_dialog.html:9
+#: modern_admin/templates/modern_admin/partials/form_dialog.html:6
+#: modern_admin/templates/modern_admin/partials/saved_view_dialog.html:5
+msgid "Close dialog"
+msgstr "Zamknij okno"
+
+#: modern_admin/templates/modern_admin/partials/action_dialog.html:20
+msgid "This operation will be added to activity."
+msgstr "Ta operacja zostanie dopisana do aktywności."
+
+#: modern_admin/templates/modern_admin/partials/action_dialog.html:20
+#: modern_admin/templates/modern_admin/partials/form_fields.html:25
+#: modern_admin/templates/modern_admin/partials/saved_view_dialog.html:8
+msgid "Cancel"
+msgstr "Anuluj"
+
+#: modern_admin/templates/modern_admin/partials/choice_filter.html:6
+msgid "Find an option…"
+msgstr "Znajdź opcję…"
+
+#: modern_admin/templates/modern_admin/partials/choice_filter.html:6
+#: modern_admin/templates/modern_admin/partials/relation_filter.html:6
+#, python-format
+msgid "Search %(label)s options"
+msgstr "Szukaj w opcjach: %(label)s"
+
+#: modern_admin/templates/modern_admin/partials/choice_filter.html:9
+#: modern_admin/templates/modern_admin/partials/relation_filter.html:7
+#, python-format
+msgid "Any %(label)s"
+msgstr "Dowolne: %(label)s"
+
+#: modern_admin/templates/modern_admin/partials/command_results.html:3
+msgid "Matches"
+msgstr "Dopasowania"
+
+#: modern_admin/templates/modern_admin/partials/command_results.html:3
+#, python-format
+msgid "Results for “%(query)s”"
+msgstr "Wyniki dla „%(query)s”"
+
+#: modern_admin/templates/modern_admin/partials/command_results.html:4
+msgid "Records"
+msgstr "Rekordy"
+
+#: modern_admin/templates/modern_admin/partials/command_results.html:5
+msgid "Quick create"
+msgstr "Szybkie tworzenie"
+
+#: modern_admin/templates/modern_admin/partials/command_results.html:5
+#: modern_admin/templates/modern_admin/partials/record_preview_body.html:14
+#: modern_admin/templates/modern_admin/partials/related_object_list.html:15
+#: modern_admin/templates/modern_admin/partials/resource_panel.html:128
+msgid "Actions"
+msgstr "Akcje"
+
+#: modern_admin/templates/modern_admin/partials/command_results.html:5
+msgid "Create"
+msgstr "Utwórz"
+
+#: modern_admin/templates/modern_admin/partials/command_results.html:6
+msgid "Pages"
+msgstr "Strony"
+
+#: modern_admin/templates/modern_admin/partials/command_results.html:6
+msgid "Navigation"
+msgstr "Nawigacja"
+
+#: modern_admin/templates/modern_admin/partials/command_results.html:6
+msgid "Open workspace"
+msgstr "Otwórz przestrzeń"
+
+#: modern_admin/templates/modern_admin/partials/command_results.html:7
+msgid "No matching commands"
+msgstr "Brak pasujących poleceń"
+
+#: modern_admin/templates/modern_admin/partials/command_results.html:7
+msgid "Try a customer, order number, or page name."
+msgstr "Spróbuj nazwy klienta, numeru zamówienia lub nazwy strony."
+
+#: modern_admin/templates/modern_admin/partials/empty_state.html:5
+#, python-format
+msgid "No %(title)s found"
+msgstr "Nie znaleziono: %(title)s"
+
+#: modern_admin/templates/modern_admin/partials/empty_state.html:6
+msgid "Try a different search or remove one of the active filters."
+msgstr "Spróbuj innego wyszukiwania lub usuń jeden z aktywnych filtrów."
+
+#: modern_admin/templates/modern_admin/partials/empty_state.html:6
+msgid "Clear search and filters"
+msgstr "Wyczyść wyszukiwanie i filtry"
+
+#: modern_admin/templates/modern_admin/partials/empty_state.html:7
+#, python-format
+msgid "Create the first %(record)s to get this workspace moving."
+msgstr "Utwórz pierwszy element „%(record)s”, aby ruszyć z pracą."
+
+#: modern_admin/templates/modern_admin/partials/empty_state.html:7
+#: modern_admin/templates/modern_admin/partials/resource_panel.html:14
+#: modern_admin/templates/modern_admin/partials/resource_panel.html:15
+#, python-format
+msgid "New %(record)s"
+msgstr "Dodaj %(record)s"
+
+#: modern_admin/templates/modern_admin/partials/empty_state.html:8
+msgid "There is nothing to show here yet."
+msgstr "Nie ma tu jeszcze nic do pokazania."
+
+#: modern_admin/templates/modern_admin/partials/error_state.html:3
+msgid "Try again"
+msgstr "Spróbuj ponownie"
+
+#: modern_admin/templates/modern_admin/partials/form_dialog.html:6
+#, python-format
+msgid "%(title)s · Editor"
+msgstr "%(title)s · Edytor"
+
+#: modern_admin/templates/modern_admin/partials/form_dialog.html:6
+msgid "Review the details before saving."
+msgstr "Sprawdź dane przed zapisaniem."
+
+#: modern_admin/templates/modern_admin/partials/form_fields.html:5
+msgid "Record fields"
+msgstr "Pola rekordu"
+
+#: modern_admin/templates/modern_admin/partials/form_fields.html:5
+msgid "Required information"
+msgstr "Informacje wymagane"
+
+#: modern_admin/templates/modern_admin/partials/language_switcher.html:5
+msgid "Interface language"
+msgstr "Język interfejsu"
+
+#: modern_admin/templates/modern_admin/partials/record_preview_body.html:6
+msgid "Close preview"
+msgstr "Zamknij podgląd"
+
+#: modern_admin/templates/modern_admin/partials/record_preview_body.html:18
+msgid "No activity recorded yet."
+msgstr "Nie zarejestrowano jeszcze żadnej aktywności."
+
+#: modern_admin/templates/modern_admin/partials/record_preview_body.html:21
+msgid "Open full record"
+msgstr "Otwórz pełny rekord"
+
+#: modern_admin/templates/modern_admin/partials/related_object_list.html:5
+msgid "You do not have access to these related records."
+msgstr "Nie masz dostępu do tych powiązanych rekordów."
+
+#: modern_admin/templates/modern_admin/partials/related_object_list.html:10
+#, python-format
+msgid "%(count)s record"
+msgid_plural "%(count)s records"
+msgstr[0] "%(count)s rekord"
+msgstr[1] "%(count)s rekordy"
+msgstr[2] "%(count)s rekordów"
+
+#: modern_admin/templates/modern_admin/partials/related_object_list.html:30
+#: modern_admin/views.py:600
+msgid "Edit"
+msgstr "Edytuj"
+
+#: modern_admin/templates/modern_admin/partials/related_object_list.html:37
+msgid "No related records yet."
+msgstr "Brak powiązanych rekordów."
+
+#: modern_admin/templates/modern_admin/partials/related_object_list.html:43
+msgid "Page"
+msgstr "Strona"
+
+#: modern_admin/templates/modern_admin/partials/related_object_list.html:43
+#, python-format
+msgid "of %(pages)s"
+msgstr "z %(pages)s"
+
+#: modern_admin/templates/modern_admin/partials/related_object_list.html:44
+#, python-format
+msgid "%(label)s pages"
+msgstr "Strony: %(label)s"
+
+#: modern_admin/templates/modern_admin/partials/related_object_list.html:45
+#: modern_admin/templates/modern_admin/partials/relation_filter.html:13
+msgid "Previous"
+msgstr "Poprzednia"
+
+#: modern_admin/templates/modern_admin/partials/related_object_list.html:46
+#: modern_admin/templates/modern_admin/partials/relation_filter.html:14
+msgid "Next"
+msgstr "Następna"
+
+#: modern_admin/templates/modern_admin/partials/relation_filter.html:6
+msgid "Search all records…"
+msgstr "Szukaj we wszystkich rekordach…"
+
+#: modern_admin/templates/modern_admin/partials/relation_filter.html:17
+msgid "Record ID"
+msgstr "ID rekordu"
+
+#: modern_admin/templates/modern_admin/partials/relation_filter.html:17
+#, python-format
+msgid "%(label)s record ID"
+msgstr "ID rekordu: %(label)s"
+
+#: modern_admin/templates/modern_admin/partials/resource_detail_body.html:8
+#, python-format
+msgid "Record #%(pk)s"
+msgstr "Rekord nr %(pk)s"
+
+#: modern_admin/templates/modern_admin/partials/resource_detail_body.html:17
+msgid "Edit record"
+msgstr "Edytuj rekord"
+
+#: modern_admin/templates/modern_admin/partials/resource_detail_body.html:21
+msgid "Record workspace"
+msgstr "Obszar rekordu"
+
+#: modern_admin/templates/modern_admin/partials/resource_detail_body.html:46
+#, python-format
+msgid "%(action)s this %(record)s."
+msgstr "%(action)s — %(record)s."
+
+#: modern_admin/templates/modern_admin/partials/resource_detail_body.html:46
+#, python-format
+msgid "%(age)s ago"
+msgstr "%(age)s temu"
+
+#: modern_admin/templates/modern_admin/partials/resource_detail_body.html:48
+msgid "No activity yet"
+msgstr "Brak aktywności"
+
+#: modern_admin/templates/modern_admin/partials/resource_detail_body.html:48
+msgid "Changes to this record will be listed here."
+msgstr "Zmiany w tym rekordzie pojawią się tutaj."
+
+#: modern_admin/templates/modern_admin/partials/resource_panel.html:9
+#, python-format
+msgid "%(count)s active constraint"
+msgid_plural "%(count)s active constraints"
+msgstr[0] "%(count)s aktywne ograniczenie"
+msgstr[1] "%(count)s aktywne ograniczenia"
+msgstr[2] "%(count)s aktywnych ograniczeń"
+
+#: modern_admin/templates/modern_admin/partials/resource_panel.html:10
+#, python-format
+msgid "Matching “%(query)s”"
+msgstr "Pasujące do „%(query)s”"
+
+#: modern_admin/templates/modern_admin/partials/resource_panel.html:21
+msgid "Work queues"
+msgstr "Kolejki pracy"
+
+#: modern_admin/templates/modern_admin/partials/resource_panel.html:22
+msgid "All records"
+msgstr "Wszystkie rekordy"
+
+#: modern_admin/templates/modern_admin/partials/resource_panel.html:35
+#: modern_admin/templates/modern_admin/partials/resource_panel.html:36
+#, python-format
+msgid "Search %(title)s"
+msgstr "Szukaj: %(title)s"
+
+#: modern_admin/templates/modern_admin/partials/resource_panel.html:39
+msgid "Clear search"
+msgstr "Wyczyść wyszukiwanie"
+
+#: modern_admin/templates/modern_admin/partials/resource_panel.html:52
+msgid "Choose a range"
+msgstr "Wybierz zakres"
+
+#: modern_admin/templates/modern_admin/partials/resource_panel.html:53
+msgid "From"
+msgstr "Od"
+
+#: modern_admin/templates/modern_admin/partials/resource_panel.html:54
+msgid "To"
+msgstr "Do"
+
+#: modern_admin/templates/modern_admin/partials/resource_panel.html:55
+msgid "Apply range"
+msgstr "Zastosuj zakres"
+
+#: modern_admin/templates/modern_admin/partials/resource_panel.html:64
+#: modern_admin/templates/modern_admin/partials/resource_panel.html:66
+msgid "Saved views"
+msgstr "Zapisane widoki"
+
+#: modern_admin/templates/modern_admin/partials/resource_panel.html:64
+msgid "Views"
+msgstr "Widoki"
+
+#: modern_admin/templates/modern_admin/partials/resource_panel.html:66
+msgid "Personal"
+msgstr "Osobiste"
+
+#: modern_admin/templates/modern_admin/partials/resource_panel.html:67
+msgid "No saved views yet."
+msgstr "Brak zapisanych widoków."
+
+#: modern_admin/templates/modern_admin/partials/resource_panel.html:68
+msgid "Save current view"
+msgstr "Zapisz bieżący widok"
+
+#: modern_admin/templates/modern_admin/partials/resource_panel.html:71
+msgid "More filters"
+msgstr "Więcej filtrów"
+
+#: modern_admin/templates/modern_admin/partials/resource_panel.html:73
+msgid "Choose columns"
+msgstr "Wybierz kolumny"
+
+#: modern_admin/templates/modern_admin/partials/resource_panel.html:75
+msgid "Visible columns"
+msgstr "Widoczne kolumny"
+
+#: modern_admin/templates/modern_admin/partials/resource_panel.html:75
+#, python-format
+msgid "%(count)s total"
+msgstr "łącznie: %(count)s"
+
+#: modern_admin/templates/modern_admin/partials/resource_panel.html:83
+msgid "Filtered by"
+msgstr "Filtrowane wg"
+
+#: modern_admin/templates/modern_admin/partials/resource_panel.html:85
+msgid "Reset"
+msgstr "Resetuj"
+
+#: modern_admin/templates/modern_admin/partials/resource_panel.html:93
+msgid "Query builder"
+msgstr "Kreator zapytań"
+
+#: modern_admin/templates/modern_admin/partials/resource_panel.html:93
+#, python-format
+msgid "Refine %(title)s"
+msgstr "Zawęź: %(title)s"
+
+#: modern_admin/templates/modern_admin/partials/resource_panel.html:93
+msgid "Close filters"
+msgstr "Zamknij filtry"
+
+#: modern_admin/templates/modern_admin/partials/resource_panel.html:104
+#, python-format
+msgid "%(label)s from"
+msgstr "%(label)s od"
+
+#: modern_admin/templates/modern_admin/partials/resource_panel.html:104
+msgid "to"
+msgstr "do"
+
+#: modern_admin/templates/modern_admin/partials/resource_panel.html:104
+#, python-format
+msgid "%(label)s to"
+msgstr "%(label)s do"
+
+#: modern_admin/templates/modern_admin/partials/resource_panel.html:109
+msgid "Reset all"
+msgstr "Resetuj wszystko"
+
+#: modern_admin/templates/modern_admin/partials/resource_panel.html:109
+msgid "Show results"
+msgstr "Pokaż wyniki"
+
+#: modern_admin/templates/modern_admin/partials/resource_panel.html:119
+msgid "Clear selection"
+msgstr "Wyczyść zaznaczenie"
+
+#: modern_admin/templates/modern_admin/partials/resource_panel.html:126
+msgid "Select all rows"
+msgstr "Zaznacz wszystkie wiersze"
+
+#: modern_admin/templates/modern_admin/partials/resource_panel.html:133
+#, python-format
+msgid "Select %(record)s"
+msgstr "Zaznacz: %(record)s"
+
+#: modern_admin/templates/modern_admin/partials/resource_panel.html:142
+#, python-format
+msgid "Preview %(record)s"
+msgstr "Podgląd: %(record)s"
+
+#: modern_admin/templates/modern_admin/partials/resource_panel.html:142
+msgid "Quick preview"
+msgstr "Szybki podgląd"
+
+#: modern_admin/templates/modern_admin/partials/resource_panel.html:145
+#, python-format
+msgid "Actions for %(record)s"
+msgstr "Akcje dla: %(record)s"
+
+#: modern_admin/templates/modern_admin/partials/resource_panel.html:153
+msgid "Rows"
+msgstr "Wiersze"
+
+#: modern_admin/templates/modern_admin/partials/resource_panel.html:153
+#, python-format
+msgid "of %(count)s"
+msgstr "z %(count)s"
+
+#: modern_admin/templates/modern_admin/partials/resource_panel.html:153
+msgid "Rows per page"
+msgstr "Wierszy na stronę"
+
+#: modern_admin/templates/modern_admin/partials/resource_panel.html:153
+#, python-format
+msgid "%(size)s per page"
+msgstr "%(size)s na stronę"
+
+#: modern_admin/templates/modern_admin/partials/resource_panel.html:154
+msgid "Pagination"
+msgstr "Paginacja"
+
+#: modern_admin/templates/modern_admin/partials/resource_panel.html:154
+msgid "Previous page"
+msgstr "Poprzednia strona"
+
+#: modern_admin/templates/modern_admin/partials/resource_panel.html:154
+msgid "Next page"
+msgstr "Następna strona"
+
+#: modern_admin/templates/modern_admin/partials/saved_view_dialog.html:5
+msgid "Save this view"
+msgstr "Zapisz ten widok"
+
+#: modern_admin/templates/modern_admin/partials/saved_view_dialog.html:5
+msgid "Keep the current search, filters, ordering, and page size for quick access."
+msgstr "Zachowaj bieżące wyszukiwanie, filtry, sortowanie i rozmiar strony, aby szybko do nich wrócić."
+
+#: modern_admin/templates/modern_admin/partials/saved_view_dialog.html:7
+#: modern_admin/views.py:323
+msgid "View name"
+msgstr "Nazwa widoku"
+
+#: modern_admin/templates/modern_admin/partials/saved_view_dialog.html:8
+#: modern_admin/views.py:385
+msgid "Save view"
+msgstr "Zapisz widok"
+
+#: modern_admin/templates/modern_admin/widgets/access_checklist.html:7
+#, python-format
+msgid "Filter %(group)s"
+msgstr "Filtruj: %(group)s"
+
+#: modern_admin/templates/modern_admin/widgets/access_checklist.html:10
+msgid "Clear"
+msgstr "Wyczyść"
+
+#: modern_admin/templates/modern_admin/widgets/access_checklist.html:19
+#, python-format
+msgid "Select every %(group)s permission"
+msgstr "Zaznacz wszystkie uprawnienia: %(group)s"
+
+#: modern_admin/templates/modern_admin/widgets/access_checklist.html:39
+msgid "Nothing can be assigned yet."
+msgstr "Nie ma jeszcze nic do przypisania."
+
+#: modern_admin/templates/modern_admin/widgets/progress.html:5
+#, python-format
+msgid "of %(total)s %(label)s"
+msgstr "z %(total)s %(label)s"
+
+#: modern_admin/views.py:72
+msgid "You do not have access to this page."
+msgstr "Nie masz dostępu do tej strony."
+
+#: modern_admin/views.py:81 modern_admin/views.py:83
+msgid "Access restricted"
+msgstr "Dostęp ograniczony"
+
+#: modern_admin/views.py:93
+msgid "You do not have access to any workspace page."
+msgstr "Nie masz dostępu do żadnej strony tej przestrzeni roboczej."
+
+#: modern_admin/views.py:139
+msgid "Unknown or unavailable work queue"
+msgstr "Nieznana lub niedostępna kolejka pracy"
+
+#: modern_admin/views.py:366
+#, python-format
+msgid "Saved view “%(name)s”."
+msgstr "Zapisano widok „%(name)s”."
+
+#: modern_admin/views.py:550
+msgid "Forms are not configured for this resource."
+msgstr "Dla tego zasobu nie skonfigurowano formularzy."
+
+#: modern_admin/views.py:570
+#, python-format
+msgid "%(model)s updated successfully."
+msgstr "Zaktualizowano: %(model)s."
+
+#: modern_admin/views.py:570
+#, python-format
+msgid "%(model)s created successfully."
+msgstr "Utworzono: %(model)s."
+
+#: modern_admin/views.py:586
+#, python-format
+msgid "Edit %(object)s"
+msgstr "Edytuj %(object)s"
+
+#: modern_admin/views.py:588 modern_admin/views.py:872
+#, python-format
+msgid "New %(model)s"
+msgstr "Dodaj %(model)s"
+
+#: modern_admin/views.py:589
+msgid "Save changes"
+msgstr "Zapisz zmiany"
+
+#: modern_admin/views.py:591
+#, python-format
+msgid "Create %(model)s"
+msgstr "Utwórz %(model)s"
+
+#: modern_admin/views.py:600
+msgid "New"
+msgstr "Nowy"
+
+#: modern_admin/views.py:638
+msgid "Unknown resource action"
+msgstr "Nieznana akcja zasobu"
+
+#: modern_admin/views.py:641
+msgid "Action is not available at this endpoint"
+msgstr "Akcja nie jest dostępna w tym punkcie końcowym"
+
+#: modern_admin/views.py:644 modern_admin/views.py:662
+msgid "You cannot run this action."
+msgstr "Nie możesz uruchomić tej akcji."
+
+#: modern_admin/views.py:671
+msgid "Select between 1 and 1,000 records."
+msgstr "Zaznacz od 1 do 1000 rekordów."
+
+#: modern_admin/views.py:679
+msgid "Selection is not permitted."
+msgstr "To zaznaczenie jest niedozwolone."
+
+#: modern_admin/views.py:690
+msgid "The action returned an unsafe redirect URL."
+msgstr "Akcja zwróciła niebezpieczny adres przekierowania."
+
+#: modern_admin/views.py:764
+msgid "Unknown detail tab"
+msgstr "Nieznana zakładka szczegółów"
+
+#: modern_admin/views.py:806
+msgid "Unknown dashboard widget"
+msgstr "Nieznany widżet pulpitu"
+
+#: modern_admin/views.py:828
+msgid "Unknown custom page"
+msgstr "Nieznana strona niestandardowa"
+
+#: modern_admin/views.py:900
+msgid "Unknown relation filter"
+msgstr "Nieznany filtr relacji"
+
+#: modern_admin/workflows.py:22
+msgid "The record's state has changed. This action is no longer available."
+msgstr "Stan rekordu uległ zmianie. Ta akcja nie jest już dostępna."

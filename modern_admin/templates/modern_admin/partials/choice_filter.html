@@ -1,11 +1,12 @@
+{% load i18n %}
 {% load modern_admin %}
 <details class="ma-choice-filter{% if filter.active_label %} is-active{% endif %}" x-data="choiceFilter" data-label="{{ filter.label }}" data-auto-submit="{{ auto_submit|yesno:'true,false' }}" :class="{ 'is-active': hasValue }" @change="chooseOption" @toggle="toggled" @click.outside="closeOptions" @keydown.escape.stop="escape">
   <summary aria-label="{{ filter.label }}"><span x-text="summary()">{{ filter.active_label|default:filter.label }}</span>{% icon "chevron-down" 13 %}</summary>
   <div class="ma-popover ma-choice-options"{% if auto_submit %} x-floating="opened"{% endif %}>
-    <input class="ma-choice-search" type="search" placeholder="Find an option…" aria-label="Search {{ filter.label }} options" x-model="term" @keydown.enter.prevent>
+    <input class="ma-choice-search" type="search" placeholder="{% translate "Find an option…" %}" aria-label="{% blocktranslate with label=filter.label %}Search {{ label }} options{% endblocktranslate %}" x-model="term" @keydown.enter.prevent>
     <div class="ma-choice-list">
       {% if filter.kind != 'multiple_choice' %}
-        <label><input type="radio" name="{{ filter.key }}" value=""{% if not filter.active_label %} checked{% endif %}><span>Any {{ filter.label|lower }}</span></label>
+        <label><input type="radio" name="{{ filter.key }}" value=""{% if not filter.active_label %} checked{% endif %}><span>{% blocktranslate with label=filter.label|lower %}Any {{ label }}{% endblocktranslate %}</span></label>
       {% endif %}
       {% for option in filter.options %}
         <label x-show="matchesOption($el)"><input type="{% if filter.kind == 'multiple_choice' %}checkbox{% else %}radio{% endif %}" name="{{ filter.key }}" value="{{ option.value }}"{% if option.selected %} checked{% endif %}><span>{{ option.label }}</span></label>

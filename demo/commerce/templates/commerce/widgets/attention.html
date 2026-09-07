@@ -1,6 +1,7 @@
+{% load i18n %}
 {% load modern_admin %}
-<header class="ma-widget-header demo-widget-title"><div><h2>{{ widget.title }}</h2><p>Exceptions worth resolving today</p></div><span class="demo-attention-count">{{ widget_context.invoices|length }}</span></header>
+<header class="ma-widget-header demo-widget-title"><div><h2>{{ widget.title }}</h2><p>{% translate "Exceptions worth resolving today" %}</p></div><span class="demo-attention-count">{{ widget_context.invoices|length }}</span></header>
 <div class="demo-attention-list">
-  {% for invoice in widget_context.invoices %}<a href="{% url modern_admin_site.name|add:':invoice_detail' invoice.pk %}"><span class="demo-list-icon is-danger">{% icon "activity" 14 %}</span><span><strong>{{ invoice.number }} is overdue</strong><small>{{ invoice.customer }} · due {{ invoice.due_date|date:"M j" }}</small></span><b>${{ invoice.total|floatformat:2 }}</b></a>{% empty %}<div class="demo-widget-empty is-positive">{% icon "check" 15 %} Nothing needs attention right now.</div>{% endfor %}
+  {% for invoice in widget_context.invoices %}<a href="{% url modern_admin_site.name|add:':invoice_detail' invoice.pk %}"><span class="demo-list-icon is-danger">{% icon "activity" 14 %}</span><span><strong>{% blocktranslate with number=invoice.number %}{{ number }} is overdue{% endblocktranslate %}</strong><small>{% blocktranslate with customer=invoice.customer due_date=invoice.due_date|date:"M j" %}{{ customer }} · due {{ due_date }}{% endblocktranslate %}</small></span><b>${{ invoice.total|floatformat:2 }}</b></a>{% empty %}<div class="demo-widget-empty is-positive">{% icon "check" 15 %} {% translate "Nothing needs attention right now." %}</div>{% endfor %}
 </div>
 

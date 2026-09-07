@@ -21,7 +21,7 @@ class Toast:
     level: Literal["success", "info", "warning", "error"] = "success"
 
     def asdict(self) -> dict[str, str]:
-        return {"message": self.message, "level": self.level}
+        return {"message": str(self.message), "level": self.level}
 
 
 def htmx_events(

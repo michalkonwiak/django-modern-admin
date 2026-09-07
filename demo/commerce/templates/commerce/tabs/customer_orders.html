@@ -1,5 +1,6 @@
+{% load i18n %}
 {% load modern_admin %}
 <div class="demo-tab-list">
-  {% for order in orders %}<a href="{% url modern_admin_site.name|add:':order_detail' order.pk %}"><span class="demo-list-icon">{% icon "receipt" 14 %}</span><span><strong>{{ order.number }}</strong><small>{{ order.created_at|date:"M j, Y" }}</small></span><span class="ma-badge is-{% if order.status == 'shipped' %}success{% elif order.status == 'processing' %}info{% elif order.status == 'cancelled' %}danger{% else %}neutral{% endif %}">{{ order.get_status_display }}</span><b>${{ order.total|floatformat:2 }}</b></a>{% empty %}<div class="demo-widget-empty">No orders for this customer.</div>{% endfor %}
+  {% for order in orders %}<a href="{% url modern_admin_site.name|add:':order_detail' order.pk %}"><span class="demo-list-icon">{% icon "receipt" 14 %}</span><span><strong>{{ order.number }}</strong><small>{{ order.created_at|date:"M j, Y" }}</small></span><span class="ma-badge is-{% if order.status == 'shipped' %}success{% elif order.status == 'processing' %}info{% elif order.status == 'cancelled' %}danger{% else %}neutral{% endif %}">{{ order.get_status_display }}</span><b>${{ order.total|floatformat:2 }}</b></a>{% empty %}<div class="demo-widget-empty">{% translate "No orders for this customer." %}</div>{% endfor %}
 </div>
 

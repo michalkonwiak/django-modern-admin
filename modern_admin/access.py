@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING, Any
 from django.contrib.auth.views import redirect_to_login
 from django.http import HttpRequest, HttpResponse
 from django.utils.cache import add_never_cache_headers, patch_vary_headers
+from django.utils.translation import gettext_lazy as _
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -25,7 +26,7 @@ def protect(
             if request.headers.get("HX-Request") == "true":
                 response = HttpResponse(headers={"HX-Redirect": response.url}, status=200)
         elif not site.has_permission(request):
-            response = HttpResponse("You do not have access to this workspace.", status=403)
+            response = HttpResponse(_("You do not have access to this workspace."), status=403)
         else:
             response = view(request, *args, **kwargs)
         add_never_cache_headers(response)

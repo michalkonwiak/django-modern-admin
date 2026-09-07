@@ -1,0 +1,12 @@
+{% load i18n %}
+{% get_current_language as current_language %}
+{% get_available_languages as available_languages %}
+{% if available_languages|length > 1 %}
+<form method="post" action="{% url modern_admin_site.name|add:':set_language' %}" class="ma-language-switcher" aria-label="{% translate "Interface language" %}" hx-boost="false">
+  {% csrf_token %}
+  <input type="hidden" name="next" value="{{ request.get_full_path }}">
+  {% for code, language_name in available_languages %}
+    <button type="submit" name="language" value="{{ code }}" class="ma-language-option" lang="{{ code }}" title="{{ language_name }}" aria-label="{{ language_name }}" aria-pressed="{% if current_language == code %}true{% else %}false{% endif %}">{{ code|upper }}</button>
+  {% endfor %}
+</form>
+{% endif %}

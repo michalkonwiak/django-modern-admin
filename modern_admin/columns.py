@@ -12,6 +12,7 @@ from django.http import HttpRequest
 from django.template.loader import render_to_string
 from django.utils.formats import date_format, number_format
 from django.utils.text import capfirst
+from django.utils.translation import gettext_lazy as _
 
 from modern_admin.exceptions import InvalidResourceConfiguration
 
@@ -57,7 +58,7 @@ class Column(Generic[ModelT]):
     def bind(self, model: type[ModelT], resource: ModelResource[ModelT]) -> Column[ModelT]:
         if self.accessor == "__str__":
             self.sortable = False
-            self._bound_label = self.label or capfirst(str(model._meta.verbose_name))
+            self._bound_label = self.label or capfirst(model._meta.verbose_name)
             return self
         root = self.accessor.split("__", 1)[0]
         model_attr = hasattr(model, root)
@@ -78,7 +79,7 @@ class Column(Generic[ModelT]):
         if self.label:
             self._bound_label = self.label
         elif model_field:
-            self._bound_label = capfirst(str(model._meta.get_field(root).verbose_name))
+            self._bound_label = capfirst(model._meta.get_field(root).verbose_name)
         else:
             self._bound_label = capfirst(root.replace("_", " "))
         return self
@@ -193,7 +194,7 @@ class BooleanColumn(Column[ModelT]):
     def get_cell(self, obj: ModelT, resource: ModelResource[ModelT], request: HttpRequest) -> Cell:
         value = bool(self.get_value(obj, resource))
         return Cell(
-            display="Yes" if value else "No",
+            display=_("Yes") if value else _("No"),
             kind="boolean",
             variant="success" if value else "neutral",
             raw=value,
@@ -202,7 +203,7 @@ class BooleanColumn(Column[ModelT]):
 
 @dataclass(slots=True)
 class DateColumn(Column[ModelT]):
-    format: str = "M j, Y"
+    format: str = "DATE_FORMAT"
 
     def get_cell(self, obj: ModelT, resource: ModelResource[ModelT], request: HttpRequest) -> Cell:
         value = self.get_value(obj, resource)
@@ -212,7 +213,7 @@ class DateColumn(Column[ModelT]):
 
 @dataclass(slots=True)
 class DateTimeColumn(DateColumn[ModelT]):
-    format: str = "M j, Y, P"
+    format: str = "DATETIME_FORMAT"
 
 
 @dataclass(slots=True)

@@ -1,5 +1,6 @@
+{% load i18n %}
 {% load modern_admin %}
 <div class="demo-tab-list">
-  {% for invoice in invoices %}<a href="{% url modern_admin_site.name|add:':invoice_detail' invoice.pk %}"><span class="demo-list-icon">{% icon "credit-card" 14 %}</span><span><strong>{{ invoice.number }}</strong><small>Due {{ invoice.due_date|date:"M j, Y" }}</small></span><span class="ma-badge is-{% if invoice.status == 'paid' %}success{% elif invoice.status == 'overdue' %}danger{% else %}info{% endif %}">{{ invoice.get_status_display }}</span><b>${{ invoice.total|floatformat:2 }}</b></a>{% empty %}<div class="demo-widget-empty">No invoices are attached to this order.</div>{% endfor %}
+  {% for invoice in invoices %}<a href="{% url modern_admin_site.name|add:':invoice_detail' invoice.pk %}"><span class="demo-list-icon">{% icon "credit-card" 14 %}</span><span><strong>{{ invoice.number }}</strong><small>{% blocktranslate with due_date=invoice.due_date|date:"M j, Y" %}Due {{ due_date }}{% endblocktranslate %}</small></span><span class="ma-badge is-{% if invoice.status == 'paid' %}success{% elif invoice.status == 'overdue' %}danger{% else %}info{% endif %}">{{ invoice.get_status_display }}</span><b>${{ invoice.total|floatformat:2 }}</b></a>{% empty %}<div class="demo-widget-empty">{% translate "No invoices are attached to this order." %}</div>{% endfor %}
 </div>
 

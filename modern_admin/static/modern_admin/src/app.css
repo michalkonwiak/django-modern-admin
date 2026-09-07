@@ -893,3 +893,13 @@
   .ma-command, .ma-filter-drawer, .ma-dialog { background: var(--workspace-solid); }
   body:has([aria-modal="true"]:not([style*="display: none"])) { overflow: hidden; }
 }
+
+@layer components {
+  /* Segmented control: the active language is the chip lifted out of the track. */
+  .ma-language-switcher { display: inline-flex; align-items: center; flex-shrink: 0; gap: 2px; padding: 2px; border: 1px solid var(--border-subtle); border-radius: 9px; background: var(--surface-subtle); }
+  .ma-language-option { height: var(--control-xs); display: inline-flex; align-items: center; padding: 0 9px; border: 1px solid transparent; border-radius: 7px; background: none; color: var(--text-tertiary); font-family: inherit; font-size: var(--type-micro); font-weight: 620; letter-spacing: .045em; cursor: pointer; transition: background 120ms ease, color 120ms ease, border-color 120ms ease; }
+  .ma-language-option:hover { background: var(--surface-hover); color: var(--text-secondary); }
+  .ma-language-option[aria-pressed="true"] { border-color: var(--glass-border); background: var(--glass-raised); color: var(--text-primary); box-shadow: var(--shadow-sm); }
+  .ma-language-option:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--focus); }
+  .ma-auth-topbar .ma-language-switcher { margin-left: auto; }
+}

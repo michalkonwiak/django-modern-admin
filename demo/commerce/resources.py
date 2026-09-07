@@ -8,6 +8,8 @@ from django.db.models import Count, Q, Sum
 from django.http import HttpRequest
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
+from django.utils.translation import ngettext
 
 from demo.commerce import services
 from demo.commerce.forms import (
@@ -61,8 +63,8 @@ site.extra_css = ("commerce/demo.css",)
 
 class ArchiveCustomer(ResourceAction[Customer]):
     key = "archive"
-    label = "Archive customer"
-    description = "The customer becomes inactive. Existing commercial records are retained."
+    label = _("Archive customer")
+    description = _("The customer becomes inactive. Existing commercial records are retained.")
     icon = "archive"
     variant = "danger"
     placements = ("row", "detail", "bulk")
@@ -78,12 +80,12 @@ class ArchiveCustomer(ResourceAction[Customer]):
     ) -> ActionResult:
         services.archive_customer(customer=obj, reason=cleaned_data["reason"], actor=request.user)
         return ActionResult.success(
-            "Customer archived.", refresh=("#resource-panel", "#resource-detail")
+            _("Customer archived."), refresh=("#resource-panel", "#resource-detail")
         )
 
     def execute_bulk(self, *, request, queryset, cleaned_data):  # type: ignore[no-untyped-def]
         archived = 0
-        for customer in queryset.select_for_update().exclude(status=Customer.Status.INACTIVE):
+        for customer in queryset.exclude(status=Customer.Status.INACTIVE):
             services.archive_customer(
                 customer=customer,
                 reason=cleaned_data["reason"],
@@ -91,46 +93,47 @@ class ArchiveCustomer(ResourceAction[Customer]):
             )
             archived += 1
         return ActionResult.success(
-            f"Archived {archived} customer{'s' if archived != 1 else ''}.",
+            ngettext("Archived %(count)d customer.", "Archived %(count)d customers.", archived)
+            % {"count": archived},
             refresh=("#resource-panel",),
         )
 
 
 class CancelOrder(TransitionAction[Order]):
     key = "cancel"
-    label = "Cancel order"
-    description = "This stops fulfillment. The reason is recorded for the support team."
+    label = _("Cancel order")
+    description = _("This stops fulfillment. The reason is recorded for the support team.")
     icon = "x"
     variant = "danger"
     form_class = CancelOrderForm
     from_states = (Order.Status.DRAFT, Order.Status.PROCESSING)
-    unavailable_message = "Only draft or processing orders can be cancelled."
+    unavailable_message = _("Only draft or processing orders can be cancelled.")
 
     def execute(
         self, *, request: HttpRequest, obj: Order, cleaned_data: Mapping[str, Any]
     ) -> ActionResult:
         services.cancel_order(order=obj, reason=cleaned_data["reason"], actor=request.user)
         return ActionResult.success(
-            "Order cancelled.", refresh=("#resource-panel", "#resource-detail")
+            _("Order cancelled."), refresh=("#resource-panel", "#resource-detail")
         )
 
 
 class MarkOrderShipped(TransitionAction[Order]):
     key = "ship"
-    label = "Mark shipped"
-    description = "Confirm that fulfillment handed this order to the carrier."
+    label = _("Mark shipped")
+    description = _("Confirm that fulfillment handed this order to the carrier.")
     icon = "package"
     variant = "primary"
     form_class = ShipOrderForm
     from_states = (Order.Status.PROCESSING,)
-    unavailable_message = "Only processing orders can be marked as shipped."
+    unavailable_message = _("Only processing orders can be marked as shipped.")
 
     def execute(
         self, *, request: HttpRequest, obj: Order, cleaned_data: Mapping[str, Any]
     ) -> ActionResult:
         services.mark_order_shipped(order=obj, actor=request.user)
         return ActionResult.success(
-            "Order marked as shipped.", refresh=("#resource-panel", "#resource-detail")
+            _("Order marked as shipped."), refresh=("#resource-panel", "#resource-detail")
         )
 
 
@@ -153,27 +156,31 @@ def order_invoices_context(request: HttpRequest, order: Order) -> Mapping[str, A
 @site.register(Customer)
 class CustomerResource(ModelResource[Customer]):
     queues = (
-        WorkQueue("mine", "Assigned to me", lambda request: Q(owner=request.user)),
+        WorkQueue("mine", _("Assigned to me"), lambda request: Q(owner=request.user)),
         WorkQueue(
             "attention",
-            "Needs attention",
+            _("Needs attention"),
             Q(status=Customer.Status.AT_RISK),
-            description="Accounts at risk. Review the relationship before taking action.",
+            description=_("Accounts at risk. Review the relationship before taking action."),
         ),
-        WorkQueue("leads", "New leads", Q(status=Customer.Status.LEAD)),
+        WorkQueue("leads", _("New leads"), Q(status=Customer.Status.LEAD)),
     )
     icon = "users"
-    title = "Customers"
-    description = "Accounts, relationships, and commercial health across the workspace."
-    navigation = Navigation(label="Customers", icon="users", group="Relationships", order=10)
+    title = _("Customers")
+    description = _("Accounts, relationships, and commercial health across the workspace.")
+    navigation = Navigation(label=_("Customers"), icon="users", group=_("Relationships"), order=10)
     list_display = (
-        TextColumn("name", label="Customer", secondary="email", width="25%"),
+        TextColumn("name", label=_("Customer"), secondary="email", width="25%"),
         RelationColumn("organization", width="19%"),
         BadgeColumn("status", variants=STATUS_VARIANTS),
-        MoneyColumn("lifetime_value", label="Lifetime value", currency="USD"),
+        MoneyColumn("lifetime_value", label=_("Lifetime value"), currency="USD"),
         RelationColumn("owner", sortable="owner__last_name"),
-        DateColumn("created_at", label="Created", format="M j, Y"),
+        DateColumn("created_at", label=_("Created"), format="DATE_FORMAT"),
     )
+    field_labels = {
+        "orders_count": _("Orders count"),
+        "open_invoice_total": _("Open invoice total"),
+    }
     search_fields = ("name", "email", "organization__name")
     filters = (
         ChoiceFilter("status"),
@@ -185,27 +192,27 @@ class CustomerResource(ModelResource[Customer]):
     actions = (ArchiveCustomer,)
     detail_sections = (
         DetailSection(
-            title="Profile",
-            description="Primary relationship and contact details.",
+            title=_("Profile"),
+            description=_("Primary relationship and contact details."),
             fields=("name", "email", "phone", "organization", "owner", "status"),
         ),
         DetailSection(
-            title="Commercial summary",
+            title=_("Commercial summary"),
             fields=("lifetime_value", "orders_count", "open_invoice_total", "created_at"),
         ),
     )
     detail_tabs = (
-        RelatedObjectList("orders", "Orders", "order", "customer", icon="receipt"),
+        RelatedObjectList("orders", _("Orders"), "order", "customer", icon="receipt"),
         DetailTab(
             "contacts",
-            "Contacts",
+            _("Contacts"),
             "commerce/tabs/customer_contacts.html",
             "users",
             context=customer_contacts_context,
         ),
         DetailTab(
             "notes",
-            "Notes",
+            _("Notes"),
             "commerce/tabs/customer_notes.html",
             "file",
             context=customer_notes_context,
@@ -221,7 +228,9 @@ class CustomerResource(ModelResource[Customer]):
         )
 
     def orders_count(self, obj: Customer) -> str:
-        return f"{obj.order_total} order{'s' if obj.order_total != 1 else ''}"
+        return ngettext("%(count)d order", "%(count)d orders", obj.order_total) % {
+            "count": obj.order_total
+        }
 
     def open_invoice_total(self, obj: Customer) -> str:
         value = obj.invoices.filter(
@@ -233,14 +242,16 @@ class CustomerResource(ModelResource[Customer]):
 @site.register(Organization)
 class OrganizationResource(ModelResource[Organization]):
     icon = "building-2"
-    title = "Companies"
-    description = "Organizations connected to your customer portfolio."
-    navigation = Navigation(label="Companies", icon="building-2", group="Relationships", order=20)
+    title = _("Companies")
+    description = _("Organizations connected to your customer portfolio.")
+    navigation = Navigation(
+        label=_("Companies"), icon="building-2", group=_("Relationships"), order=20
+    )
     list_display = (
-        TextColumn("name", label="Company", secondary="domain", width="32%"),
+        TextColumn("name", label=_("Company"), secondary="domain", width="32%"),
         TextColumn("industry"),
-        NumberColumn("employee_count", label="Employees"),
-        DateColumn("created_at", format="M j, Y"),
+        NumberColumn("employee_count", label=_("Employees")),
+        DateColumn("created_at", format="DATE_FORMAT"),
     )
     search_fields = ("name", "domain", "industry")
     ordering = ("name",)
@@ -251,30 +262,31 @@ class OrderResource(ModelResource[Order]):
     queues = (
         WorkQueue(
             "fulfillment",
-            "Ready to ship",
+            _("Ready to ship"),
             Q(status=Order.Status.PROCESSING),
-            description="Review each order and confirm handover to the carrier.",
+            description=_("Review each order and confirm handover to the carrier."),
         ),
         WorkQueue(
             "overdue",
-            "Overdue",
+            _("Overdue"),
             lambda request: Q(status=Order.Status.PROCESSING, expected_at__lt=timezone.localdate()),
-            description="Processing orders past their expected date.",
+            description=_("Processing orders past their expected date."),
         ),
-        WorkQueue("drafts", "Drafts", Q(status=Order.Status.DRAFT)),
+        WorkQueue("drafts", _("Drafts"), Q(status=Order.Status.DRAFT)),
     )
     icon = "receipt"
-    title = "Orders"
-    description = "Track fulfillment, value, and exceptions from placement to delivery."
-    navigation = Navigation(label="Orders", icon="receipt", group="Operations", order=10)
+    title = _("Orders")
+    description = _("Track fulfillment, value, and exceptions from placement to delivery.")
+    navigation = Navigation(label=_("Orders"), icon="receipt", group=_("Operations"), order=10)
     list_display = (
-        TextColumn("number", label="Order", width="16%", sortable="id"),
+        TextColumn("number", label=_("Order"), width="16%", sortable="id"),
         RelationColumn("customer", width="24%", sortable="customer__name"),
         BadgeColumn("status", variants=STATUS_VARIANTS),
         MoneyColumn("total", currency="USD"),
-        DateTimeColumn("placed_at", label="Placed", format="M j, Y, P"),
-        DateColumn("expected_at", label="Expected", format="M j, Y"),
+        DateTimeColumn("placed_at", label=_("Placed"), format="DATETIME_FORMAT"),
+        DateColumn("expected_at", label=_("Expected"), format="DATE_FORMAT"),
     )
+    field_labels = {"number": _("Number")}
     search_fields = ("id", "customer__name", "customer__email")
     filters = (ChoiceFilter("status"), RelationFilter("customer"), DateRangeFilter("created_at"))
     ordering = ("-created_at",)
@@ -282,20 +294,22 @@ class OrderResource(ModelResource[Order]):
     actions = (MarkOrderShipped, CancelOrder)
     detail_sections = (
         DetailSection(
-            title="Order summary",
+            title=_("Order summary"),
             fields=("number", "customer", "status", "placed_at", "expected_at", "currency"),
         ),
-        DetailSection(title="Financials", fields=("subtotal", "tax", "total", "updated_at")),
+        DetailSection(title=_("Financials"), fields=("subtotal", "tax", "total", "updated_at")),
     )
     detail_tabs = (
         DetailTab(
             "invoices",
-            "Invoices",
+            _("Invoices"),
             "commerce/tabs/order_invoices.html",
             "credit-card",
             context=order_invoices_context,
         ),
-        DetailTab("fulfillment", "Fulfillment", "commerce/tabs/order_fulfillment.html", "package"),
+        DetailTab(
+            "fulfillment", _("Fulfillment"), "commerce/tabs/order_fulfillment.html", "package"
+        ),
     )
 
     def get_queryset(self, request: HttpRequest):  # type: ignore[no-untyped-def]
@@ -305,14 +319,14 @@ class OrderResource(ModelResource[Order]):
 @site.register(Invoice)
 class InvoiceResource(ModelResource[Invoice]):
     icon = "credit-card"
-    title = "Invoices"
-    navigation = Navigation(label="Invoices", icon="credit-card", group="Billing", order=10)
+    title = _("Invoices")
+    navigation = Navigation(label=_("Invoices"), icon="credit-card", group=_("Billing"), order=10)
     list_display = (
-        TextColumn("number", label="Invoice", width="18%"),
+        TextColumn("number", label=_("Invoice"), width="18%"),
         RelationColumn("customer", width="24%", sortable="customer__name"),
         BadgeColumn("status", variants=STATUS_VARIANTS),
         MoneyColumn("total"),
-        DateColumn("due_date", label="Due", format="M j, Y"),
+        DateColumn("due_date", label=_("Due"), format="DATE_FORMAT"),
     )
     search_fields = ("number", "customer__name", "customer__email")
     filters = (ChoiceFilter("status"), DateRangeFilter("due_date"))
@@ -325,14 +339,16 @@ class InvoiceResource(ModelResource[Invoice]):
 @site.register(Payment)
 class PaymentResource(ModelResource[Payment]):
     icon = "circle-dollar-sign"
-    title = "Payments"
-    navigation = Navigation(label="Payments", icon="circle-dollar-sign", group="Billing", order=20)
+    title = _("Payments")
+    navigation = Navigation(
+        label=_("Payments"), icon="circle-dollar-sign", group=_("Billing"), order=20
+    )
     list_display = (
-        TextColumn("reference", label="Reference", width="23%"),
+        TextColumn("reference", label=_("Reference"), width="23%"),
         RelationColumn("invoice"),
         BadgeColumn("status", variants=STATUS_VARIANTS),
         MoneyColumn("amount"),
-        DateTimeColumn("processed_at", label="Processed"),
+        DateTimeColumn("processed_at", label=_("Processed")),
     )
     search_fields = ("reference", "invoice__number", "invoice__customer__name")
     filters = (ChoiceFilter("status"), DateRangeFilter("created_at"))
@@ -346,14 +362,14 @@ class PaymentResource(ModelResource[Payment]):
 class ProductResource(ModelResource[Product]):
     form_fields = ("name", "sku", "status", "unit_price", "stock")
     icon = "package"
-    title = "Products"
-    navigation = Navigation(label="Products", icon="package", group="Operations", order=20)
+    title = _("Products")
+    navigation = Navigation(label=_("Products"), icon="package", group=_("Operations"), order=20)
     list_display = (
-        TextColumn("name", label="Product", secondary="sku", width="32%"),
+        TextColumn("name", label=_("Product"), secondary="sku", width="32%"),
         BadgeColumn("status", variants=STATUS_VARIANTS),
-        MoneyColumn("unit_price", label="Unit price"),
+        MoneyColumn("unit_price", label=_("Unit price")),
         NumberColumn("stock"),
-        DateColumn("created_at", label="Created"),
+        DateColumn("created_at", label=_("Created")),
     )
     search_fields = ("name", "sku")
     filters = (ChoiceFilter("status"),)
@@ -409,53 +425,53 @@ class OperationsDashboard(Dashboard):
     widgets = (
         MetricWidget(
             "revenue",
-            "Collected revenue",
+            _("Collected revenue"),
             value=dashboard_revenue,
             change=8.4,
-            description="versus last month",
+            description=_("versus last month"),
             icon="circle-dollar-sign",
         ),
         MetricWidget(
             "orders",
-            "Orders in motion",
+            _("Orders in motion"),
             value=lambda request: Order.objects.filter(status=Order.Status.PROCESSING).count(),
             change=3.2,
-            description="currently processing",
+            description=_("currently processing"),
             icon="receipt",
         ),
         MetricWidget(
             "customers",
-            "Active customers",
+            _("Active customers"),
             value=lambda request: Customer.objects.filter(status=Customer.Status.ACTIVE).count(),
             change=5.1,
-            description="healthy accounts",
+            description=_("healthy accounts"),
             icon="users",
         ),
         MetricWidget(
             "invoices",
-            "Invoices to collect",
+            _("Invoices to collect"),
             value=dashboard_open_invoices,
             change=-2.0,
-            description="open or overdue",
+            description=_("open or overdue"),
             icon="credit-card",
         ),
         TemplateWidget(
             "recent-orders",
-            "Recent orders",
+            _("Recent orders"),
             "commerce/widgets/recent_orders.html",
             span=2,
             context=recent_orders,
         ),
         TemplateWidget(
             "pipeline",
-            "Customer health",
+            _("Customer health"),
             "commerce/widgets/customer_health.html",
             span=2,
             context=pipeline_context,
         ),
         ProgressWidget(
             "monthly-goal",
-            "September revenue goal",
+            _("September revenue goal"),
             span=2,
             value=lambda request: (
                 Payment.objects.filter(status=Payment.Status.SUCCEEDED).aggregate(
@@ -464,11 +480,11 @@ class OperationsDashboard(Dashboard):
                 or 0
             ),
             total=250000,
-            description="collected",
+            description=_("collected"),
         ),
         TemplateWidget(
             "attention",
-            "Needs attention",
+            _("Needs attention"),
             "commerce/widgets/attention.html",
             span=2,
             context=lambda request: {
@@ -484,18 +500,21 @@ class OperationsDashboard(Dashboard):
         overdue = Invoice.objects.filter(status=Invoice.Status.OVERDUE).count()
         if overdue:
             self.alerts = {
-                "title": f"{overdue} overdue invoice{'s' if overdue != 1 else ''}",
-                "message": "Collections work is waiting for review.",
+                "title": ngettext(
+                    "%(count)d overdue invoice", "%(count)d overdue invoices", overdue
+                )
+                % {"count": overdue},
+                "message": _("Collections work is waiting for review."),
                 "url": reverse("modern_admin:invoice_list") + "?status=overdue",
             }
         return context
 
 
-@site.page(path="settings/", label="Settings", icon="settings", group="System", order=10)
+@site.page(path="settings/", label=_("Settings"), icon="settings", group=_("System"), order=10)
 class SettingsPage(PageResource):
     permission_required = "commerce.view_workspace_settings"
-    title = "Workspace settings"
-    description = "Configuration shared across operations."
+    title = _("Workspace settings")
+    description = _("Configuration shared across operations.")
     template_name = "commerce/settings.html"
 
     def get_context_data(self, request: HttpRequest, **kwargs: Any) -> dict[str, Any]:

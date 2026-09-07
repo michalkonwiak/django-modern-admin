@@ -1,10 +1,11 @@
 from __future__ import annotations
 
 from collections.abc import Callable
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
 from django.http import HttpRequest
+from django.utils.translation import gettext_lazy as _
 
 if TYPE_CHECKING:
     from modern_admin.sites import ModernAdminSite
@@ -16,7 +17,7 @@ BadgeValue = str | int | Callable[[HttpRequest], str | int | None] | None
 class Navigation:
     label: str | None = None
     icon: str = "circle"
-    group: str = "Workspace"
+    group: str = field(default_factory=lambda: _("Workspace"))
     order: int = 100
     badge: BadgeValue = None
 
@@ -26,7 +27,7 @@ class NavigationItem:
     label: str
     icon: str
     url_name: str
-    group: str = "Workspace"
+    group: str = field(default_factory=lambda: _("Workspace"))
     order: int = 100
     badge: BadgeValue = None
     permission: Callable[[HttpRequest], bool] | None = None
