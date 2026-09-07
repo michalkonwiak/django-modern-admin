@@ -146,7 +146,7 @@
     });
     Alpine.data("choiceFilter", choiceFilter);
     Alpine.data("relationFilter", () => ({
-      ...choiceFilter(), page: 1, hasNext: false, hasPrevious: false, status: "",
+      ...choiceFilter(), page: 1, hasNext: false, hasPrevious: false, status: "", notice: "",
       controller: null,
       init() {
         this.hasValue = this.$refs.value.value !== "";
@@ -175,7 +175,8 @@
         this.controller?.abort();
         const controller = new AbortController();
         this.controller = controller;
-        this.status = "Loading…";
+        this.status = "";
+        this.notice = "Loading…";
         this.hasNext = this.hasPrevious = false;
         this.$refs.results.replaceChildren();
         const url = new URL(this.$root.dataset.url, location.origin);
@@ -188,7 +189,8 @@
           if (controller.signal.aborted) return;
           this.page = data.page;
           this.hasNext = data.has_next; this.hasPrevious = data.has_previous;
-          this.status = data.results.length ? `Page ${data.page} of ${data.pages}` : "No matching records.";
+          this.status = data.results.length ? `Page ${data.page} of ${data.pages}` : "";
+          this.notice = data.results.length ? "" : "No matching records.";
           data.results.forEach(option => {
             const button = document.createElement("button");
             button.type = "button"; button.className = "ma-relation-option";
@@ -199,7 +201,7 @@
             this.$refs.results.append(button);
           });
         } catch (error) {
-          if (error.name !== "AbortError") this.status = "Could not load records. Reopen or search to retry.";
+          if (error.name !== "AbortError") this.notice = "Could not load records. Reopen or search to retry.";
         }
       }
     }));

@@ -4,12 +4,15 @@
   <div class="ma-popover ma-choice-options"{% if auto_submit %} x-floating="opened"{% endif %}>
     <input class="ma-choice-search" type="search" placeholder="Search all records…" aria-label="Search {{ filter.label }} options" x-model="term" @input.debounce.200ms="search" @keydown.enter.prevent>
     <button type="button" class="ma-relation-option" @click="clearValue" :aria-pressed="!hasValue">Any {{ filter.label|lower }}</button>
-    <p role="status" aria-live="polite" x-text="status"></p>
     <div class="ma-choice-list" x-ref="results"></div>
-    <div class="ma-page-actions">
-      <button type="button" class="ma-button is-ghost" @click="previous" :disabled="!hasPrevious">Previous</button>
-      <button type="button" class="ma-button is-ghost" @click="next" :disabled="!hasNext">Next</button>
-    </div>
+    <p class="ma-choice-notice" aria-live="polite" x-show="notice" x-text="notice" x-cloak></p>
+    <footer class="ma-choice-footer">
+      <p class="ma-choice-status" role="status" aria-live="polite" x-text="status"></p>
+      <div class="ma-choice-pager">
+        <button type="button" class="ma-button is-quiet is-small" @click="previous" :disabled="!hasPrevious">Previous</button>
+        <button type="button" class="ma-button is-quiet is-small" @click="next" :disabled="!hasNext">Next</button>
+      </div>
+    </footer>
     <input class="ma-input" type="text" :type="'hidden'" name="{{ filter.key }}" value="{{ filter.value }}" x-ref="value" placeholder="Record ID" aria-label="{{ filter.label }} record ID">
   </div>
 </details>

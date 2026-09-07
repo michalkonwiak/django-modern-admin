@@ -24,7 +24,7 @@ def test_workspace_login_is_styled(page: Page, live_server, width, theme):
     assert field.evaluate("e => getComputedStyle(e).borderTopStyle") == "solid"
     assert field.bounding_box()["height"] >= 42
     assert field.evaluate("e => getComputedStyle(e).fontSize") == (
-        "16px" if width == 390 else "13px"
+        "16px" if width == 390 else "14px"
     )
     assert page.evaluate("document.documentElement.scrollWidth <= innerWidth")
     assert page.locator("html").evaluate("e => e.classList.contains('dark')") == (theme == "dark")
@@ -626,3 +626,93 @@ def test_related_list_panel_stays_inside_the_page_and_scrolls_itself(
     markup = page.content()
     for gone in (">LIVE<", "Live resource view", "Activity stream", "ma-live-pulse"):
         assert gone not in markup
+
+
+@pytest.mark.parametrize("width", [390, 1440])
+def test_no_text_renders_below_the_type_scale_floor(page, live_server, customers, width):
+    """The UI used to ship 7.5-9px text. 11px is the floor now."""
+    page.set_viewport_size({"width": width, "height": 1000})
+    too_small = []
+    for path in ("/app/", "/app/customer/", f"/app/customer/{customers[0].pk}/", "/app/settings/"):
+        page.goto(f"{live_server.url}{path}", wait_until="networkidle")
+        too_small += page.evaluate(
+            """[...document.querySelectorAll('body *')]
+            .filter(e => e.offsetParent !== null
+                && [...e.childNodes].some(n => n.nodeType === 3 && n.textContent.trim())
+                && parseFloat(getComputedStyle(e).fontSize) < 11)
+            .map(e => (e.tagName + '.' + e.className).slice(0, 60)
+                + ' @' + getComputedStyle(e).fontSize)"""
+        )
+    assert too_small == [], too_small
+
+
+def test_toolbar_controls_share_one_height(page, live_server):
+    page.goto(f"{live_server.url}/app/customer/", wait_until="networkidle")
+    heights = page.evaluate(
+        """[...document.querySelectorAll(
+            '.ma-filter-form .ma-search-field, .ma-toolbar-filters .ma-choice-filter summary,'
+            + ' .ma-toolbar-end .ma-toolbar-button, .ma-toolbar-end .ma-toolbar-icon')]
+        .map(e => Math.round(e.getBoundingClientRect().height))"""
+    )
+    assert heights, "no toolbar controls found"
+    assert len(set(heights)) == 1, heights
+
+
+@pytest.mark.parametrize("width", [390, 1440])
+def test_relation_popover_status_is_a_styled_footer(page, live_server, organization, width):
+    """The page position used to be a bare <p> above the list, unstyled."""
+
+    def seed():
+        from demo.commerce.models import Organization
+
+        Organization.objects.bulk_create(
+            [Organization(name=f"Company {i:03d}", domain=f"c{i}.example") for i in range(150)]
+        )
+
+    with ThreadPoolExecutor(max_workers=1) as executor:
+        executor.submit(seed).result()
+    page.set_viewport_size({"width": width, "height": 1000})
+    page.goto(f"{live_server.url}/app/customer/", wait_until="networkidle")
+    if width == 390:
+        # The toolbar filters are hidden at this width; they live in the drawer.
+        page.get_by_role("button", name="More filters").click()
+        picker = page.locator('.ma-filter-drawer details[data-label="Organization"]')
+    else:
+        picker = page.locator('.ma-toolbar-filters details[data-label="Organization"]')
+    picker.locator("summary").click()
+
+    status = picker.locator(".ma-choice-status")
+    expect(status).to_have_text("Page 1 of 2")
+    expect(picker.get_by_role("status")).to_have_text("Page 1 of 2")
+    assert status.evaluate("e => e.closest('.ma-choice-footer') !== null")
+    assert status.evaluate("e => parseFloat(getComputedStyle(e).fontSize)") == 11
+    footer = picker.locator(".ma-choice-footer")
+    assert footer.evaluate("e => getComputedStyle(e).borderTopStyle") == "solid"
+    # A nested <footer> must not pick up the filter drawer's own footer padding.
+    assert footer.evaluate("e => Math.round(e.getBoundingClientRect().height)") == 36
+    # The status sits below the results, not above them.
+    assert status.evaluate(
+        "e => e.compareDocumentPosition(e.closest('.ma-choice-options')"
+        ".querySelector('.ma-choice-list')) === Node.DOCUMENT_POSITION_PRECEDING"
+    )
+
+    # Pager keeps its labels and is not squashed into icon squares on mobile.
+    previous = picker.get_by_role("button", name="Previous", exact=True)
+    expect(previous).to_be_disabled()
+    assert previous.evaluate("e => e.getBoundingClientRect().width") > 40
+    picker.get_by_role("button", name="Next", exact=True).click()
+    expect(status).to_have_text("Page 2 of 2")
+    expect(previous).to_be_enabled()
+
+    # Empty and error states render where the results go, not in the footer.
+    picker.get_by_role("searchbox").fill("zzz-no-such-record")
+    notice = picker.locator(".ma-choice-notice")
+    expect(notice).to_have_text("No matching records.")
+    # An empty page position collapses instead of leaving a blank strip.
+    expect(status).to_be_hidden()
+    assert notice.evaluate("e => e.closest('.ma-choice-footer') === null")
+
+    page.route("**/filters/*/choices/**", lambda route: route.abort())
+    picker.get_by_role("searchbox").fill("boom")
+    expect(notice).to_contain_text("Could not load records")
+    assert notice.evaluate("e => e.getBoundingClientRect().height") > 20, "error must not clip"
