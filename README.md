@@ -472,6 +472,11 @@ resource definition, reproduction steps, and expected versus actual behavior.
 Redact customer data, credentials, and tokens. Discuss substantial API changes before
 implementing them; preserve Django conventions and keep domain logic out of the framework.
 
+Install GNU gettext (`msgfmt` on PATH) for translation catalogue checks:
+`sudo apt-get install gettext` on Debian/Ubuntu, or `brew install gettext` on macOS.
+The tests compare compiled translations with the source content, independent of
+file timestamps after a Git checkout.
+
 Run the relevant checks before submitting a change:
 
 ```bash

@@ -8,8 +8,12 @@ every unit test still passes.
 
 from __future__ import annotations
 
+import gettext
+import os
 import pathlib
 import re
+import shutil
+import subprocess
 
 import pytest
 from django.conf import settings
@@ -49,13 +53,47 @@ def test_every_message_is_translated(path: pathlib.Path) -> None:
     assert untranslated == [], untranslated
 
 
-@pytest.mark.parametrize("path", CATALOGUES, ids=lambda path: path.parent.parent.parent.name)
-def test_compiled_catalogue_is_not_stale(path: pathlib.Path) -> None:
+def _assert_catalogue_current(path: pathlib.Path, generated: pathlib.Path) -> None:
     compiled = path.with_suffix(".mo")
-    assert compiled.exists(), f"run `python manage.py compilemessages -l pl` for {path}"
-    assert compiled.stat().st_mtime >= path.stat().st_mtime, (
-        f"{compiled.name} is older than {path.name}; run `python manage.py compilemessages -l pl`"
+    rebuild = f"run `python manage.py compilemessages -l pl` for {path}"
+    assert compiled.exists(), rebuild
+    msgfmt = shutil.which("msgfmt")
+    assert msgfmt, "Install GNU gettext (msgfmt) to check compiled translation catalogues"
+    subprocess.run(
+        [msgfmt, "--check-format", "-o", str(generated), str(path)],
+        check=True, capture_output=True, text=True,
     )
+    # Compare parsed messages, including plural/context keys and metadata. Binary
+    # layout can vary between gettext versions; checkout mtimes have no meaning.
+    with compiled.open("rb") as stored_file, generated.open("rb") as generated_file:
+        stored = gettext.GNUTranslations(stored_file)
+        expected = gettext.GNUTranslations(generated_file)
+    assert stored._catalog == expected._catalog, f"{compiled} is stale; {rebuild}"
+
+
+@pytest.mark.parametrize("path", CATALOGUES, ids=lambda path: str(path.relative_to(ROOT)))
+def test_compiled_catalogue_is_not_stale(path: pathlib.Path, tmp_path: pathlib.Path) -> None:
+    # Explicitly reproduce checkout ordering: an older MO must still pass when
+    # its translations match the source. Never rebuild the tracked MO in this test.
+    source = tmp_path / path.name
+    compiled = source.with_suffix(".mo")
+    shutil.copyfile(path, source)
+    shutil.copyfile(path.with_suffix(".mo"), compiled)
+    os.utime(compiled, (1, 1))
+    _assert_catalogue_current(source, tmp_path / "expected.mo")
+
+
+def test_newer_compiled_catalogue_with_outdated_translation_fails(tmp_path: pathlib.Path) -> None:
+    source = tmp_path / "django.po"
+    shutil.copyfile(CATALOGUES[0], source)
+    shutil.copyfile(CATALOGUES[0].with_suffix(".mo"), source.with_suffix(".mo"))
+    source.write_text(source.read_text().replace(
+        'msgstr "Nie masz dostępu do tej przestrzeni roboczej."',
+        'msgstr "Zmienione tłumaczenie."',
+    ))
+    os.utime(source, (1, 1))
+    with pytest.raises(AssertionError, match="is stale"):
+        _assert_catalogue_current(source, tmp_path / "expected.mo")
 
 
 def test_workspace_renders_in_polish(authenticated_client, customers) -> None:
