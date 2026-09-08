@@ -313,6 +313,7 @@ class ModelResource(Resource, Generic[ModelT]):
 
 
 class PageResource(Resource):
+    fragments: ClassVar[Mapping[str, str]] = {}
     path = ""
     label = ""
     navigation: Navigation | None = None

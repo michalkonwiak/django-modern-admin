@@ -231,8 +231,8 @@ class CustomerResource(ModelResource[Customer]):
 ## HTMX lifecycle
 
 1. Controls use real links/forms with canonical query strings and work without JS.
-2. With HTMX, the same URL receives `HX-Request: true`; `HX-Target` selects the
-   documented fragment endpoint behavior.
+2. With HTMX, the same URL receives `HX-Request: true`; named fragment parameters select
+   documented fragment behavior; history restores receive the full page.
 3. The same view builds the same queryset/context, then returns the corresponding
    partial rather than duplicating data logic. List controls use `hx-push-url` so
    history and bookmarks reflect server state.
@@ -312,7 +312,10 @@ Sorting/search across relations can add joins and `distinct()`, exact counts can
 expensive, relation filter choices can grow unbounded, and cells that call arbitrary
 properties can hide queries. The framework never guesses `select_related`, exposes
 `get_queryset`, only adds `distinct` when relational search requires it, supports
-configurable counts, and documents that custom columns must not query. Relation filters use server-side autocomplete with explicit pagination instead of
+configurable counts, and guards column rendering with database execute wrappers.
+In DEBUG, queries emit `ColumnQueryWarning`; `MODERN_ADMIN_COLUMN_QUERIES="error"`
+rejects queries before execution in tests or strict deployments. The guard wraps
+custom `get_cell` overrides and template columns on all framework cell-rendering paths. Relation filters use server-side autocomplete with explicit pagination instead of
 rendering large relation choice sets. Explicit `choices=` remain local choice lists;
 ModelForm relation widgets follow the configured Django form.
 
@@ -329,7 +332,11 @@ Ambiguous target-dependent responses, stale URLs, out-of-order searches, and bro
 history are common. The framework uses named fragment request parameters, canonical
 GET forms, `hx-sync` for search, and `hx-push-url`. OOB swaps are reserved for global
 surfaces (toasts/dialog host), not routine page composition. Responses never infer
-authorization from `HX-Request`.
+authorization from `HX-Request`. Custom pages and dashboards register a `fragments`
+mapping and share `render_fragment`; the `fragment_form` template tag supplies
+canonical GET, request replacement, live search, and history attributes for page
+and TemplateWidget forms. Fragment responses strip the transport parameter from
+the pushed URL, and history restores always render the shell.
 
 ### Where configuration could become harder than Django
 

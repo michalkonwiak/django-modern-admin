@@ -1,9 +1,11 @@
 from __future__ import annotations
 
+import json
 from typing import Any
 
 from django import forms, template
 from django.forms import BoundField
+from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 
 register = template.Library()
@@ -88,3 +90,15 @@ def initials(value: Any) -> str:
 @register.filter
 def get_item(mapping: dict[str, Any], key: str) -> Any:
     return mapping.get(key)
+
+
+@register.simple_tag(takes_context=True)
+def fragment_form(context, target, fragment, url=None):
+    """Attributes for a canonical GET form, including debounced live search."""
+    url = url or context["request"].path
+    return format_html(
+        'method="get" action="{}" hx-get="{}" hx-target="{}" '
+        'hx-swap="outerHTML" hx-push-url="true" hx-sync="this:replace" '
+        'hx-trigger="submit, input delay:250ms, search" hx-vals="{}"',
+        url, url, target, json.dumps({"fragment": fragment}),
+    )

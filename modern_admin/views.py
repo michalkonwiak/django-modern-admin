@@ -29,8 +29,9 @@ from modern_admin.columns import Cell, Column
 from modern_admin.filters import RelationFilter
 from modern_admin.forms.widgets import AccessChecklist
 from modern_admin.models import SavedView
+from modern_admin.rendering import render_cell
 from modern_admin.resources import ModelResource
-from modern_admin.responses import Toast, htmx_events, is_htmx, notify
+from modern_admin.responses import Toast, htmx_events, is_htmx, notify, render_fragment
 from modern_admin.sections import RelatedObjectList
 from modern_admin.sites import ModernAdminSite
 
@@ -194,7 +195,7 @@ def _list_context(
             TableRow(
                 obj=obj,
                 cells=tuple(
-                    (column, column.get_cell(obj, resource, request)) for column in columns
+                    (column, render_cell(column, obj, resource, request)) for column in columns
                 ),
                 detail_url=detail_url,
                 preview_url=f"{detail_url}?surface=preview",
@@ -426,7 +427,7 @@ def resource_detail_view(
             raw = resource.get_field_value(obj, field_name)
             column = detail_columns.get(field_name)
             if column:
-                cell = column.get_cell(obj, resource, request)
+                cell = render_cell(column, obj, resource, request)
                 values.append(
                     DetailValue(
                         label=resource.get_field_label(field_name),
@@ -792,7 +793,9 @@ def dashboard_view(request: HttpRequest, *, site: ModernAdminSite) -> HttpRespon
         breadcrumbs=((_("Overview"), ""),),
     )
     context = dashboard.get_context_data(request, **context)
-    return render(request, dashboard.template_name, context)
+    return render_fragment(
+        request, dashboard.template_name, context, fragments=dashboard.fragments
+    )
 
 
 def widget_view(request: HttpRequest, *, site: ModernAdminSite, widget_key: str) -> HttpResponse:
@@ -834,7 +837,7 @@ def page_view(
         breadcrumbs=((_("Overview"), site.reverse("dashboard")), (page.title, "")),
     )
     context = page.get_context_data(request, **context)
-    return render(request, page.template_name, context)
+    return render_fragment(request, page.template_name, context, fragments=page.fragments)
 
 
 def command_palette_view(request: HttpRequest, *, site: ModernAdminSite) -> HttpResponse:
@@ -940,7 +943,7 @@ def _detail_tab_context(request, resource, obj, tab):
         rows.append(
             {
                 "label": child.get_object_label(item),
-                "cells": tuple(column.get_cell(item, child, request) for column in columns),
+                "cells": tuple(render_cell(column, item, child, request) for column in columns),
                 "url": site.reverse(f"{child.key}_detail", args=(item.pk,)),
                 "edit_url": site.reverse(f"{child.key}_edit", args=(item.pk,))
                 if child.has_form and child.permission_policy.can_change(request.user, item)

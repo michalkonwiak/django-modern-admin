@@ -580,3 +580,57 @@ and does not implement Django 6's report-only settings or per-view decorators.
 Do not cache full HTML independently of its nonce-bearing CSP header.
 See [Django CSP](https://docs.djangoproject.com/en/6.0/ref/csp/) and
 [Alpine CSP expressions](https://alpinejs.dev/advanced/csp) for extension guidance.
+
+
+### Column query diagnostics
+
+Framework cell rendering (lists, related tables, and detail columns) emits
+`modern_admin.rendering.ColumnQueryWarning` for database queries when `DEBUG=True`,
+including queries inside custom `get_cell()` implementations and `TemplateColumn`
+templates. Load relations and computed data in `get_queryset()` with
+`select_related()`, `prefetch_related()`, or annotations.
+
+Set `MODERN_ADMIN_COLUMN_QUERIES = "error"` in test settings to raise
+`ColumnQueryError` before a query executes. `"warn"` enables diagnostics regardless
+of DEBUG; `"off"` disables them (the default outside DEBUG). All configured database
+aliases are covered. The guard covers cell evaluation, not arbitrary page context,
+actions, or code that calls `get_cell()` directly; custom renderers can use
+`modern_admin.rendering.render_cell(column, obj, resource, request)`.
+
+### GET forms on custom pages and widgets
+
+`PageResource` and `Dashboard` support named fragments:
+
+```python
+class ReportPage(PageResource):
+    path = "report"
+    template_name = "reports/page.html"
+    fragments = {"results": "reports/results.html"}
+```
+
+Include `reports/results.html` in the full page. That partial must contain its
+replacement root, for example `<section id="report-results">...</section>`.
+Use the shared tag in a page or `TemplateWidget` template:
+
+```html+django
+{% load modern_admin %}
+<form {% fragment_form "#report-results" "results" %}>
+  <input type="search" name="q" value="{{ request.GET.q }}">
+  <button type="submit">Search</button>
+</form>
+{% include "reports/results.html" %}
+```
+
+The tag uses the current request path, a real GET action, debounced input events,
+`hx-sync="this:replace"`, and `hx-push-url`. Put all filters inside the form so each
+request represents the current state. An optional `url=` argument points the form
+at another page; use the owning page/dashboard URL for widgets also rendered via
+a refresh endpoint. Declare the fragment on that destination page/dashboard.
+
+The view selects only registered fragment names, never infers them from
+`HX-Target`, returns 404 for unknown HTMX fragments, and pushes a URL without the
+transport-only `fragment` parameter. Normal navigation and history restoration
+render the full page. Custom Django endpoints can reuse
+`modern_admin.responses.render_fragment(request, template_name, context, fragments=...)`.
+Handwritten HTMX forms still need to follow the same contract; arbitrary HTML is
+not automatically rewritten.
