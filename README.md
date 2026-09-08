@@ -639,3 +639,29 @@ render the full page. Custom Django endpoints can reuse
 `modern_admin.responses.render_fragment(request, template_name, context, fragments=...)`.
 Handwritten HTMX forms still need to follow the same contract; arbitrary HTML is
 not automatically rewritten.
+
+### First-visit workspace tour
+
+The shared app shell offers a four-step tour on an account's first authenticated
+visit to each admin site. It introduces navigation, workspace search, language,
+and theme controls using the existing design tokens. The spotlight follows visible
+controls and adapts to mobile layouts; Escape, Skip, and the close button dismiss
+it. The Replay tour button in Settings opens it again.
+
+Apply migrations when upgrading:
+
+```bash
+python manage.py migrate
+```
+
+`ProductTourState` stores completion or dismissal per `AUTH_USER_MODEL` account and
+site name, so the decision survives logout, cleared browser storage, and different
+devices. Existing accounts without a decision see it on their next visit. Closing
+the browser before a decision leaves the tour eligible. Replaying never resets the
+original decision. Projects may opt out with `site.product_tour_enabled = False`.
+
+Status is loaded from an authenticated, uncached endpoint without adding a query to
+list/fragment rendering. Updates require POST and CSRF, with a database uniqueness
+constraint for retries. If status loading fails, the workspace remains usable; if
+saving fails, a message explains that the tour may reappear. With JavaScript
+disabled, the tour and its replay control stay hidden.

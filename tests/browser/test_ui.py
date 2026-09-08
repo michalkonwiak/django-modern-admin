@@ -241,6 +241,9 @@ def test_access_checklist_filters_toggles_and_saves(page: Page, live_server, use
 
 @pytest.fixture
 def page(live_server, user, customers, order) -> Page:
+    from modern_admin.models import ProductTourState
+
+    ProductTourState.objects.create(user=user, site_name="modern_admin", outcome="completed")
     browser_path = os.environ.get("PLAYWRIGHT_BROWSERS_PATH")
     if not browser_path:
         pytest.skip("Set PLAYWRIGHT_BROWSERS_PATH after running `playwright install chromium`.")
@@ -250,7 +253,7 @@ def page(live_server, user, customers, order) -> Page:
         page.goto(f"{live_server.url}/login/", wait_until="domcontentloaded")
         page.fill("#id_username", "operator")
         page.fill("#id_password", "secret")
-        page.click('button[type="submit"]')
+        page.locator('.demo-login-form button[type="submit"]').click()
         page.wait_for_url("**/app/")
         yield page
         browser.close()
@@ -716,3 +719,110 @@ def test_relation_popover_status_is_a_styled_footer(page, live_server, organizat
     picker.get_by_role("searchbox").fill("boom")
     expect(notice).to_contain_text("Could not load records")
     assert notice.evaluate("e => e.getBoundingClientRect().height") > 20, "error must not clip"
+
+
+@pytest.mark.parametrize(
+    "width,theme", [(390, "light"), (1440, "light"), (390, "dark"), (1440, "dark")]
+)
+def test_product_tour_first_visit_complete_and_replay(page, live_server, user, width, theme):
+    from modern_admin.models import ProductTourState
+
+    with ThreadPoolExecutor(max_workers=1) as executor:
+        executor.submit(lambda: ProductTourState.objects.filter(user=user).delete()).result()
+    page.set_viewport_size({"width": width, "height": 844})
+    page.evaluate("theme => localStorage.setItem('ma-theme', theme)", theme)
+    page.goto(f"{live_server.url}/app/", wait_until="networkidle")
+    tour = page.locator("[data-ma-tour]")
+    expect(tour).to_be_visible()
+    assert page.locator("#ma-tour-title").evaluate("el => el === document.activeElement")
+    for step in range(4):
+        expect(tour.locator("[data-tour-count]")).to_have_text(f"Step {step + 1} of 4")
+        assert_inside_viewport(page, ".ma-tour-card")
+        page.screenshot(path=f"/tmp/modern-admin-tour-{width}-{theme}-{step}.png")
+        if step == 1:
+            page.keyboard.press("Control+k")
+            expect(page.locator(".ma-command")).not_to_be_visible()
+            tour.locator("[data-tour-back]").click()
+            expect(tour.locator("[data-tour-count]")).to_have_text("Step 1 of 4")
+            tour.locator("[data-tour-next]").click()
+        if step == 3:
+            with page.expect_response(
+                lambda response: (
+                    response.url.endswith("/tour/") and response.request.method == "POST"
+                )
+            ) as saved:
+                tour.locator("[data-tour-next]").click()
+            assert saved.value.status == 204
+        else:
+            tour.locator("[data-tour-next]").click()
+    with ThreadPoolExecutor(max_workers=1) as executor:
+        assert executor.submit(
+            lambda: ProductTourState.objects.get(user=user).outcome
+        ).result() == "completed"
+    page.reload(wait_until="networkidle")
+    expect(page.locator("[data-ma-tour]")).not_to_be_visible()
+    page.goto(f"{live_server.url}/app/settings/", wait_until="networkidle")
+    page.locator("[data-ma-tour-start]").click()
+    expect(page.locator("[data-ma-tour]")).to_be_visible()
+    with page.expect_response(
+        lambda response: response.url.endswith("/tour/") and response.request.method == "POST"
+    ):
+        page.keyboard.press("Escape")
+    expect(page.locator("[data-ma-tour-start]")).to_be_focused()
+
+
+def test_product_tour_skip_and_save_failure(page, live_server, user):
+    from modern_admin.models import ProductTourState
+
+    with ThreadPoolExecutor(max_workers=1) as executor:
+        executor.submit(lambda: ProductTourState.objects.filter(user=user).delete()).result()
+    page.goto(f"{live_server.url}/app/customer/", wait_until="networkidle")
+    tour = page.locator("[data-ma-tour]")
+    expect(tour).to_be_visible()
+    # Native modality keeps keyboard focus inside the tour in both directions.
+    tour.locator("[data-tour-next]").focus()
+    page.keyboard.press("Tab")
+    expect(tour.locator("[data-tour-close]")).to_be_focused()
+    page.keyboard.press("Shift+Tab")
+    expect(tour.locator("[data-tour-next]")).to_be_focused()
+    with page.expect_response(
+        lambda response: response.url.endswith("/tour/") and response.request.method == "POST"
+    ):
+        tour.locator("[data-tour-skip]").click()
+    with ThreadPoolExecutor(max_workers=1) as executor:
+        assert executor.submit(
+            lambda: ProductTourState.objects.get(user=user).outcome
+        ).result() == "dismissed"
+    page.reload(wait_until="networkidle")
+    expect(page.locator("[data-ma-tour]")).not_to_be_visible()
+    page.goto(f"{live_server.url}/app/settings/", wait_until="networkidle")
+    page.locator("[data-ma-tour-start]").click()
+    page.route("**/tour/", lambda route: route.fulfill(status=503))
+    page.locator("[data-tour-close]").click()
+    expect(page.locator("[data-ma-tour]")).not_to_be_visible()
+    expect(page.locator("#toast-region")).to_contain_text("could not be saved")
+
+
+
+def test_product_tour_polish_small_screen_and_history(page, live_server):
+    page.set_viewport_size({"width": 320, "height": 568})
+    page.context.set_extra_http_headers({"Accept-Language": "pl"})
+    page.goto(f"{live_server.url}/app/customer/", wait_until="networkidle")
+    page.goto(f"{live_server.url}/app/settings/", wait_until="networkidle")
+    page.locator("[data-ma-tour-start]").click()
+    expect(page.locator("[data-tour-count]")).to_have_text("Krok 1 z 4")
+    for _ in range(3):
+        page.locator("[data-tour-next]").click()
+    assert_inside_viewport(page, ".ma-tour-card")
+    assert page.locator(".ma-tour-card").evaluate("el => el.scrollWidth === el.clientWidth")
+    page.screenshot(path="/tmp/modern-admin-tour-polish-small.png")
+    page.keyboard.press("Escape")
+    # The tour remains usable after list navigation and history restoration.
+    page.goto(f"{live_server.url}/app/customer/", wait_until="networkidle")
+    page.locator("#resource-search").fill("Alex")
+    page.wait_for_url("**q=Alex*")
+    page.go_back(wait_until="networkidle")
+    page.goto(f"{live_server.url}/app/settings/", wait_until="networkidle")
+    page.locator("[data-ma-tour-start]").click()
+    expect(page.locator("[data-tour-count]")).to_have_text("Krok 1 z 4")
+    expect(page.locator("[data-ma-tour]")).to_be_visible()

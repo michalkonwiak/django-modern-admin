@@ -1,0 +1,38 @@
+{% load i18n modern_admin static %}
+<dialog class="ma-tour" data-ma-tour data-url="{% url modern_admin_site.name|add:':product_tour' %}"
+        data-save-error="{% translate 'Your tour preference could not be saved. The tour may appear again next time.' %}"
+        aria-labelledby="ma-tour-title" aria-describedby="ma-tour-description" data-next="{% translate 'Next' %}" data-finish="{% translate 'Start exploring' %}">
+  <div class="ma-tour-spotlight" data-tour-spotlight hidden aria-hidden="true"></div>
+  <section class="ma-tour-card" data-tour-card>
+    <header class="ma-tour-topline"><span class="ma-eyebrow">{% translate "Workspace tour" %}</span><button type="button" class="ma-icon-button" data-tour-close aria-label="{% translate 'Close tour' %}">{% icon "x" 16 %}</button></header>
+    <div class="ma-tour-emblem" aria-hidden="true">{% icon "sparkles" 24 %}</div>
+    <div data-tour-copy aria-live="polite" aria-atomic="true">
+      <p class="ma-tour-count" data-tour-count></p>
+      <h2 id="ma-tour-title" tabindex="-1"></h2>
+      <p id="ma-tour-description"></p>
+    </div>
+    <div class="ma-tour-progress" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+    <footer class="ma-tour-footer">
+      <button type="button" class="ma-button is-quiet" data-tour-skip>{% translate "Skip tour" %}</button>
+      <div><button type="button" class="ma-button is-secondary" data-tour-back>{% translate "Back" %}</button><button type="button" class="ma-button is-primary" data-tour-next></button></div>
+    </footer>
+    <p class="ma-tour-hint">{% translate "You can replay this tour from Settings." %}</p>
+  </section>
+  <template data-tour-step data-count="{% translate 'Step 1 of 4' %}">
+    <h2>{% blocktranslate with site=site_title %}Make yourself at home in {{ site }}{% endblocktranslate %}</h2>
+    <p>{% translate "A quick look around your workspace. Four short steps, then you're ready to get things done." %}</p>
+  </template>
+  <template data-tour-step data-count="{% translate 'Step 2 of 4' %}" data-target=".ma-nav, .ma-topbar .ma-mobile-trigger">
+    <h2>{% translate "Your work, one place away" %}</h2>
+    <p>{% translate "Use the navigation to move between pages and records. You'll only see areas your account can access. On smaller screens, open it with the menu button." %}</p>
+  </template>
+  <template data-tour-step data-count="{% translate 'Step 3 of 4' %}" data-target=".ma-command-trigger">
+    <h2>{% translate "Find it without the clicking" %}</h2>
+    <p>{% translate "Search workspace jumps to pages and records. Open it from the top bar or press Ctrl K on Windows and Linux, or Command K on Mac." %}</p>
+  </template>
+  <template data-tour-step data-count="{% translate 'Step 4 of 4' %}" data-target=".ma-topbar-actions">
+    <h2>{% translate "Settle into your workspace" %}</h2>
+    <p>{% translate "Choose your language and switch between light and dark mode in the top bar. Your account menu holds sign out. You can replay this tour from Settings." %}</p>
+  </template>
+</dialog>
+<script defer src="{% static 'modern_admin/tour.js' %}?v=20260908-tour"></script>

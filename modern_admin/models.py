@@ -51,3 +51,27 @@ class SavedView(models.Model):
 
     def __str__(self) -> str:
         return self.name
+
+
+class ProductTourState(models.Model):
+    """An account's first-run decision, shared across sessions and devices."""
+
+    class Outcome(models.TextChoices):
+        COMPLETED = "completed", "Completed"
+        DISMISSED = "dismissed", "Dismissed"
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="modern_admin_product_tours",
+    )
+    site_name = models.CharField(max_length=100)
+    outcome = models.CharField(max_length=10, choices=Outcome.choices)
+    finished_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=("user", "site_name"), name="modern_admin_unique_product_tour",
+            )
+        ]

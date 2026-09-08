@@ -920,3 +920,88 @@ msgstr "Nieznany filtr relacji"
 #: modern_admin/workflows.py:22
 msgid "The record's state has changed. This action is no longer available."
 msgstr "Stan rekordu uległ zmianie. Ta akcja nie jest już dostępna."
+
+#: modern_admin/templates/modern_admin/partials/product_tour.html
+msgid "Workspace tour"
+msgstr "Przewodnik po panelu"
+
+#: modern_admin/templates/modern_admin/partials/product_tour.html
+msgid "Your tour preference could not be saved. The tour may appear again next time."
+msgstr "Nie udało się zapisać preferencji przewodnika. Może on pojawić się ponownie przy następnej wizycie."
+
+#: modern_admin/templates/modern_admin/partials/product_tour.html
+msgid "Start exploring"
+msgstr "Zaczynamy"
+
+#: modern_admin/templates/modern_admin/partials/product_tour.html
+msgid "Close tour"
+msgstr "Zamknij przewodnik"
+
+#: modern_admin/templates/modern_admin/partials/product_tour.html
+msgid "Skip tour"
+msgstr "Pomiń"
+
+#: modern_admin/templates/modern_admin/partials/product_tour.html
+msgid "Back"
+msgstr "Wstecz"
+
+#: modern_admin/templates/modern_admin/partials/product_tour.html
+msgid "You can replay this tour from Settings."
+msgstr "Do przewodnika wrócisz w Ustawieniach."
+
+#: modern_admin/templates/modern_admin/partials/product_tour.html
+msgid "Step 1 of 4"
+msgstr "Krok 1 z 4"
+
+#: modern_admin/templates/modern_admin/partials/product_tour.html
+msgid "Step 2 of 4"
+msgstr "Krok 2 z 4"
+
+#: modern_admin/templates/modern_admin/partials/product_tour.html
+msgid "Step 3 of 4"
+msgstr "Krok 3 z 4"
+
+#: modern_admin/templates/modern_admin/partials/product_tour.html
+msgid "Step 4 of 4"
+msgstr "Krok 4 z 4"
+
+#: modern_admin/templates/modern_admin/partials/product_tour.html
+#, python-format
+msgid "Make yourself at home in %(site)s"
+msgstr "Poznaj swój panel %(site)s"
+
+#: modern_admin/templates/modern_admin/partials/product_tour.html
+msgid "A quick look around your workspace. Four short steps, then you're ready to get things done."
+msgstr "Rozejrzyj się po swoim panelu. Cztery krótkie kroki i możesz przejść do pracy."
+
+#: modern_admin/templates/modern_admin/partials/product_tour.html
+msgid "Your work, one place away"
+msgstr "Wszystko pod ręką"
+
+#: modern_admin/templates/modern_admin/partials/product_tour.html
+msgid "Use the navigation to move between pages and records. You'll only see areas your account can access. On smaller screens, open it with the menu button."
+msgstr "Nawigacja prowadzi do stron i rekordów. Widzisz tylko obszary dostępne dla Twojego konta. Na mniejszych ekranach otworzysz ją przyciskiem menu."
+
+#: modern_admin/templates/modern_admin/partials/product_tour.html
+msgid "Find it without the clicking"
+msgstr "Szukaj, zamiast przeklikiwać"
+
+#: modern_admin/templates/modern_admin/partials/product_tour.html
+msgid "Search workspace jumps to pages and records. Open it from the top bar or press Ctrl K on Windows and Linux, or Command K on Mac."
+msgstr "Wyszukiwarka przeniesie Cię do stron i rekordów. Otwórz ją na górnym pasku lub skrótem Ctrl K w Windows i Linux albo Command K na Macu."
+
+#: modern_admin/templates/modern_admin/partials/product_tour.html
+msgid "Settle into your workspace"
+msgstr "Dopasuj panel do siebie"
+
+#: modern_admin/templates/modern_admin/partials/product_tour.html
+msgid "Choose your language and switch between light and dark mode in the top bar. Your account menu holds sign out. You can replay this tour from Settings."
+msgstr "Na górnym pasku zmienisz język i wybierzesz jasny lub ciemny motyw. Wylogowanie znajdziesz w menu konta. Przewodnik uruchomisz ponownie w Ustawieniach."
+
+#: demo/commerce/templates/commerce/settings.html
+msgid "Replay tour"
+msgstr "Uruchom ponownie"
+
+#: demo/commerce/templates/commerce/settings.html
+msgid "Revisit navigation, search, and workspace preferences."
+msgstr "Przypomnij sobie nawigację, wyszukiwanie i ustawienia panelu."

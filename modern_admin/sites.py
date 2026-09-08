@@ -25,6 +25,7 @@ PageT = TypeVar("PageT", bound=PageResource)
 
 
 class ModernAdminSite:
+    product_tour_enabled = True
     site_title = "Northstar"
     site_subtitle = _("Operations")
     extra_css: tuple[str, ...] = ()
@@ -169,6 +170,7 @@ class ModernAdminSite:
         }
 
     def get_urls(self) -> list[URLPattern]:
+        from modern_admin.tours import product_tour_view
         from modern_admin.views import (
             action_view,
             command_palette_view,
@@ -184,6 +186,7 @@ class ModernAdminSite:
         )
 
         patterns: list[URLPattern] = [
+            path("tour/", product_tour_view, {"site": self}, name="product_tour"),
             path("", dashboard_view, {"site": self}, name="dashboard"),
             path("commands/", command_palette_view, {"site": self}, name="commands"),
             path("widgets/<slug:widget_key>/", widget_view, {"site": self}, name="widget"),

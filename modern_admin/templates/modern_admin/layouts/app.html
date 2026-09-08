@@ -98,6 +98,8 @@
     </section>
   </div>
 
+  {% if modern_admin_site.product_tour_enabled %}{% include "modern_admin/partials/product_tour.html" %}{% endif %}
+
   <div id="toast-region" class="ma-toast-region" aria-live="polite" aria-atomic="true">
     {% for message in messages %}
       <div class="ma-toast is-{{ message.tags|default:'info' }}" x-data="toast" x-init="start()" x-show="visible" x-transition.opacity.duration.160ms>

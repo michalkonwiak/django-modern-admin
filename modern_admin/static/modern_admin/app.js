@@ -219,6 +219,7 @@
           window.localStorage.setItem("ma-theme", value ? "dark" : "light");
         });
         document.addEventListener("keydown", event => {
+          if (document.querySelector("[data-ma-tour][open]")) return;
           if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
             event.preventDefault();
             this.openCommand();

@@ -11,11 +11,11 @@
   <title>{% block title %}{{ site_title }}{% endblock %}</title>
   <meta name="htmx-config" content='{"allowEval":false,"inlineScriptNonce":"{{ csp_nonce }}","inlineStyleNonce":"{{ csp_nonce }}"}'>
   <script{% if csp_nonce %} nonce="{{ csp_nonce }}"{% endif %}>try{if(localStorage.getItem('ma-theme')==='dark'||(!localStorage.getItem('ma-theme')&&matchMedia('(prefers-color-scheme: dark)').matches))document.documentElement.classList.add('dark')}catch(e){}</script>
-  <link rel="stylesheet" href="{% static 'modern_admin/app.css' %}?v=20260907-2">
+  <link rel="stylesheet" href="{% static 'modern_admin/app.css' %}?v=20260908-tour">
   {% for stylesheet in modern_admin_site.extra_css %}<link rel="stylesheet" href="{% static stylesheet %}">{% endfor %}
   <script defer src="{% static 'modern_admin/vendor/htmx.min.js' %}"></script>
   <script defer src="{% url modern_admin_site.name|add:':javascript_catalog' %}?language={{ LANGUAGE_CODE }}"></script>
-  <script defer src="{% static 'modern_admin/app.js' %}?v=20260907-i18n"></script>
+  <script defer src="{% static 'modern_admin/app.js' %}?v=20260908-tour"></script>
   <script defer src="{% static 'modern_admin/vendor/alpine.min.js' %}"></script>
   {% block extra_head %}{% endblock %}
 </head>

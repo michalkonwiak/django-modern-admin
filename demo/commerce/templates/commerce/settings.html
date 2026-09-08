@@ -10,6 +10,15 @@
     <div class="demo-settings-content">
       <section class="ma-section" id="general"><header><div><h2>{% translate "Workspace profile" %}</h2><p>{% translate "Shared identity and regional defaults." %}</p></div></header><div class="ma-form-grid"><div class="ma-field"><label>{% translate "Workspace name" %}</label><input class="ma-input" value="{{ workspace.name }}"></div><div class="ma-field"><label>{% translate "Operating region" %}</label><select class="ma-input"><option>{{ workspace.region }}</option></select></div><div class="ma-field"><label>{% translate "Timezone" %}</label><select class="ma-input"><option>{{ workspace.timezone }}</option></select></div><div class="ma-field"><label>{% translate "Default currency" %}</label><select class="ma-input"><option>{{ workspace.currency }}</option></select></div></div></section>
       <section class="ma-section"><header><div><h2>{% translate "Appearance" %}</h2><p>{% translate "Theme follows each member's preference." %}</p></div></header><div class="demo-setting-row"><span class="demo-setting-icon">{% icon "moon" 16 %}</span><div><strong>{% translate "Color theme" %}</strong><small>{% translate "Switch between designed light and dark palettes." %}</small></div><button class="ma-button is-secondary is-small" type="button" @click="toggleTheme()">{% translate "Toggle theme" %}</button></div><div class="demo-setting-row"><span class="demo-setting-icon">{% icon "globe" 16 %}</span><div><strong>{% translate "Interface language" %}</strong><small>{% translate "Every screen and message follows this choice." %}</small></div>{% include "modern_admin/partials/language_switcher.html" %}</div></section>
+      {% if modern_admin_site.product_tour_enabled %}
+      <section class="ma-section" id="workspace-tour">
+        <div class="demo-setting-row">
+          <span class="demo-setting-icon">{% icon "sparkles" 16 %}</span>
+          <div><strong>{% translate "Workspace tour" %}</strong><small>{% translate "Revisit navigation, search, and workspace preferences." %}</small></div>
+          <button class="ma-button is-secondary is-small" type="button" data-ma-tour-start hidden>{% translate "Replay tour" %}</button>
+        </div>
+      </section>
+      {% endif %}
       <section class="ma-section"><header><div><h2>{% translate "Danger zone" %}</h2><p>{% translate "Destructive workspace-level operations." %}</p></div></header><div class="demo-setting-row"><span class="demo-setting-icon is-danger">{% icon "archive" 16 %}</span><div><strong>{% translate "Archive workspace" %}</strong><small>{% translate "Data remains exportable for 30 days." %}</small></div><button class="ma-button is-secondary is-small" type="button" disabled>{% translate "Archive" %}</button></div></section>
     </div>
   </div>
