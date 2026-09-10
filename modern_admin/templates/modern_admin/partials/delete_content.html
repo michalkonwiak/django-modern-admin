@@ -1,0 +1,20 @@
+{% load i18n modern_admin %}
+<header class="ma-dialog-header">
+  <span class="ma-dialog-action-icon is-danger">{% icon "trash" 18 %}</span>
+  <div><div class="ma-eyebrow">{{ resource.verbose_name }}</div><h2 id="delete-dialog-title">{% translate "Delete record" %}</h2><p id="delete-dialog-description">{% translate "This permanently deletes the record and its related records listed below. This cannot be undone." %}</p></div>
+  {% if dialog %}<button class="ma-icon-button" type="button" @click="close()" aria-label="{% translate 'Close dialog' %}">{% icon "x" 16 %}</button>{% endif %}
+</header>
+<form method="post" action="{{ request.path }}" class="ma-form"{% if dialog %} hx-post="{{ request.path }}" hx-target="#dialog-host" hx-swap="innerHTML"{% endif %} hx-disabled-elt="find button[type=submit]">
+  {% csrf_token %}
+  <input type="hidden" name="confirmation" value="{{ confirmation }}">
+  <input type="hidden" name="next" value="{{ return_url }}">
+  <div class="ma-dialog-body">
+    <div class="ma-action-object"><span class="ma-avatar">{{ object_label|initials }}</span><span><strong>{{ object_label }}</strong><small>{% blocktranslate with pk=object.pk %}Record #{{ pk }}{% endblocktranslate %}</small></span></div>
+    {% if error %}<div class="ma-form-alert" role="alert">{{ error }}</div>{% endif %}
+    {% if summary %}<section class="ma-delete-summary" aria-labelledby="deletion-summary-title"><h3 id="deletion-summary-title" class="ma-eyebrow">{% translate "Records to delete" %}</h3><dl>{% for label, count in summary %}<div><dt>{{ label|capfirst }}</dt><dd>{{ count }}</dd></div>{% endfor %}</dl></section>{% endif %}
+  </div>
+  <footer class="ma-dialog-actions">
+    <span>{% translate "This operation will be added to activity." %}</span>
+    <div>{% if dialog %}<button type="button" class="ma-button is-secondary" @click="close()">{% translate "Cancel" %}</button>{% else %}<a class="ma-button is-secondary" href="{{ cancel_url }}">{% translate "Cancel" %}</a>{% endif %}<button type="submit" class="ma-button is-danger"{% if blocked %} disabled{% endif %}><span class="ma-submit-label">{% translate "Delete record" %}</span><span class="ma-button-spinner"></span></button></div>
+  </footer>
+</form>

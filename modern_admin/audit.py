@@ -10,10 +10,10 @@ from django.utils.translation import gettext_lazy as _
 
 from modern_admin.models import AuditEvent
 
-# The timeline stores machine keys so history survives renames; only the two
+# The timeline stores machine keys so history survives renames; the
 # verbs the framework writes itself have a translation of their own. Keys that
 # come from a resource action are labelled from that action instead.
-BUILTIN_ACTION_LABELS = {"created": _("created"), "updated": _("updated")}
+BUILTIN_ACTION_LABELS = {"created": _("created"), "updated": _("updated"), "deleted": _("deleted")}
 
 
 def action_label(action: str) -> str:
@@ -27,9 +27,10 @@ def record_event(
     action: str,
     obj: models.Model,
     metadata: Mapping[str, Any] | None = None,
+    using: str | None = None,
 ) -> AuditEvent:
     actor = request.user if not isinstance(request.user, AnonymousUser) else None
-    return AuditEvent.objects.create(
+    return AuditEvent.objects.using(using).create(
         actor=actor,
         action=action,
         resource_type=obj._meta.label_lower,

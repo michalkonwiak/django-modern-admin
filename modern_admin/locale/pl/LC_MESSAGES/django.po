@@ -1005,3 +1005,31 @@ msgstr "Uruchom ponownie"
 #: demo/commerce/templates/commerce/settings.html
 msgid "Revisit navigation, search, and workspace preferences."
 msgstr "Przypomnij sobie nawigację, wyszukiwanie i ustawienia panelu."
+
+msgid "Delete"
+msgstr "Usuń"
+
+msgid "Delete record"
+msgstr "Usuń rekord"
+
+msgid "Records to delete"
+msgstr "Rekordy do usunięcia"
+
+msgid "This permanently deletes the record and its related records listed below. This cannot be undone."
+msgstr "Rekord oraz wymienione poniżej powiązane rekordy zostaną trwale usunięte. Tej operacji nie można cofnąć."
+
+msgid "This record cannot be deleted because other records depend on it. Remove or reassign those relationships first."
+msgstr "Nie można usunąć tego rekordu, ponieważ inne rekordy są z nim powiązane. Najpierw usuń lub zmień te powiązania."
+
+msgid "You do not have permission to delete all related records."
+msgstr "Nie masz uprawnień do usunięcia wszystkich powiązanych rekordów."
+
+msgid "Review the current deletion summary and confirm again."
+msgstr "Sprawdź aktualne podsumowanie usuwania i potwierdź ponownie."
+
+#, python-format
+msgid "%(model)s deleted successfully."
+msgstr "Usunięto rekord: %(model)s."
+
+msgid "deleted"
+msgstr "usunął(-ęła)"

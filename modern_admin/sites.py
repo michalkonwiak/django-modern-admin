@@ -177,6 +177,7 @@ class ModernAdminSite:
             dashboard_view,
             page_view,
             relation_filter_choices_view,
+            resource_delete_view,
             resource_detail_view,
             resource_form_view,
             resource_list_view,
@@ -236,6 +237,12 @@ class ModernAdminSite:
                         resource_detail_view,
                         {"site": self, "resource_key": key},
                         name=f"{key}_detail",
+                    ),
+                    path(
+                        f"{key}/<str:object_id>/delete/",
+                        resource_delete_view,
+                        {"site": self, "resource_key": key},
+                        name=f"{key}_delete",
                     ),
                     path(
                         f"{key}/<str:object_id>/edit/",

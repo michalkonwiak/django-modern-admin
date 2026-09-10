@@ -11,7 +11,8 @@
         {% for value in values %}<div><dt>{{ value.label }}</dt><dd>{% if value.kind == 'badge' %}<span class="ma-record-status is-{{ value.variant }}">{{ value.value }}</span>{% else %}{{ value.value }}{% endif %}</dd></div>{% endfor %}
       </dl></section>
     {% endfor %}
-    {% if detail_actions %}<section class="ma-preview-section"><h3>{% translate "Actions" %}</h3><div class="ma-preview-actions">
+    {% if detail_actions or delete_url %}<section class="ma-preview-section"><h3>{% translate "Actions" %}</h3><div class="ma-preview-actions">
+      {% if delete_url %}<div><a class="ma-button is-danger-quiet" href="{{ delete_url }}" hx-get="{{ delete_url }}" hx-target="#dialog-host" hx-swap="innerHTML">{% icon "trash" 14 %}{% translate "Delete" %}</a></div>{% endif %}
       {% for link in detail_actions %}<div>{% if link.unavailable_reason %}<button class="ma-button is-secondary" type="button" disabled>{{ link.action.label }}</button><p>{{ link.unavailable_reason }}</p>{% else %}<a class="ma-button {% if link.action.variant == 'danger' %}is-danger-quiet{% else %}is-secondary{% endif %}" href="{{ link.url }}" hx-get="{{ link.url }}" hx-target="#dialog-host" hx-swap="innerHTML">{% icon link.action.icon 14 %}{{ link.action.label }}</a>{% endif %}</div>{% endfor %}
     </div></section>{% endif %}
     <section class="ma-preview-section"><h3>{% translate "Activity" %}</h3><ol class="ma-preview-activity">

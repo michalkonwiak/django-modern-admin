@@ -19,7 +19,7 @@
     <linearGradient id="ev-echo-glass"><stop stop-color="#829B8E" stop-opacity=".25"/><stop offset=".45" stop-color="#BBC8BE" stop-opacity=".1"/><stop offset="1" stop-color="#4A6757" stop-opacity=".28"/></linearGradient>
     <path id="ev-cable-path" pathLength="1" d="M700 624C736 629 685 757 745 763S776 660 814 657"/>
     <path id="ev-battery-route" pathLength="1" d="M814 657Q838 686 962 718L1256 711"/>
-    <path id="ev-contour" pathLength="1" d="M784 617L802 527Q809 495 852 487L1059 488Q1116 492 1192 582L1386 605Q1452 616 1473 650"/>
+    <path id="ev-contour" pathLength="1" d="M784 617L806 532Q813 505 855 500L1120 501Q1165 506 1267 591L1370 611Q1420 623 1436 650"/>
     <filter id="ev-glow" x="-15%" y="-45%" width="130%" height="190%" color-interpolation-filters="sRGB"><feGaussianBlur stdDeviation="1.5" result="blur"/><feComponentTransfer in="blur" result="soft"><feFuncA type="linear" slope=".25"/></feComponentTransfer><feMerge><feMergeNode in="soft"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
   </defs>
   <style>
@@ -137,26 +137,28 @@
     </g>
     <!-- Electric SUV: taller cabin, upright tail, roof rails and larger aero wheels. -->
     <g id="vehicle" class="ev-drive">
-      <ellipse cx="1137" cy="757" rx="390" ry="36" fill="url(#ev-shadow)"/>
-      <path d="M807 687L848 748L1368 744L1450 699Z" fill="#18211D"/>
-      <path d="M784 617L802 527Q809 495 852 487L1059 488Q1116 492 1192 582L1386 605Q1452 616 1473 650L1477 702L1464 728L1390 738Q1381 651 1320 650Q1256 651 1250 742L954 751Q947 670 892 666Q831 669 831 745L798 733Q779 727 778 704Z" fill="url(#ev-paint)" stroke="#7F8B86" stroke-width="1.2"/>
-      <path d="M808 604L824 533Q828 514 855 510L1055 510Q1101 514 1165 578L1081 610Z" fill="url(#ev-glass)" stroke="#7F8B86" stroke-width="1.5"/>
-      <path d="M829 533Q869 514 1051 520L1111 549Q1018 526 829 545Z" fill="#B7C1BC" opacity=".2"/>
-      <path d="M921 510L911 607M1042 510L1081 610" stroke="#9AABA0" stroke-width="4"/>
-      <path d="M846 479L1046 480M854 487V479M1032 488V480" fill="none" stroke="#7F8B86" stroke-width="4" stroke-linecap="round"/>
-      <path d="M802 520L820 496L871 488" fill="none" stroke="#7F8B86" stroke-width="3"/>
-      <path d="M1192 582L1386 605Q1438 615 1461 646L1370 653L1101 627Z" fill="url(#ev-hood)"/>
-      <path d="M809 632L1230 629M928 633L930 695M1087 632L1099 696M1218 641L1224 699" class="ev-detail" opacity=".6"/>
-      <path d="M942 701L1089 699M1115 697L1211 695" class="ev-detail" opacity=".4"/>
-      <path d="M995 641H1017M1151 636H1173" stroke="#657A6C" stroke-width="3" stroke-linecap="round"/>
-      <path d="M1093 600L1129 592L1145 605L1137 619L1110 618Z" fill="#B7C1BC" stroke="#7F8B86"/>
-      <path d="M1390 641L1460 655" stroke="#F0F5F1" stroke-width="5" stroke-linecap="round"/>
-      <path d="M1460 669V690" stroke="#E8ECEA" stroke-width="4" stroke-linecap="round"/>
-      <path d="M1397 704L1457 691" stroke="#29332F" stroke-width="7" stroke-linecap="round"/>
+      <ellipse cx="1114" cy="757" rx="365" ry="36" fill="url(#ev-shadow)"/>
+      <path d="M807 687L848 748L1368 744L1418 699Z" fill="#18211D"/>
+      <path d="M829 745V720Q829 651 892 651Q957 651 957 720V747ZM1255 740V703Q1255 636 1320 635Q1386 636 1386 703V738Z" fill="#29332F"/>
+      <path d="M784 617L806 532Q813 505 855 500L1120 501Q1165 506 1267 591L1370 611Q1420 623 1436 650L1440 702L1427 728L1383 738L1379 705Q1376 644 1320 641Q1264 644 1261 705L1257 742L954 751L951 722Q948 660 892 658Q836 660 833 722L831 745L798 733Q779 727 778 704Z" fill="url(#ev-paint)" stroke="#7F8B86" stroke-width="1.2"/>
+      <path d="M812 610L830 539Q834 524 859 523L1115 524Q1154 528 1245 589L1175 613Z" fill="url(#ev-glass)" stroke="#7F8B86" stroke-width="1.5"/>
+      <path d="M837 539Q907 522 1111 533L1168 558Q1055 535 837 551Z" fill="#B7C1BC" opacity=".2"/>
+      <path d="M1140 532L1245 589L1175 613Z" fill="#17221D" opacity=".45"/>
+      <path d="M923 523L911 611M1049 523L1055 612" stroke="#9AABA0" stroke-width="4"/>
+      <path d="M849 492L1104 493M857 500V492M1090 501V493" fill="none" stroke="#7F8B86" stroke-width="4" stroke-linecap="round"/>
+      <path d="M806 532L824 510L874 501" fill="none" stroke="#7F8B86" stroke-width="3"/>
+      <path d="M1267 591L1370 611Q1412 623 1425 646L1368 653L1189 630Z" fill="url(#ev-hood)"/>
+      <path d="M809 632L1241 631M940 633L948 694M1056 632L1062 698M1195 634L1211 690Q1212 698 1201 699" class="ev-detail" opacity=".6"/>
+      <path d="M952 704L1062 701L1201 699" class="ev-detail" opacity=".4"/>
+      <path d="M979 645H1001M1124 641H1146" stroke="#657A6C" stroke-width="3" stroke-linecap="round"/>
+      <path d="M1178 607L1208 599L1224 612L1216 626L1189 625Z" fill="#B7C1BC" stroke="#7F8B86"/>
+      <path d="M1370 641L1423 655" stroke="#F0F5F1" stroke-width="5" stroke-linecap="round"/>
+      <path d="M1423 669V690" stroke="#E8ECEA" stroke-width="4" stroke-linecap="round"/>
+      <path d="M1384 704L1420 695" stroke="#29332F" stroke-width="7" stroke-linecap="round"/>
       <path d="M790 609L787 635L811 638" fill="none" stroke="#8C6864" stroke-width="4"/>
       <path d="M957 742L1249 734M798 721L827 731" stroke="#40564A" stroke-width="6"/>
-      <g transform="translate(892 720)"><ellipse rx="51" ry="57" fill="#111815" stroke="#4A5751" stroke-width="2"/><ellipse rx="36" ry="42" fill="#85918B"/><g transform="scale(.95 1.1)"><g class="ev-wheel" fill="#29332F"><circle r="34" fill="#5E6C64"/><path d="M-4-8L-10-32Q2-37 15-28L7-5Z" transform="rotate(0)"/><path d="M-4-8L-10-32Q2-37 15-28L7-5Z" transform="rotate(72)"/><path d="M-4-8L-10-32Q2-37 15-28L7-5Z" transform="rotate(144)"/><path d="M-4-8L-10-32Q2-37 15-28L7-5Z" transform="rotate(216)"/><path d="M-4-8L-10-32Q2-37 15-28L7-5Z" transform="rotate(288)"/><circle r="8" fill="#AAB5AE"/></g></g></g>
-      <g transform="translate(1320 703)"><ellipse rx="51" ry="57" fill="#111815" stroke="#4A5751" stroke-width="2"/><ellipse rx="36" ry="42" fill="#85918B"/><g transform="scale(.95 1.1)"><g class="ev-wheel" fill="#29332F"><circle r="34" fill="#5E6C64"/><path d="M-4-8L-10-32Q2-37 15-28L7-5Z" transform="rotate(0)"/><path d="M-4-8L-10-32Q2-37 15-28L7-5Z" transform="rotate(72)"/><path d="M-4-8L-10-32Q2-37 15-28L7-5Z" transform="rotate(144)"/><path d="M-4-8L-10-32Q2-37 15-28L7-5Z" transform="rotate(216)"/><path d="M-4-8L-10-32Q2-37 15-28L7-5Z" transform="rotate(288)"/><circle r="8" fill="#AAB5AE"/></g></g></g>
+      <g transform="translate(892 720)"><ellipse rx="53" ry="58" fill="#111815" stroke="#4A5751" stroke-width="2"/><ellipse rx="36" ry="42" fill="#85918B"/><g transform="scale(.95 1.1)"><g class="ev-wheel" fill="#29332F"><circle r="34" fill="#5E6C64"/><path d="M-4-8L-10-32Q2-37 15-28L7-5Z" transform="rotate(0)"/><path d="M-4-8L-10-32Q2-37 15-28L7-5Z" transform="rotate(72)"/><path d="M-4-8L-10-32Q2-37 15-28L7-5Z" transform="rotate(144)"/><path d="M-4-8L-10-32Q2-37 15-28L7-5Z" transform="rotate(216)"/><path d="M-4-8L-10-32Q2-37 15-28L7-5Z" transform="rotate(288)"/><circle r="8" fill="#AAB5AE"/></g></g></g>
+      <g transform="translate(1320 703)"><ellipse rx="53" ry="58" fill="#111815" stroke="#4A5751" stroke-width="2"/><ellipse rx="36" ry="42" fill="#85918B"/><g transform="scale(.95 1.1)"><g class="ev-wheel" fill="#29332F"><circle r="34" fill="#5E6C64"/><path d="M-4-8L-10-32Q2-37 15-28L7-5Z" transform="rotate(0)"/><path d="M-4-8L-10-32Q2-37 15-28L7-5Z" transform="rotate(72)"/><path d="M-4-8L-10-32Q2-37 15-28L7-5Z" transform="rotate(144)"/><path d="M-4-8L-10-32Q2-37 15-28L7-5Z" transform="rotate(216)"/><path d="M-4-8L-10-32Q2-37 15-28L7-5Z" transform="rotate(288)"/><circle r="8" fill="#AAB5AE"/></g></g></g>
       <rect x="805" y="649" width="20" height="15" rx="5" fill="#29332F"/>
       <path d="M811 656H818" stroke="#31E6A1" stroke-width="2"/>
       <!-- Subtle battery cutaway on the sill. -->

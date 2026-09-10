@@ -3,14 +3,16 @@ from __future__ import annotations
 from contextlib import nullcontext
 from dataclasses import dataclass
 from typing import Any
-from urllib.parse import urlencode
+from urllib.parse import urlencode, urlsplit
 
 from django import forms
 from django.contrib import messages
 from django.contrib.auth.views import redirect_to_login
+from django.core import signing
 from django.core.exceptions import ValidationError
 from django.core.paginator import Paginator
 from django.db import models, router, transaction
+from django.db.models.deletion import ProtectedError, RestrictedError
 from django.http import (
     Http404,
     HttpRequest,
@@ -23,9 +25,11 @@ from django.shortcuts import get_object_or_404, render
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.text import capfirst
 from django.utils.translation import gettext_lazy as _
+from django.views.decorators.http import require_http_methods
 
 from modern_admin.audit import action_label, events_for, record_event
 from modern_admin.columns import Cell, Column
+from modern_admin.deletion import PROTECTED_MESSAGE, deletion_preview
 from modern_admin.filters import RelationFilter
 from modern_admin.forms.widgets import AccessChecklist
 from modern_admin.models import SavedView
@@ -43,6 +47,7 @@ class TableRow:
     detail_url: str
     actions: tuple[ActionLink, ...]
     preview_url: str = ""
+    delete_url: str = ""
 
 
 @dataclass(frozen=True, slots=True)
@@ -127,6 +132,15 @@ def _query_url(request: HttpRequest, **changes: str | int | None) -> str:
     return f"{request.path}?{encoded}" if encoded else request.path
 
 
+def _delete_url(
+    request: HttpRequest, resource: ModelResource, obj: models.Model, return_url: str = ""
+) -> str:
+    if not resource.can_delete(request, obj):
+        return ""
+    url = resource.site.reverse(f"{resource.key}_delete", args=(obj.pk,))
+    return url + "?" + urlencode({"next": return_url}) if return_url else url
+
+
 def _list_context(
     request: HttpRequest,
     site: ModernAdminSite,
@@ -199,6 +213,7 @@ def _list_context(
                 ),
                 detail_url=detail_url,
                 preview_url=f"{detail_url}?surface=preview",
+                delete_url=_delete_url(request, resource, obj, _query_url(request)),
                 actions=tuple(
                     ActionLink(
                         action=action,
@@ -473,6 +488,9 @@ def resource_detail_view(
             for action in resource.get_actions(request, "detail", obj)
         ),
         can_change=resource.has_form and resource.permission_policy.can_change(request.user, obj),
+        delete_url=_delete_url(
+            request, resource, obj, request.headers.get("HX-Current-URL", "") if preview else ""
+        ),
         edit_url=site.reverse(f"{resource.key}_edit", args=(obj.pk,)),
         list_url=site.reverse(f"{resource.key}_list"),
         detail_url=site.reverse(f"{resource.key}_detail", args=(obj.pk,)),
@@ -608,6 +626,105 @@ def resource_form_view(
     if request.method == "POST" and form.errors and is_htmx(request):
         response.status_code = 422
     return response
+
+
+@require_http_methods(["GET", "POST"])
+def resource_delete_view(
+    request: HttpRequest, *, site: ModernAdminSite, resource_key: str, object_id: str
+) -> HttpResponse:
+    if response := _guard(request):
+        return response
+    resource = site.get_resource(resource_key)
+    obj = get_object_or_404(resource.get_queryset(request), pk=object_id)
+    if not resource.can_delete(request, obj):
+        return _permission_denied(request, site)
+
+    list_url = site.reverse(f"{resource.key}_list")
+    detail_url = site.reverse(f"{resource.key}_detail", args=(obj.pk,))
+    params = request.POST if request.method == "POST" else request.GET
+    candidate = params.get("next", "")
+    return_url = list_url
+    # Only return to this worklist; never redirect back to the deleted record.
+    if (
+        url_has_allowed_host_and_scheme(
+            candidate, allowed_hosts={request.get_host()}, require_https=request.is_secure()
+        )
+        and urlsplit(candidate).path == list_url
+    ):
+        return_url = candidate
+
+    using = router.db_for_write(resource.model, instance=obj)
+    preview = None
+    error = ""
+    blocked = False
+    try:
+        with transaction.atomic(using=using):
+            if request.method == "POST":
+                queryset = resource.get_queryset(request).using(using)
+                _lock_action_rows(queryset.filter(pk=object_id))
+                obj = get_object_or_404(queryset, pk=object_id)
+                if not resource.can_delete(request, obj):
+                    return _permission_denied(request, site)
+            preview = deletion_preview(request, resource, obj, using=using)
+            if request.method == "POST":
+                try:
+                    confirmed = signing.loads(
+                        request.POST.get("confirmation", ""),
+                        salt="modern_admin.delete",
+                        max_age=3600,
+                    )
+                except signing.BadSignature:
+                    confirmed = None
+                if confirmed != preview.fingerprint:
+                    error = _("Review the current deletion summary and confirm again.")
+                else:
+                    # Capture identity before Model.delete() clears the primary key.
+                    record_event(request=request, action="deleted", obj=obj, using=using)
+                    resource.delete_object(request, obj)
+    except (ProtectedError, RestrictedError):
+        error, blocked = PROTECTED_MESSAGE, True
+    except ValidationError as exc:
+        error, blocked = " ".join(exc.messages), True
+    else:
+        if request.method == "POST" and not error:
+            message = _("%(model)s deleted successfully.") % {
+                "model": capfirst(resource.model._meta.verbose_name)
+            }
+            # HX-Redirect reloads the destination; persist the toast across navigation.
+            messages.success(request, message)
+            if is_htmx(request):
+                return HttpResponse(status=204, headers={"HX-Redirect": return_url})
+            return HttpResponseRedirect(return_url)
+
+    context = _site_context(
+        site,
+        request,
+        resource=resource,
+        object=obj,
+        object_label=resource.get_object_label(obj),
+        summary=preview.summary if preview else (),
+        confirmation=signing.dumps(preview.fingerprint, salt="modern_admin.delete")
+        if preview and not blocked
+        else "",
+        error=error,
+        blocked=blocked,
+        return_url=return_url,
+        cancel_url=detail_url,
+        dialog=is_htmx(request),
+        breadcrumbs=(
+            (_("Overview"), site.reverse("dashboard")),
+            (resource.title, list_url),
+            (_("Delete record"), ""),
+        ),
+    )
+    return render(
+        request,
+        "modern_admin/partials/delete_dialog.html"
+        if is_htmx(request)
+        else resource.delete_template_name,
+        context,
+        status=422 if request.method == "POST" and error else 200,
+    )
 
 
 def _lock_action_rows(queryset: models.QuerySet) -> None:
@@ -793,9 +910,7 @@ def dashboard_view(request: HttpRequest, *, site: ModernAdminSite) -> HttpRespon
         breadcrumbs=((_("Overview"), ""),),
     )
     context = dashboard.get_context_data(request, **context)
-    return render_fragment(
-        request, dashboard.template_name, context, fragments=dashboard.fragments
-    )
+    return render_fragment(request, dashboard.template_name, context, fragments=dashboard.fragments)
 
 
 def widget_view(request: HttpRequest, *, site: ModernAdminSite, widget_key: str) -> HttpResponse:

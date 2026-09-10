@@ -279,6 +279,33 @@ The UI uses CSS tokens and ordinary Django template composition. You can customi
 the application without introducing a component runtime or maintaining a fork.
 See [architecture and extension points](ARCHITECTURE.md).
 
+## Deleting records
+
+Every model resource includes a **Delete** entry in its row menu, detail page, and
+record preview. It uses the existing confirmation dialog and danger-button styles.
+The confirmation lists counts by model, including cascaded records. Deletion only
+runs on a CSRF-protected POST with a signed confirmation; a changed deletion graph
+or an expired confirmation requires another review. `PROTECT` and `RESTRICT`
+relationships display a blocking explanation.
+
+The operator must have both view and delete access to the record. Cascaded models
+registered on the site also enforce their resource policies and scoped querysets;
+unregistered models require Django delete permission. Implicit many-to-many links
+do not require separate permissions. Set `delete_enabled = False` on a resource to
+disable deletion, or customize `PermissionPolicy.can_delete(user, obj)` for business
+rules. The built-in account policy prevents users from deleting their own account.
+
+The `{resource_key}_delete` URL accepts the object's primary key, for example
+`reverse("modern_admin:customer_delete", args=(customer.pk,))`. The full-page fallback
+works without JavaScript and can be customized with `delete_template_name`.
+Successful deletion returns to the resource list, preserving worklist filters when
+opened there, and shows a success notification. A `deleted` audit event retains the
+original identity and label; deletion and its audit write share one transaction and
+write database. Override `delete_object(request, obj)` to call your domain service
+inside that transaction; the default calls `obj.delete()` and honors model overrides.
+The confirmation describes Django's hard-delete graph, so custom deletion hooks must
+not delete additional objects outside that reviewed graph.
+
 ## Permissions and data boundaries
 
 The default site gate requires an active staff user. Resource views then enforce

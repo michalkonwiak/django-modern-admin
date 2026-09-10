@@ -1,0 +1,6 @@
+<div class="ma-dialog-backdrop" data-ma-dialog x-data="dialog" x-init="open()" @click.self="close()" @keydown.escape.window="close()" @keydown.tab="trap($event)">
+  <section class="ma-dialog" role="alertdialog" aria-modal="true" aria-labelledby="delete-dialog-title" aria-describedby="delete-dialog-description" x-show="visible" x-transition:enter="ma-enter" x-transition:enter-start="ma-dialog-enter" x-transition:leave="ma-leave" x-transition:leave-end="ma-dialog-enter">
+    <span class="ma-dialog-refraction" aria-hidden="true"></span>
+    {% include "modern_admin/partials/delete_content.html" %}
+  </section>
+</div>

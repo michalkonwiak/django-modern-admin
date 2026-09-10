@@ -11,6 +11,7 @@ from django.utils.safestring import mark_safe
 register = template.Library()
 
 ICON_PATHS: dict[str, str] = {
+    "trash": '<path d="M3 6h18M9 6V4h6v2M5 6l1 14h12l1-14M10 10v6M14 10v6"/>',
     "activity": '<path d="M3 12h4l3-8 4 16 3-8h4"/>',
     "archive": '<rect width="18" height="4" x="3" y="3" rx="1"/><path d="M5 7v13h14V7M10 12h4"/>',
     "arrow-down": '<path d="m6 9 6 6 6-6"/>',

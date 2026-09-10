@@ -11,6 +11,7 @@
       </div>
     </div>
     <div class="ma-page-actions">
+      {% if delete_url %}<a href="{{ delete_url }}" class="ma-button is-danger-quiet" aria-label="{% translate 'Delete' %}" hx-get="{{ delete_url }}" hx-target="#dialog-host" hx-swap="innerHTML">{% icon "trash" 14 %}<span>{% translate "Delete" %}</span></a>{% endif %}
       {% for link in detail_actions %}
         <a href="{{ link.url }}" class="ma-button{% if link.action.variant == 'danger' %} is-danger-quiet{% else %} is-secondary{% endif %}" hx-get="{{ link.url }}" hx-target="#dialog-host" hx-swap="innerHTML">{% icon link.action.icon 14 %}<span>{{ link.action.label }}</span></a>
       {% endfor %}

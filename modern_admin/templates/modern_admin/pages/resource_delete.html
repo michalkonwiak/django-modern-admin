@@ -1,0 +1,4 @@
+{% extends "modern_admin/layouts/app.html" %}
+{% load i18n %}
+{% block title %}{% translate "Delete record" %} · {{ resource.title }}{% endblock %}
+{% block content %}<div class="ma-page"><section class="ma-dialog" aria-labelledby="delete-dialog-title" aria-describedby="delete-dialog-description">{% include "modern_admin/partials/delete_content.html" %}</section></div>{% endblock %}

@@ -826,3 +826,58 @@ def test_product_tour_polish_small_screen_and_history(page, live_server):
     page.locator("[data-ma-tour-start]").click()
     expect(page.locator("[data-tour-count]")).to_have_text("Krok 1 z 4")
     expect(page.locator("[data-ma-tour]")).to_be_visible()
+
+
+@pytest.mark.parametrize("width", [390, 1440])
+@pytest.mark.parametrize("theme", ["light", "dark"])
+def test_delete_dialog_preserves_worklist_and_theme(
+    page: Page, live_server, width, theme
+):
+    page.set_viewport_size({"width": width, "height": 844})
+    page.evaluate("theme => localStorage.setItem('ma-theme', theme)", theme)
+    page.goto(f"{live_server.url}/app/customer/?q=Anna", wait_until="networkidle")
+    page.locator(".ma-row-menu").click()
+    page.get_by_role("link", name="Delete", exact=True).click()
+    dialog = page.get_by_role("alertdialog")
+    expect(dialog).to_be_visible()
+    assert_inside_viewport(page, ".ma-dialog")
+    expect(dialog.get_by_text("Anna Kowalska", exact=True)).to_be_visible()
+    assert page.evaluate("document.documentElement.scrollWidth <= innerWidth")
+    assert page.locator("html").evaluate("e => e.classList.contains('dark')") == (theme == "dark")
+    page.screenshot(path=f"/tmp/modern-admin-delete-{theme}-{width}.png", full_page=True)
+    dialog.get_by_role("button", name="Cancel", exact=True).click()
+    expect(dialog).to_have_count(0)
+    expect(page.locator(".ma-data-row")).to_contain_text("Anna Kowalska")
+    page.locator(".ma-row-menu").click()
+    page.get_by_role("link", name="Delete", exact=True).click()
+    page.get_by_role("button", name="Delete record", exact=True).click()
+    page.wait_for_url("**/app/customer/?q=Anna")
+    expect(page.locator(".ma-data-row")).to_have_count(0)
+    expect(page.get_by_text("Customer deleted successfully.", exact=True)).to_be_visible()
+
+
+def test_delete_from_preview_closes_only_confirmation_on_escape(page: Page, live_server):
+    page.goto(f"{live_server.url}/app/customer/?q=Anna", wait_until="networkidle")
+    page.locator(".ma-preview-trigger").click()
+    preview = page.locator("#record-preview")
+    preview.get_by_role("link", name="Delete", exact=True).click()
+    expect(page.get_by_role("alertdialog")).to_be_visible()
+    page.keyboard.press("Escape")
+    expect(page.get_by_role("alertdialog")).to_have_count(0)
+    expect(preview).to_be_visible()
+    preview.get_by_role("link", name="Delete", exact=True).click()
+    page.get_by_role("button", name="Delete record", exact=True).click()
+    expect(page.locator(".ma-data-row")).to_have_count(0)
+    expect(preview).to_have_count(0)
+    assert "q=Anna" in page.url
+
+
+def test_protected_delete_dialog_disables_confirmation(page: Page, live_server, customers):
+    page.goto(f"{live_server.url}/app/customer/{customers[0].pk}/", wait_until="networkidle")
+    page.get_by_role("link", name="Delete", exact=True).click()
+    dialog = page.get_by_role("alertdialog")
+    expect(dialog.get_by_role("alert")).to_contain_text("other records depend on it")
+    expect(dialog.get_by_role("button", name="Delete record", exact=True)).to_be_disabled()
+    dialog.get_by_role("button", name="Cancel", exact=True).click()
+    expect(dialog).to_have_count(0)
+    expect(page.get_by_role("heading", name="Alex Morgan", exact=True)).to_be_visible()

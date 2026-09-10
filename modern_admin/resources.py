@@ -76,6 +76,8 @@ class ModelResource(Resource, Generic[ModelT]):
     list_template_name = "modern_admin/pages/resource_list.html"
     detail_template_name = "modern_admin/pages/resource_detail.html"
     form_template_name = "modern_admin/pages/resource_form.html"
+    delete_template_name = "modern_admin/pages/resource_delete.html"
+    delete_enabled = True
     permission_policy_class: type[PermissionPolicy[ModelT]] = PermissionPolicy
 
     def __init__(self, model: type[ModelT], site: ModernAdminSite) -> None:
@@ -163,6 +165,18 @@ class ModelResource(Resource, Generic[ModelT]):
 
     def get_queryset(self, request: HttpRequest) -> QuerySet[ModelT]:
         return self.model._default_manager.all()
+
+    def can_delete(self, request: HttpRequest, obj: ModelT) -> bool:
+        return bool(
+            self.delete_enabled
+            and self.has_permission(request)
+            and self.permission_policy.can_view(request.user, obj)
+            and self.permission_policy.can_delete(request.user, obj)
+        )
+
+    def delete_object(self, request: HttpRequest, obj: ModelT) -> None:
+        """Run inside the view's transaction; model delete overrides are respected."""
+        obj.delete()
 
     @property
     def verbose_name(self) -> str:

@@ -706,6 +706,11 @@
   .ma-action-object > span:last-child { display: flex; flex-direction: column; }
   .ma-action-object strong { font-size: var(--type-sm); }
   .ma-action-object small { color: var(--text-tertiary); font-size: var(--type-xs); }
+  .ma-delete-summary { margin-top: 14px; }
+  .ma-delete-summary dl { margin-top: 8px; }
+  .ma-delete-summary dl > div { display: flex; justify-content: space-between; gap: 16px; padding: 8px 0; border-top: 1px solid var(--border-subtle); font-size: var(--type-sm); }
+  .ma-delete-summary dt { color: var(--text-secondary); }
+  .ma-delete-summary dd { font-weight: 650; font-variant-numeric: tabular-nums; }
   .ma-dialog-actions { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 17px; border-top: 1px solid var(--border-subtle); background: var(--glass-subtle); }
   .ma-dialog-actions > span { color: var(--text-tertiary); font-size: var(--type-xs); }
   .ma-dialog-actions > div { display: flex; gap: 7px; }

@@ -19,7 +19,7 @@
     <pattern id="ev-windows" width="43" height="52" patternUnits="userSpaceOnUse"><rect x="8" y="9" width="26" height="32" fill="#576A60" fill-opacity=".6"/><path d="M8 9H34V41H8ZM21 9V41" fill="none" stroke="#B5C2B7" stroke-width=".9"/><path d="M9 43H35" stroke="#5C685F" stroke-width="2"/></pattern>
     <path id="ev-cable-path" pathLength="1" d="M700 624C736 629 685 757 745 763S776 660 814 657"/>
     <path id="ev-battery-route" pathLength="1" d="M814 657Q838 686 962 718L1256 711"/>
-    <path id="ev-contour" pathLength="1" d="M791 625Q849 605 914 542Q960 513 1056 526Q1114 537 1199 598Q1370 608 1461 654"/>
+    <path id="ev-contour" pathLength="1" d="M791 625Q850 605 924 547Q984 515 1104 530Q1170 539 1264 611Q1371 621 1422 654"/>
     <filter id="ev-glow" x="-15%" y="-45%" width="130%" height="190%" color-interpolation-filters="sRGB"><feGaussianBlur stdDeviation="1.5" result="blur"/><feComponentTransfer in="blur" result="soft"><feFuncA type="linear" slope=".25"/></feComponentTransfer><feMerge><feMergeNode in="soft"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
   </defs>
   <style>
@@ -149,23 +149,24 @@
     </g>
     <!-- Tesla-inspired fastback: continuous glass roof, flush handles, low smooth nose. -->
     <g id="vehicle" class="ev-drive">
-      <ellipse cx="1137" cy="752" rx="390" ry="36" fill="url(#ev-shadow)"/>
-      <path d="M807 687L848 748L1368 744L1450 699Z" fill="#18211D"/>
-      <path d="M791 625Q849 605 914 542Q960 513 1056 526Q1114 537 1199 598Q1370 608 1461 654Q1483 668 1475 697L1464 719Q1435 731 1387 732Q1380 662 1322 658Q1263 657 1253 737L950 747Q947 679 893 677Q838 679 837 741L803 730Q782 721 779 698L776 653Q776 634 791 625Z" fill="url(#ev-paint)" stroke="#7F8B86" stroke-width="1.2"/>
-      <path d="M838 620Q885 581 925 548Q969 526 1054 537Q1116 548 1180 597L1093 622Z" fill="url(#ev-glass)" stroke="#7F8B86" stroke-width="1.5"/>
-      <path d="M913 557Q968 532 1047 543Q1085 551 1112 569Q1003 537 913 567Z" fill="#B7C1BC" opacity=".23"/>
-      <path d="M1036 535L1080 619M906 565L884 619" stroke="#8C9992" stroke-width="3"/>
-      <path d="M1101 549L1180 597L1093 622L1080 619Z" fill="#17221D" opacity=".45"/>
-      <path d="M1199 598Q1337 612 1439 651L1368 662L1104 637Z" fill="url(#ev-hood)"/>
-      <path d="M804 642Q1037 643 1240 637M953 650L957 701Q960 710 974 710L1088 706Q1103 705 1100 690L1096 646M1215 649L1224 704" class="ev-detail" opacity=".55"/>
-      <path d="M1018 653L1040 652M1163 647L1185 646" stroke="#6C7972" stroke-width="3" stroke-linecap="round"/>
-      <path d="M1109 616L1134 611L1148 619L1142 628L1119 629Z" fill="#D7DEDA" stroke="#7F8B86"/>
-      <path d="M1395 652L1456 662L1447 668L1396 659Z" fill="#F7FAF8" stroke="#7F8B86" stroke-width="1"/>
-      <path d="M1413 697L1460 684" stroke="#29332F" stroke-width="4" stroke-linecap="round"/>
+      <ellipse cx="1114" cy="752" rx="365" ry="36" fill="url(#ev-shadow)"/>
+      <path d="M807 687L848 748L1368 744L1418 699Z" fill="#18211D"/>
+      <path d="M829 745V720Q829 651 892 651Q957 651 957 720V747ZM1255 740V703Q1255 636 1320 635Q1386 636 1386 703V738Z" fill="#29332F"/>
+      <path d="M791 625Q850 605 924 547Q984 515 1104 530Q1170 539 1264 611Q1371 621 1422 654Q1444 668 1437 697L1428 719Q1412 729 1380 732L1376 706Q1373 649 1320 646Q1267 648 1264 706L1260 737L953 747L949 724Q946 662 892 660Q839 662 836 724L836 741L803 730Q782 721 779 698L776 653Q776 634 791 625Z" fill="url(#ev-paint)" stroke="#7F8B86" stroke-width="1.2"/>
+      <path d="M845 620Q896 575 935 554Q989 527 1101 541Q1168 551 1242 609L1174 625Z" fill="url(#ev-glass)" stroke="#7F8B86" stroke-width="1.5"/>
+      <path d="M928 562Q990 535 1097 547Q1135 555 1164 574Q1040 543 928 573Z" fill="#B7C1BC" opacity=".23"/>
+      <path d="M1048 538L1059 622M922 565L899 620" stroke="#8C9992" stroke-width="3"/>
+      <path d="M1133 550L1242 609L1174 625L1163 622Z" fill="#17221D" opacity=".45"/>
+      <path d="M1264 611Q1363 621 1415 651L1369 662L1187 638Z" fill="url(#ev-hood)"/>
+      <path d="M804 642Q1037 643 1240 637M950 642L956 690Q958 702 973 703L1060 700L1059 642M1060 700L1197 696Q1209 695 1207 681L1192 638" class="ev-detail" opacity=".55"/>
+      <path d="M981 653L1003 652M1124 648L1146 647" stroke="#6C7972" stroke-width="3" stroke-linecap="round"/>
+      <path d="M1175 619L1199 614L1213 622L1207 631L1184 632Z" fill="#D7DEDA" stroke="#7F8B86"/>
+      <path d="M1376 652L1422 662L1415 668L1377 659Z" fill="#F7FAF8" stroke="#7F8B86" stroke-width="1"/>
+      <path d="M1387 697L1423 687" stroke="#29332F" stroke-width="4" stroke-linecap="round"/>
       <path d="M784 650L810 656" stroke="#8C6864" stroke-width="4" stroke-linecap="round"/>
       <path d="M978 729L1237 719" stroke="#7F8B86" stroke-width="1.2" opacity=".5"/>
-      <g transform="translate(892 720)"><ellipse rx="46" ry="52" fill="#111815" stroke="#4A5751" stroke-width="2"/><ellipse rx="32" ry="38" fill="#85918B"/><g transform="scale(.85 1)"><g class="ev-wheel" fill="#29332F"><circle r="34" fill="#5E6C64"/><path d="M-4-8L-10-32Q2-37 15-28L7-5Z" transform="rotate(0)"/><path d="M-4-8L-10-32Q2-37 15-28L7-5Z" transform="rotate(72)"/><path d="M-4-8L-10-32Q2-37 15-28L7-5Z" transform="rotate(144)"/><path d="M-4-8L-10-32Q2-37 15-28L7-5Z" transform="rotate(216)"/><path d="M-4-8L-10-32Q2-37 15-28L7-5Z" transform="rotate(288)"/><circle r="8" fill="#AAB5AE"/></g></g></g>
-      <g transform="translate(1320 703)"><ellipse rx="46" ry="52" fill="#111815" stroke="#4A5751" stroke-width="2"/><ellipse rx="32" ry="38" fill="#85918B"/><g transform="scale(.85 1)"><g class="ev-wheel" fill="#29332F"><circle r="34" fill="#5E6C64"/><path d="M-4-8L-10-32Q2-37 15-28L7-5Z" transform="rotate(0)"/><path d="M-4-8L-10-32Q2-37 15-28L7-5Z" transform="rotate(72)"/><path d="M-4-8L-10-32Q2-37 15-28L7-5Z" transform="rotate(144)"/><path d="M-4-8L-10-32Q2-37 15-28L7-5Z" transform="rotate(216)"/><path d="M-4-8L-10-32Q2-37 15-28L7-5Z" transform="rotate(288)"/><circle r="8" fill="#AAB5AE"/></g></g></g>
+      <g transform="translate(892 720)"><ellipse rx="50" ry="54" fill="#111815" stroke="#4A5751" stroke-width="2"/><ellipse rx="35" ry="39" fill="#85918B"/><g transform="scale(.95 1.03)"><g class="ev-wheel" fill="#29332F"><circle r="34" fill="#5E6C64"/><path d="M-4-8L-10-32Q2-37 15-28L7-5Z" transform="rotate(0)"/><path d="M-4-8L-10-32Q2-37 15-28L7-5Z" transform="rotate(72)"/><path d="M-4-8L-10-32Q2-37 15-28L7-5Z" transform="rotate(144)"/><path d="M-4-8L-10-32Q2-37 15-28L7-5Z" transform="rotate(216)"/><path d="M-4-8L-10-32Q2-37 15-28L7-5Z" transform="rotate(288)"/><circle r="8" fill="#AAB5AE"/></g></g></g>
+      <g transform="translate(1320 703)"><ellipse rx="50" ry="54" fill="#111815" stroke="#4A5751" stroke-width="2"/><ellipse rx="35" ry="39" fill="#85918B"/><g transform="scale(.95 1.03)"><g class="ev-wheel" fill="#29332F"><circle r="34" fill="#5E6C64"/><path d="M-4-8L-10-32Q2-37 15-28L7-5Z" transform="rotate(0)"/><path d="M-4-8L-10-32Q2-37 15-28L7-5Z" transform="rotate(72)"/><path d="M-4-8L-10-32Q2-37 15-28L7-5Z" transform="rotate(144)"/><path d="M-4-8L-10-32Q2-37 15-28L7-5Z" transform="rotate(216)"/><path d="M-4-8L-10-32Q2-37 15-28L7-5Z" transform="rotate(288)"/><circle r="8" fill="#AAB5AE"/></g></g></g>
       <rect x="805" y="649" width="20" height="15" rx="5" fill="#29332F"/>
       <path d="M811 656H818" stroke="#31E6A1" stroke-width="2"/>
       <!-- Subtle battery cutaway on the sill. -->
